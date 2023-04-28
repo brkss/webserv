@@ -18,11 +18,15 @@ class Lexer
 		~Lexer();
 
 	public:
-		void	readChar();
-		void 	readWord();
-		char	getChar();
-		void	setLine(const std::string &line);
-		bool 	isDirective(const std::string &name) const;
+		std::string getTokenName();
+		Token 		getNextToken();
+		char		getChar();
+		void		readChar();
+		void 		readWord();
+		void		setLine(const std::string &line);
+		bool 		isDirective(const std::string &name) const;
+
+		void 		skipSpcae();
 
 };
 
