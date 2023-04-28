@@ -1,14 +1,14 @@
 #include "lexer.hpp"
 
-Lexer::Lexer(): _line_size(0),  _index(0), _c(0)  {}
+Lexer::Lexer(): _line_size(0),  _index(0), _c(0)  {
 
-Lexer::Lexer(const Lexer& lexer_)
-{
+}
+
+Lexer::Lexer(const Lexer& lexer_){
 	*this = lexer_;
 }
 
-Lexer& Lexer::operator=(const Lexer& lexer_)
-{
+Lexer& Lexer::operator=(const Lexer& lexer_) {
 	this->_line = lexer_._line;
 	this->_line_size = lexer_._line_size;
 	this->_index = lexer_._index;
@@ -16,77 +16,73 @@ Lexer& Lexer::operator=(const Lexer& lexer_)
 	return (*this);
 }
 
-Lexer::~Lexer() {}
+Lexer::~Lexer() {
 
-void Lexer::readChar()
-{
+}
+
+void Lexer::readChar() {
 	if (this->_index < this->_line_size)
 		this->_c = this->_line[_index++];
 	else
 		this->_c = 0; // END of line
 }
 
-void Lexer::readWord()
-{
+void Lexer::readWord()	{
 	while (std::isalpha(this->_c))
 		readChar();
 }
 
-char Lexer::getChar()
-{
+char Lexer::getChar() {
 	return (this->_c);
 }
 
-void	Lexer::setLine(const std::string &line)
-{
+void	Lexer::setLine(const std::string &line)	{
 	this->_line = line;
 	this->_line_size = line.size();
 	this->_index = 0;
 	this->_c = this->_line[this->_index];
 }
 
-std::string Lexer::getTokenName()
-{
+std::string Lexer::getTokenName() {
+
 	size_t origin_index = this->_index - 1;
 	size_t len = 0;
 
-	while (std::isalnum(this->_c) || std::strchr("-_:/.", this->_c))
-	{
+	while (std::isalnum(this->_c) || std::strchr("-_:/.", this->_c)) {
 		readChar();	
 		len++;
 	}
+	// Reimplement this later
 	this->_index--;
 	return (this->_line.substr(origin_index, len));
 }
 
-bool Lexer::isDirective(const std::string &name) const
-{
-	for(int i = 0; i < Token::_nb_directives; i++)
-	{
+bool Lexer::isDirective(const std::string &name) const {
+
+	for(size_t i = 0; i < Token::_nb_directives; i++) {
 		if (Token::_directives[i][0] == name)
 				return (true);	
 	}
 	return (false);	
 }
 
-bool isNumeric(const std::string &str) 
-{
-	for (int i = 0; i < str.size(); i++)
-	{
+bool isNumeric(const std::string &str) {
+	size_t str_size;
+
+	str_size = str.size();
+	for (size_t i = 0; i < str_size; i++) {
 		if (not std::isdigit(str[i]))
 			return (false);
 	}
 	return (true);
 }
 
-void Lexer::skipSpcae()
-{
+void Lexer::skipSpcae() {
 	while (this->_c and std::isspace(this->_c))
 		readChar();
 }
 
-Token Lexer::getNextToken()
-{
+Token Lexer::getNextToken() {
 	Token 		ret_token;
 	std::string name;
 

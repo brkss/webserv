@@ -1,5 +1,6 @@
 #ifndef TOKEN_HPP
 # define TOKEN_HPP
+
 #include <string>
 
 class Token
@@ -9,7 +10,6 @@ class Token
 		std::string _type;
 
 	public:
-		
 		// Modifiers 
 		static const std::string HTTP;
 		static const std::string SERVER;
@@ -31,18 +31,18 @@ class Token
 		static const std::string INT_VALUE;
 		static const std::string UNDEFINED;
 
-		static const std::string _directives[6][2];
+		static const std::string _directives[11][2];
 		static const size_t		 _nb_directives;
 
 	public:
 		Token();		
 		Token(const Token& token_);		
 		Token& operator=(const Token& token_);		
+		Token(const std::string &name, const std::string &type);
 		~Token();
 
-		Token(const std::string &name, const std::string &type);
-
-		const std::string &getTokenType();
+		const std::string &getTokenType() const;
+		const std::string &getTokenName() const;
 };
 
-#endif 
+#endif /* TOKEN_HPP */

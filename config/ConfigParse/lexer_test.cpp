@@ -29,7 +29,10 @@ int main(int ac, char **av)
 		token = lexer.getNextToken();
 		while (token.getTokenType() != Token::TOKEN_EOF)
 		{
-			std::cout << "--: " <<  token.getTokenType() << std::endl;
+			std::cout << "--: TkenType : " <<  token.getTokenType() << std::endl;
+			std::cout << "--: TkenName : " <<  token.getTokenName() << std::endl;
+			std::cout << std::endl;
+
 			token = lexer.getNextToken();
 		}
 	}
