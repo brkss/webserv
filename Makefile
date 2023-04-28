@@ -1,6 +1,9 @@
 NAME = server
 
-SRC = lerxer.cpp lexer_test.cpp token.cpp
+SRC = ./config/ConfigParse/lerxer.cpp \
+	  ./config/ConfigParse/lexer_test.cpp \
+	  ./config/ConfigParse/token.cpp
+
 
 FLAGS = -Wall -Werror -Wextra
 
