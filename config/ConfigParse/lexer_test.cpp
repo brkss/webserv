@@ -1,5 +1,7 @@
 #include "lexer.hpp"
 #include "token.hpp"
+#include "http.hpp"
+#include "server.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -9,6 +11,13 @@ int main(int ac, char **av)
 	std::string		line;
 	Lexer			lexer;
 	Token			token;
+
+	Http http;
+	Http http1;
+
+	Http test(http1);
+	(void) test;
+	(void) http;
 
 	if (ac != 2)
 	{

@@ -25,7 +25,6 @@ class Lexer
 		void 		readWord();
 		void		setLine(const std::string &line);
 		bool 		isDirective(const std::string &name) const;
-
 		void 		skipSpcae();
 
 };

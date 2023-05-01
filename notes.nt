@@ -1,0 +1,7 @@
+
+Context server in http context, and location in server.
+
+The configuration file may include several server blocks( called virtual servers)  distinguished by ports on which they listen to and by server names.
+	[] decide which server should processes a request.
+
+nginx directive inheritance :  see( https://www.nginx.com/blog/avoiding-top-10-nginx-configuration-mistakes/#directive-inheritance )

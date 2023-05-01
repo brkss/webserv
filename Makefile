@@ -2,7 +2,10 @@ NAME = server
 
 SRC = ./config/ConfigParse/lerxer.cpp \
 	  ./config/ConfigParse/lexer_test.cpp \
-	  ./config/ConfigParse/token.cpp
+	  ./config/ConfigParse/token.cpp \
+	  ./config/ConfigParse/server.cpp \
+	  ./config/ConfigParse/location.cpp \
+	  ./config/ConfigParse/http.cpp
 
 
 FLAGS = -Wall -Werror -Wextra

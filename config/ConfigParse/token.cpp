@@ -40,7 +40,7 @@ const std::string &Token::getTokenType() const {
 	return (this->_type);
 }
 
-const std::string &Token::getTokenName() const {
+const std::string &Token::getTokenValue() const {
 	return (this->_name);
 }
 

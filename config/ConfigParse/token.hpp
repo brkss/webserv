@@ -42,7 +42,7 @@ class Token
 		~Token();
 
 		const std::string &getTokenType() const;
-		const std::string &getTokenName() const;
+		const std::string &getTokenValue() const;
 };
 
 #endif /* TOKEN_HPP */
