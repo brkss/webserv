@@ -41,4 +41,20 @@ const size_t	  &Http::getClientMaxBodySize() const {
 	return (this->_client_max_body_size);
 }
 
+void Http::setErroLog(const std::string &value) {
+	this->_erro_log = value;
+}
+void Http::setRoot(const std::string &value) {
+	this->_root = value;
+}
+void Http::setIndex(const std::string &value) {
+	this->_index = value;
+}
+void Http::setAutoindex(bool value)  {
+	this->_autoindex = value;
+}
+
+void Http::setClientMaxBodySize(size_t value) {
+	this->_client_max_body_size = value;
+}
 

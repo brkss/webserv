@@ -11,7 +11,7 @@ const std::string Token::RETURN 				= "return";
 const std::string Token::AUTOINDEX				= "autoindex";
 const std::string Token::INDEX 					= "index";
 const std::string Token::CLIENT_MAX_BODY_SIZE 	= "client_max_body_size";
-const std::string Token::TOKEN_EOF 				= "";
+const std::string Token::TOKEN_EOF 				= "EOF";
 const std::string Token::COLON  				= ";";
 const std::string Token::LBRACE 				= "{";
 const std::string Token::RBRACE 				= "}";
@@ -41,14 +41,31 @@ const std::string &Token::getTokenType() const {
 }
 
 const std::string &Token::getTokenValue() const {
-	return (this->_name);
+	return (this->_value);
 }
 
-Token::Token(const std::string &name, const std::string &type)
-	: _name(name), _type(type) {
+const size_t &Token::getLineNum() const {
+	return (this->_line_num);
 }
 
-Token::Token() { 
+bool Token::isGlobalDirective() const {
+	std::string type = this->_type;
+
+	if (type == Token::ROOT or type == Token::ERROR_LOG or 
+		type ==  Token::AUTOINDEX or  type == Token::INDEX or type == Token::CLIENT_MAX_BODY_SIZE )
+		return (true);
+	return (false);
+}
+
+void Token::setLineNum(size_t  line_num) {
+	this->_line_num = line_num;
+}
+
+Token::Token(const std::string &type, const std::string &value)
+	: _value(value), _type(type), _line_num(0) {
+}
+
+Token::Token() :_line_num(0){ 
 }
 
 Token::Token(const Token& token_) {
@@ -57,8 +74,9 @@ Token::Token(const Token& token_) {
 
 Token & Token::operator=(const Token& token_) {
 	if (this != &token_) {
-		this->_name = token_._name;
+		this->_value = token_._value;
 		this->_type = token_._type;
+		this->_line_num = token_._line_num;
 	}
 	return (*this);
 }

@@ -9,7 +9,9 @@ class Lexer
 		std::string _line;
 		size_t		_line_size;
 		size_t		_index;
+		size_t		_line_num;
 		char		_c;
+
 
 	public:
 		Lexer();		
@@ -23,7 +25,7 @@ class Lexer
 		char		getChar();
 		void		readChar();
 		void 		readWord();
-		void		setLine(const std::string &line);
+		void		setLine(const std::string &line, size_t line_num);
 		bool 		isDirective(const std::string &name) const;
 		void 		skipSpcae();
 

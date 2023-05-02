@@ -21,14 +21,23 @@ class  Parse
 		Parse(const Parse &parse);
 		Parse &operator=(const Parse &parse);
 		~Parse();
-		parseFile(const std::string &file_name);
+		void parseFile(const std::string &file_name);
 
-		void addToken(Token &token);
+		void addToken(Token token);
 		Token &currToken(void);
 		Token &nextToken(void);
 
 		void parseHttpBlock();
-		void expectToken(const std::string &expected);
+		void parseGlobalDirective();
+		void expectToken(const std::string &expected) throw(std::invalid_argument);
+
+		void parseServer();
+		void parseRoot(Http &config) ;
+		void parseAutoIndex(Http &config);
+		void parseErrorLog(Http &config);
+		void parseIndex(Http &config);
+		void parseClientBodySize(Http &config);
+
 
 };
 

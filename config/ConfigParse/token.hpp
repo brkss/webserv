@@ -6,8 +6,9 @@
 class Token
 {
 	private:
-		std::string _name;
+		std::string _value;
 		std::string _type;
+		size_t		_line_num;
 
 	public:
 		// Modifiers 
@@ -38,11 +39,15 @@ class Token
 		Token();		
 		Token(const Token& token_);		
 		Token& operator=(const Token& token_);		
-		Token(const std::string &name, const std::string &type);
+		Token(const std::string &type, const std::string &value);
 		~Token();
 
 		const std::string &getTokenType() const;
 		const std::string &getTokenValue() const;
+		const size_t &getLineNum() const;
+
+		bool isGlobalDirective() const ;
+		void setLineNum(size_t  line_num);
 };
 
 #endif /* TOKEN_HPP */

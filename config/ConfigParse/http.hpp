@@ -24,6 +24,14 @@ class  Http
 		const bool		  &getAutoindex() const ;
 		const size_t	  &getClientMaxBodySize() const ;
 
+		void setErroLog(const std::string &value);
+		void setRoot(const std::string &value);
+		void setIndex(const std::string &value);
+		void setAutoindex(bool value);
+		void setClientMaxBodySize(size_t value);
+
+
+
 };
 
 #endif /* HTTP_HPP */

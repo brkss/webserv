@@ -1,5 +1,9 @@
 #include "lexer.hpp"
 
+
+
+#include <iostream> 
+
 Lexer::Lexer(): _line_size(0),  _index(0), _c(0)  {
 
 }
@@ -24,7 +28,10 @@ void Lexer::readChar() {
 	if (this->_index < this->_line_size)
 		this->_c = this->_line[_index++];
 	else
+	{
+		this->_index++;
 		this->_c = 0; // END of line
+	}
 }
 
 void Lexer::readWord()	{
@@ -36,8 +43,9 @@ char Lexer::getChar() {
 	return (this->_c);
 }
 
-void	Lexer::setLine(const std::string &line)	{
+void	Lexer::setLine(const std::string &line, size_t line_num)	{
 	this->_line = line;
+	this->_line_num = line_num;
 	this->_line_size = line.size();
 	this->_index = 0;
 	this->_c = this->_line[this->_index];
@@ -48,7 +56,7 @@ std::string Lexer::getTokenName() {
 	size_t origin_index = this->_index - 1;
 	size_t len = 0;
 
-	while (std::isalnum(this->_c) || std::strchr("-_:/.", this->_c)) {
+	while (this->_c and (std::isalnum(this->_c) || std::strchr("-_:/.", this->_c))) {
 		readChar();	
 		len++;
 	}
@@ -106,11 +114,12 @@ Token Lexer::getNextToken() {
 			name = getTokenName();
 			if (isDirective(name))
 				ret_token = Token(name, name);
-			else if (isNumeric(name))
-				ret_token = Token(Token::INT_VALUE, name);
+			else if (name.empty())
+				ret_token = Token(Token::TOKEN_EOF, Token::TOKEN_EOF);
 			else
-				ret_token = Token(Token::UNDEFINED, name);
+				ret_token = Token(Token::VALUE, name);
 			break;
 	}
+	ret_token.setLineNum(this->_line_num);
 	return (ret_token);
 }

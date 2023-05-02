@@ -1,14 +1,14 @@
 NAME = server
 
-SRC = ./config/ConfigParse/lerxer.cpp \
-	  ./config/ConfigParse/lexer_test.cpp \
+SRC = ./config/ConfigParse/lexer.cpp \
+	  ./config/ConfigParse/main.cpp \
 	  ./config/ConfigParse/token.cpp \
 	  ./config/ConfigParse/server.cpp \
 	  ./config/ConfigParse/location.cpp \
-	  ./config/ConfigParse/http.cpp
+	  ./config/ConfigParse/http.cpp \
+	  ./config/ConfigParse/parse.cpp
 
-
-FLAGS = -Wall -Werror -Wextra
+FLAGS = -Wall -Werror -Wextra -fsanitize=address
 
 COMPILER = c++
 
