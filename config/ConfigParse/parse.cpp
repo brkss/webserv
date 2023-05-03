@@ -26,6 +26,8 @@ void Parse::print_config() {
 		std::cout << "-----:" << "ServerName: " << (*it).getServerName() << std::endl;
 		std::cout << "-----:" << "Adderss: " << (*it).getAddress() << std::endl;
 		std::cout << "-----:" << "Port: " << (*it).getPort() << std::endl;
+		std::cout << "-----:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
+		std::cout << "-----:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
 
 	}
 
@@ -130,6 +132,26 @@ void Parse::parseListen(Server &conf) {
 	expectToken(Token::COLON);
 }
 
+
+void Parse::parseReturn(Server &conf){
+	Token curr_token;
+
+	nextToken();
+	expectToken(Token::VALUE);
+	curr_token = currToken();
+	if (is_number(curr_token.getTokenValue()))
+	{
+		nextToken();
+		expectToken(Token::VALUE);
+		conf.setReturnCode(std::atoi(curr_token.getTokenValue().c_str()));
+		conf.setReturnURL(currToken().getTokenValue());
+	}
+	else 
+		conf.setReturnURL(curr_token.getTokenValue());
+	nextToken();
+	expectToken(Token::COLON);
+
+}
 void Parse::parseLocation()
 {
 
@@ -157,6 +179,8 @@ void Parse::parseServer() {
 			parseServerName(server_conf);
 		else if (curr_token.getTokenType() == Token::LISTEN)
 			parseListen(server_conf);
+		else if (curr_token.getTokenType() == Token::RETURN)
+			parseReturn(server_conf);
 		else 
 			throw_error(curr_token, "Unexpected Token");
 		nextToken();

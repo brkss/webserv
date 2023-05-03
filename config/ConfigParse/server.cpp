@@ -74,6 +74,15 @@ void 	Server::setServerName(const std::string &server_name) {
 void	Server::addLocation(Location &location) {
 	this->_locations.push_back(location);
 }
+void 	Server::setReturnCode(short code) {
+
+	this->_return_code = code;
+}
+
+void 	Server::setReturnURL(const std::string &url) {
+	this->_return_URL = url;
+}
+
 
 
 

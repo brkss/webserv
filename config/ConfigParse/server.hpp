@@ -15,6 +15,7 @@ class Server : public Http
 		short						_port;
 		std::string 				_server_name;
 		std::vector<Location>		_locations;
+			
 
 	protected:
 		//return code URL;
@@ -37,6 +38,8 @@ class Server : public Http
 		void						setAddress(const std::string &address);
 		void 						setPort(short server_port);
 		void 						setServerName(const std::string &server_name);
+		void 						setReturnCode(short code);
+		void 						setReturnURL(const std::string &url);
 		void						addLocation(Location &location);
 
 };

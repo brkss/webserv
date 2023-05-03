@@ -40,8 +40,8 @@ class  Parse
 
 		void parseListen(Server &conf);
 		void parseServerName(Server &conf);
+		void parseReturn(Server &conf);
 		void parseLocation();
-
 
 		void print_config();
 
