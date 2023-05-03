@@ -28,7 +28,7 @@ class  Parse
 		Token &nextToken(void);
 
 		void parseHttpBlock();
-		void parseGlobalDirective();
+		void parseGlobalDirective(Http &config);
 		void expectToken(const std::string &expected) throw(std::invalid_argument);
 
 		void parseServer();
@@ -37,6 +37,15 @@ class  Parse
 		void parseErrorLog(Http &config);
 		void parseIndex(Http &config);
 		void parseClientBodySize(Http &config);
+
+		void parseListen(Server &conf);
+		void parseServerName(Server &conf);
+		void parseLocation();
+
+
+		void print_config();
+
+		void addServer(const Server &server);
 
 
 };

@@ -1,7 +1,35 @@
 #include "parse.hpp"
 #include "lexer.hpp"
 #include <string>
+#include <arpa/inet.h> // for ip4 wrapper function 
 
+
+void Parse::print_config() {
+	typedef  std::vector<Server>::const_iterator cv_iterator;
+	std::cerr << "--- Common config ---"    << std::endl;
+	std::cout << "Error log : " << this->_common_config.getErroLog() << std::endl;
+	std::cout << "Index		: " << this->_common_config.getIndex()  << std::endl;
+	std::cout << "Auto index: " << this->_common_config.getAutoIndex()  << std::endl;
+	std::cout << "Root		: " << this->_common_config.getRoot() << std::endl;
+	std::cout << "ClientBody : " << this->_common_config.getClientMaxBodySize() << std::endl;
+	std::cerr << "--- Servers config ---"    << std::endl;
+	
+	for (cv_iterator it  = this->_servers.begin() ; it != this->_servers.end(); it++)
+	{
+		std::cout << ">>> server <<< " << std::endl;
+
+		std::cout << "-----:" << "Error log : " << (*it).getErroLog() << std::endl;
+		std::cout << "-----:" << "Index		: " << (*it).getIndex()  << std::endl;
+		std::cout << "-----:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
+		std::cout << "-----:" << "Root		: " << (*it).getRoot() << std::endl;
+		std::cout << "-----:" << "ClientBoy : " << (*it).getClientMaxBodySize() << std::endl;
+		std::cout << "-----:" << "ServerName: " << (*it).getServerName() << std::endl;
+		std::cout << "-----:" << "Adderss: " << (*it).getAddress() << std::endl;
+		std::cout << "-----:" << "Port: " << (*it).getPort() << std::endl;
+
+	}
+
+}
 void throw_error(const Token &token, std::string error) throw(std::invalid_argument)
 {
 	error = error + " '" +  token.getTokenValue() + "'";
@@ -9,6 +37,21 @@ void throw_error(const Token &token, std::string error) throw(std::invalid_argum
 	throw(std::invalid_argument(error));
 
 }
+
+bool is_number(const std::string &str) {
+	std::string::const_iterator it = str.begin();
+	while (std::isdigit(*it))
+		it++;
+	return ( !str.empty() && it == str.end());
+
+}
+
+bool is_valid_ip_address(const std::string& ip_address) {
+    struct in_addr address;
+    return inet_pton(AF_INET, ip_address.c_str(), &address) != 0;
+}
+
+
 Parse::Parse(): _token_index(0) {
 
 }
@@ -62,9 +105,65 @@ void Parse::expectToken(const std::string &expected) throw(std::invalid_argument
 
 }
 
-void Parse::parseServer()
-{	
+void	Parse::parseServerName(Server &conf)
+{
+	nextToken();
+	expectToken(Token::VALUE);
+	conf.setServerName(currToken().getTokenValue());
+	nextToken();
+	expectToken(Token::COLON);
+}
 
+void Parse::parseListen(Server &conf) {
+	std::string value;
+
+	nextToken();
+	expectToken(Token::VALUE);
+	value = currToken().getTokenValue();
+	if (is_number(value))
+		conf.setPort(std::atoi(value.c_str()));
+	else if (is_valid_ip_address(value))
+		conf.setAddress(value);
+	else
+		throw_error(currToken(), "Bad argument");
+	nextToken();
+	expectToken(Token::COLON);
+}
+
+void Parse::parseLocation()
+{
+
+}
+
+void Parse::addServer(const Server &server) {
+	this->_servers.push_back(server);
+}
+void Parse::parseServer() {
+
+	Server server_conf(this->_common_config);
+	Token curr_token;
+
+	nextToken();
+	expectToken(Token::LBRACE);	
+	nextToken();
+	curr_token = currToken();
+	while (curr_token.getTokenType() != Token::TOKEN_EOF && curr_token.getTokenType() != Token::RBRACE)
+	{
+		if (curr_token.getTokenType() == Token::LOCATION)
+			parseLocation();
+		else if (curr_token.isGlobalDirective())
+			parseGlobalDirective(server_conf);
+		else if (curr_token.getTokenType() == Token::SERVER_NAME)
+			parseServerName(server_conf);
+		else if (curr_token.getTokenType() == Token::LISTEN)
+			parseListen(server_conf);
+		else 
+			throw_error(curr_token, "Unexpected Token");
+		nextToken();
+		curr_token = currToken();
+	}
+	expectToken(Token::RBRACE);
+	addServer(server_conf);
 }
 
 void Parse::parseRoot(Http &config) {
@@ -83,9 +182,9 @@ void Parse::parseAutoIndex(Http &config) {
 	value = currToken().getTokenValue();
 
 	if (value == "on")
-		config.setAutoindex(true);
+		config.setAutoIndex(true);
 	else if ( value == "off")
-		config.setAutoindex(false);
+		config.setAutoIndex(false);
 	else
 		throw_error(currToken(), "Ivalid argument");
 	nextToken();
@@ -110,18 +209,15 @@ void   Parse::parseIndex(Http &config) {
 	expectToken(Token::COLON);
 }
 
+	
 void   Parse::parseClientBodySize(Http &config) {
 
 	std::string value;
-	std::string::const_iterator it;
 
 	nextToken();
 	expectToken(Token::VALUE);
 	value  = currToken().getTokenValue();
-	it = value.begin();
-	while (std::isdigit(*it))
-		it++;
-	if (it == value.end())
+	if (is_number(value))
 		config.setClientMaxBodySize(std::atol(value.c_str()));
 	else
 		throw_error(currToken(), "Bad argument");
@@ -129,22 +225,21 @@ void   Parse::parseClientBodySize(Http &config) {
 	expectToken(Token::COLON);
 }
 
-void Parse::parseGlobalDirective() {
+void Parse::parseGlobalDirective(Http &config) {
 
-	Http &global_config = this->_common_config;
 	Token curr_token;
 
 	curr_token = currToken();
 	if (curr_token.getTokenType() == Token::ROOT)
-		parseRoot(global_config);
+		parseRoot(config);
 	else if (curr_token.getTokenType() == Token::AUTOINDEX)
-		parseAutoIndex(global_config);
+		parseAutoIndex(config);
 	else if (curr_token.getTokenType() == Token::ERROR_LOG)
-		parseErrorLog(global_config);
+		parseErrorLog(config);
 	else if (curr_token.getTokenType() == Token::INDEX)
-		parseIndex(global_config);
+		parseIndex(config);
 	else if (curr_token.getTokenType() == Token::CLIENT_MAX_BODY_SIZE)
-		parseClientBodySize(global_config);
+		parseClientBodySize(config);
 }
 
 void Parse::parseHttpBlock() {
@@ -163,7 +258,7 @@ void Parse::parseHttpBlock() {
 		if (curr_token.getTokenType() == Token::SERVER)
 			parseServer();
 		else if (curr_token.isGlobalDirective())
-			parseGlobalDirective();
+			parseGlobalDirective(this->_common_config);
 		else 
 			throw_error(curr_token, "Unexpected Token");
 		nextToken();

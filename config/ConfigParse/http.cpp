@@ -33,7 +33,7 @@ const std::string &Http::getIndex() const {
 	return (this->_index);
 }
 
-const bool		  &Http::getAutoindex() const {
+const bool		  &Http::getAutoIndex() const {
 	return (this->_autoindex);
 }
 
@@ -50,7 +50,7 @@ void Http::setRoot(const std::string &value) {
 void Http::setIndex(const std::string &value) {
 	this->_index = value;
 }
-void Http::setAutoindex(bool value)  {
+void Http::setAutoIndex(bool value)  {
 	this->_autoindex = value;
 }
 

@@ -24,6 +24,7 @@ class Server : public Http
 	public:
 		Server();
 		Server(const Server& server);
+		Server(const Http& http);
 		Server &operator=(const Server & server);
 		virtual ~Server();
 
@@ -33,6 +34,10 @@ class Server : public Http
 		const std::vector<Location> &getLocations() const;
 		const std::string			&getReturnURL() const ;
 		const short					&getReturnCode() const ;
+		void						setAddress(const std::string &address);
+		void 						setPort(short server_port);
+		void 						setServerName(const std::string &server_name);
+		void						addLocation(Location &location);
 
 };
 

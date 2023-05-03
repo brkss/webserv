@@ -17,8 +17,8 @@ int main(int ac, char **av)
 	}
 	try {
 		parser.parseFile(av[1]);
+		parser.print_config();
 	}
-
 	catch(const std::exception &e){
 
 		std::cout << e.what() << std::endl;

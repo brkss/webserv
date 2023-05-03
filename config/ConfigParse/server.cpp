@@ -9,6 +9,15 @@ Server::Server(const Server& server) : Http(server) {
 	*this = server;
 }
 
+Server::Server(const Http& http) {
+
+	this->_erro_log = http.getErroLog();
+	this->_root = http.getRoot();
+	this->_index = http.getIndex();
+	this->_autoindex = http.getAutoIndex();
+	this->_client_max_body_size = http.getClientMaxBodySize();
+}
+
 Server &Server::operator=(const Server & server) {
 
 	if (this != &server)
@@ -52,6 +61,19 @@ const short					&Server::getReturnCode() const {
 	return (this->_return_code);
 }
 
+void	Server::setAddress(const std::string &address) {
+	this->_address = address;
+}
+void 	Server::setPort(short server_port) {
+	this->_port =  server_port;
+}
+void 	Server::setServerName(const std::string &server_name) {
+	this->_server_name = server_name;
+}
+
+void	Server::addLocation(Location &location) {
+	this->_locations.push_back(location);
+}
 
 
 

@@ -21,13 +21,13 @@ class  Http
 		const std::string &getErroLog() const ;
 		const std::string &getRoot() const ;
 		const std::string &getIndex() const ;
-		const bool		  &getAutoindex() const ;
+		const bool		  &getAutoIndex() const ;
 		const size_t	  &getClientMaxBodySize() const ;
 
 		void setErroLog(const std::string &value);
 		void setRoot(const std::string &value);
 		void setIndex(const std::string &value);
-		void setAutoindex(bool value);
+		void setAutoIndex(bool value);
 		void setClientMaxBodySize(size_t value);
 
 
