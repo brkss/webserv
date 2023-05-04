@@ -11,6 +11,8 @@ const std::string Token::RETURN 				= "return";
 const std::string Token::AUTOINDEX				= "autoindex";
 const std::string Token::INDEX 					= "index";
 const std::string Token::CLIENT_MAX_BODY_SIZE 	= "client_max_body_size";
+const std::string Token::LIMIT_EXCEPT 			= "limit_except";
+const std::string Token::CGI	 				= "cgi";
 const std::string Token::TOKEN_EOF 				= "EOF";
 const std::string Token::COLON  				= ";";
 const std::string Token::LBRACE 				= "{";
@@ -51,7 +53,7 @@ const size_t &Token::getLineNum() const {
 bool Token::isGlobalDirective() const {
 	std::string type = this->_type;
 
-	if (type == Token::ROOT or type == Token::ERROR_LOG or 
+	if (type ==  Token::CGI or type  == Token::ROOT or type == Token::ERROR_LOG or 
 		type ==  Token::AUTOINDEX or  type == Token::INDEX or type == Token::CLIENT_MAX_BODY_SIZE )
 		return (true);
 	return (false);

@@ -21,10 +21,12 @@ class Token
 	   	static const std::string SERVER_NAME;
 	   	static const std::string ERROR_LOG;
 	   	static const std::string CLIENT_MAX_BODY_SIZE;
+		static const std::string LIMIT_EXCEPT;
 		static const std::string RETURN;
 		static const std::string AUTOINDEX;
 		static const std::string INDEX;
 		static const std::string TOKEN_EOF;
+		static const std::string CGI;
 		static const std::string COLON;
 		static const std::string LBRACE;
 		static const std::string RBRACE;

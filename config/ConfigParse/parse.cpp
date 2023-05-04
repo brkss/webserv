@@ -1,11 +1,14 @@
 #include "parse.hpp"
+#include "location.hpp"
 #include "lexer.hpp"
 #include <string>
 #include <arpa/inet.h> // for ip4 wrapper function 
+#include <algorithm> // for find method
 
 
 void Parse::print_config() {
 	typedef  std::vector<Server>::const_iterator cv_iterator;
+	typedef  std::vector<Location>::const_iterator cl_iterator;
 	std::cerr << "--- Common config ---"    << std::endl;
 	std::cout << "Error log : " << this->_common_config.getErroLog() << std::endl;
 	std::cout << "Index		: " << this->_common_config.getIndex()  << std::endl;
@@ -18,20 +21,43 @@ void Parse::print_config() {
 	{
 		std::cout << ">>> server <<< " << std::endl;
 
-		std::cout << "-----:" << "Error log : " << (*it).getErroLog() << std::endl;
-		std::cout << "-----:" << "Index		: " << (*it).getIndex()  << std::endl;
-		std::cout << "-----:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
-		std::cout << "-----:" << "Root		: " << (*it).getRoot() << std::endl;
-		std::cout << "-----:" << "ClientBoy : " << (*it).getClientMaxBodySize() << std::endl;
-		std::cout << "-----:" << "ServerName: " << (*it).getServerName() << std::endl;
-		std::cout << "-----:" << "Adderss: " << (*it).getAddress() << std::endl;
-		std::cout << "-----:" << "Port: " << (*it).getPort() << std::endl;
-		std::cout << "-----:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
-		std::cout << "-----:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
+		std::cout << "-----:server:" << "Error log : " << (*it).getErroLog() << std::endl;
+		std::cout << "-----:server:" << "Index		: " << (*it).getIndex()  << std::endl;
+		std::cout << "-----:server:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
+		std::cout << "-----:server:" << "Root		: " << (*it).getRoot() << std::endl;
+		std::cout << "-----:server:" << "ClientBoy : " << (*it).getClientMaxBodySize() << std::endl;
+		std::cout << "-----:server:" << "ServerName: " << (*it).getServerName() << std::endl;
+		std::cout << "-----:server:" << "Adderss: " << (*it).getAddress() << std::endl;
+		std::cout << "-----:server:" << "Port: " << (*it).getPort() << std::endl;
+		std::cout << "-----:server:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
+		std::cout << "-----:server:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
+		for (cl_iterator lit = it->getLocations().begin(); lit != it->getLocations().end(); lit++)
+		{
+			std::cout << "			>>> Location <<< " << std::endl;
+			std::cout << "-----------:Location:" << "Location endpoint : " << (*lit).getEndpoint() << std::endl;
+			std::cout << "-----------:Location:" << "Error log : " << (*lit).getErroLog() << std::endl;
+			std::cout << "-----------:Location:" << "Index		: " << (*lit).getIndex()  << std::endl;
+			std::cout << "-----------:Location:" << "Auto index: " << (*lit).getAutoIndex()  << std::endl;
+			std::cout << "-----------:Location:" << "Root		: " << (*lit).getRoot() << std::endl;
+			std::cout << "-----------:Location:" << "ClientBoy : " << (*lit).getClientMaxBodySize() << std::endl;
+			std::cout << "-----------:Location:" << "ServerName: " << (*lit).getServerName() << std::endl;
+			std::cout << "-----------:Location:" << "Adderss: " << (*lit).getAddress() << std::endl;
+			std::cout << "-----------:Location:" << "Port: " << (*lit).getPort() << std::endl;
+			std::cout << "-----------:Location:" << "ReturnCode: " << (*lit).getReturnCode() << std::endl;
+			std::cout << "-----------:Location:" << "ReturnURL: " << (*lit).getReturnURL() << std::endl;
+			std::cout << "-----------:Allowed Methods: " ;
+			for (std::vector<std::string>::const_iterator m = lit->getAllowedMethods().begin();
+				m != lit->getAllowedMethods().end(); m++) {
+				std::cout << *m << " " ;
+				}
+			std::cout << std::endl;
 
+		}
 	}
 
+
 }
+
 void throw_error(const Token &token, std::string error) throw(std::invalid_argument)
 {
 	error = error + " '" +  token.getTokenValue() + "'";
@@ -152,9 +178,58 @@ void Parse::parseReturn(Server &conf){
 	expectToken(Token::COLON);
 
 }
-void Parse::parseLocation()
-{
 
+bool isValidMethod(const std::string &str) {
+	const char* valid_methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
+	return (std::find(valid_methods, valid_methods+ sizeof(valid_methods), str));
+}
+
+void Parse::parseAcceptedMethods(Location &location) {
+	Token curr_token ;
+
+	nextToken();
+	curr_token = currToken();
+	while (curr_token.getTokenType() == Token::VALUE)
+	{
+		if (isValidMethod(curr_token.getTokenValue()))
+			location.addMethod(curr_token.getTokenValue());
+		else 
+			throw_error(currToken(), "Bad argument");
+		nextToken();
+		curr_token = currToken();
+	}
+	expectToken(Token::COLON);
+}
+
+void Parse::parseLocation(Server &server_conf) {
+
+	Location location_conf(server_conf);
+	Token curr_token;
+	std::string endpoint;
+
+	nextToken();
+	expectToken(Token::VALUE);	
+	location_conf.setEndpoint(currToken().getTokenValue());
+	nextToken();
+	expectToken(Token::LBRACE);	
+	nextToken();
+	curr_token = currToken();
+	while (curr_token.getTokenType() != Token::TOKEN_EOF && curr_token.getTokenType() != Token::RBRACE) {
+
+		if (curr_token.isGlobalDirective())
+			parseGlobalDirective(location_conf);
+		else if (curr_token.getTokenType() == Token::RETURN)
+			parseReturn(location_conf);
+		else if (curr_token.getTokenType() == Token::LIMIT_EXCEPT) 
+			parseAcceptedMethods(location_conf);
+		else 
+			throw_error(curr_token, "Unexpected Token");
+		nextToken();
+		curr_token = currToken();
+	}
+	expectToken(Token::RBRACE);
+	std::cout << "location added " << std::endl;
+	server_conf.addLocation(location_conf);
 }
 
 void Parse::addServer(const Server &server) {
@@ -162,7 +237,9 @@ void Parse::addServer(const Server &server) {
 }
 void Parse::parseServer() {
 
-	Server server_conf(this->_common_config);
+	Server erver_conf(this->_common_config);
+	std::cout << "return URL" <<  server_conf.getReturnURL() << std::endl;
+	std::cout << "return Code" <<  server_conf.getReturnCode() << std::endl;
 	Token curr_token;
 
 	nextToken();
@@ -172,7 +249,7 @@ void Parse::parseServer() {
 	while (curr_token.getTokenType() != Token::TOKEN_EOF && curr_token.getTokenType() != Token::RBRACE)
 	{
 		if (curr_token.getTokenType() == Token::LOCATION)
-			parseLocation();
+			parseLocation(server_conf);
 		else if (curr_token.isGlobalDirective())
 			parseGlobalDirective(server_conf);
 		else if (curr_token.getTokenType() == Token::SERVER_NAME)
@@ -249,6 +326,20 @@ void   Parse::parseClientBodySize(Http &config) {
 	expectToken(Token::COLON);
 }
 
+void Parse::parseCgi(Http &config) {
+	std::string extention;
+	std::string path;
+
+	nextToken();
+	expectToken(Token::VALUE);
+	extention = currToken().getTokenValue();
+	nextToken();
+	expectToken(Token::VALUE);
+	path = currToken().getTokenValue();
+	config.addCgi(std::make_pair(extention, path));
+	expectToken(Token::COLON);
+}
+
 void Parse::parseGlobalDirective(Http &config) {
 
 	Token curr_token;
@@ -264,6 +355,8 @@ void Parse::parseGlobalDirective(Http &config) {
 		parseIndex(config);
 	else if (curr_token.getTokenType() == Token::CLIENT_MAX_BODY_SIZE)
 		parseClientBodySize(config);
+	else if (curr_token.getTokenType() == Token::CGI)
+		parseCgi(config);
 }
 
 void Parse::parseHttpBlock() {

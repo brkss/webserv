@@ -15,6 +15,7 @@ Http &Http::operator=(const Http &http) {
 		this->_index = http._index;
 		this->_autoindex = http._autoindex;
 		this->_client_max_body_size = http._client_max_body_size;
+		this->_cgi = http._cgi;
 	}
 	return (*this);
 }
@@ -56,5 +57,8 @@ void Http::setAutoIndex(bool value)  {
 
 void Http::setClientMaxBodySize(size_t value) {
 	this->_client_max_body_size = value;
+}
+void Http::addCgi(const pair &cgi) {
+	this->_cgi.insert(cgi);
 }
 

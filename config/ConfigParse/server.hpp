@@ -40,7 +40,7 @@ class Server : public Http
 		void 						setServerName(const std::string &server_name);
 		void 						setReturnCode(short code);
 		void 						setReturnURL(const std::string &url);
-		void						addLocation(Location &location);
+		void						addLocation(const Location &location);
 
 };
 

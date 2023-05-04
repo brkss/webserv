@@ -41,11 +41,14 @@ class  Parse
 		void parseListen(Server &conf);
 		void parseServerName(Server &conf);
 		void parseReturn(Server &conf);
-		void parseLocation();
+		void parseLocation(Server &server_conf);
+		void parseCgi(Http &Conf);
+		void parseAcceptedMethods(Location &location);
 
 		void print_config();
 
 		void addServer(const Server &server);
+		
 
 
 };

@@ -9,13 +9,13 @@ Server::Server(const Server& server) : Http(server) {
 	*this = server;
 }
 
-Server::Server(const Http& http) {
+Server::Server(const Http& http) :Http(http) {
 
-	this->_erro_log = http.getErroLog();
-	this->_root = http.getRoot();
-	this->_index = http.getIndex();
-	this->_autoindex = http.getAutoIndex();
-	this->_client_max_body_size = http.getClientMaxBodySize();
+	//this->_erro_log = http.getErroLog();
+	//this->_root = http.getRoot();
+	//this->_index = http.getIndex();
+	//this->_autoindex = http.getAutoIndex();
+	//this->_client_max_body_size = http.getClientMaxBodySize();
 }
 
 Server &Server::operator=(const Server & server) {
@@ -26,7 +26,7 @@ Server &Server::operator=(const Server & server) {
 		this->_address = server._address; 
 		this->_port = server._port;
 		this->_server_name = server._server_name;
-		//this->_locations = server._locations;
+		this->_locations = server._locations;
 		this->_return_URL = server._return_URL;
 		this->_return_code = server._return_code;
 	}
@@ -71,7 +71,7 @@ void 	Server::setServerName(const std::string &server_name) {
 	this->_server_name = server_name;
 }
 
-void	Server::addLocation(Location &location) {
+void	Server::addLocation(const Location &location) {
 	this->_locations.push_back(location);
 }
 void 	Server::setReturnCode(short code) {
