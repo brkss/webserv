@@ -14,6 +14,7 @@ Location &Location::operator=(const Location& location)
 	{
 		Server::operator=(location);
 		this->_endpoint = location._endpoint;
+		this->_allowed_methods = location._allowed_methods;
 	}
 	return (*this);
 

@@ -21,7 +21,7 @@ const std::string Token::UNDEFINED				= "undefined";
 const std::string Token::INT_VALUE				= "INT";
 const std::string Token::VALUE 					= "value";
 
-const std::string Token::_directives[11][2] = {
+const std::string Token::_directives[12][2] = {
 
 	{"http",		Token::HTTP},
 	{"server",		Token::SERVER},
@@ -33,10 +33,11 @@ const std::string Token::_directives[11][2] = {
 	{"autoindex",	Token::AUTOINDEX},
 	{"index",		Token::INDEX},
 	{"error_log",		Token::ERROR_LOG},
+	{"limit_except",		Token::LIMIT_EXCEPT},
 	{"client_max_body_size", Token::CLIENT_MAX_BODY_SIZE}
 };
 
-const  size_t Token::_nb_directives  = 11;
+const  size_t Token::_nb_directives  = 12;
 
 const std::string &Token::getTokenType() const {
 	return (this->_type);

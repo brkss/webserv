@@ -61,7 +61,10 @@ std::string Lexer::getTokenName() {
 		len++;
 	}
 	// Reimplement this later
-	this->_index--;
+	if (len)
+		this->_index--;
+	else
+		len = 1;
 	return (this->_line.substr(origin_index, len));
 }
 
@@ -121,5 +124,7 @@ Token Lexer::getNextToken() {
 			break;
 	}
 	ret_token.setLineNum(this->_line_num);
+	//std::cout << "token type:" << ret_token.getTokenType() << std::endl;
+	//std::cout << "token value:" << ret_token.getTokenValue() << std::endl;
 	return (ret_token);
 }

@@ -181,7 +181,8 @@ void Parse::parseReturn(Server &conf){
 
 bool isValidMethod(const std::string &str) {
 	const char* valid_methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
-	return (std::find(valid_methods, valid_methods+ sizeof(valid_methods), str));
+	std::vector<std::string> methods(valid_methods, valid_methods + sizeof(valid_methods) /  sizeof(char*)) ;
+	return (std::find(methods.begin(), methods.end(), str) != methods.end());
 }
 
 void Parse::parseAcceptedMethods(Location &location) {
@@ -223,12 +224,16 @@ void Parse::parseLocation(Server &server_conf) {
 		else if (curr_token.getTokenType() == Token::LIMIT_EXCEPT) 
 			parseAcceptedMethods(location_conf);
 		else 
+		{
+
+			std::cerr << curr_token.getTokenValue() << std::endl;	
+			std::cerr << curr_token.getTokenType() << std::endl;	
 			throw_error(curr_token, "Unexpected Token");
+		}
 		nextToken();
 		curr_token = currToken();
 	}
 	expectToken(Token::RBRACE);
-	std::cout << "location added " << std::endl;
 	server_conf.addLocation(location_conf);
 }
 
@@ -237,9 +242,7 @@ void Parse::addServer(const Server &server) {
 }
 void Parse::parseServer() {
 
-	Server erver_conf(this->_common_config);
-	std::cout << "return URL" <<  server_conf.getReturnURL() << std::endl;
-	std::cout << "return Code" <<  server_conf.getReturnCode() << std::endl;
+	Server server_conf(this->_common_config);
 	Token curr_token;
 
 	nextToken();
