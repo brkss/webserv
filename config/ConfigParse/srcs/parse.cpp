@@ -1,6 +1,6 @@
-#include "parse.hpp"
-#include "location.hpp"
-#include "lexer.hpp"
+#include "../inc/parse.hpp"
+#include "../inc/location.hpp"
+#include "../inc/lexer.hpp"
 #include <string>
 #include <arpa/inet.h> // for ip4 wrapper function 
 #include <algorithm> // for find method

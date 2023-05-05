@@ -1,4 +1,4 @@
-#include "defaultConfig.hpp"
+#include "../inc/defaultConfig.hpp"
 
 const std::string DefaulConfig::ERROR_LOG = "error.log";
 const std::string DefaulConfig::ROOT		 = "/var/www/";

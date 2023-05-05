@@ -1,13 +1,13 @@
 NAME = server
 
-SRC = ./config/ConfigParse/lexer.cpp \
-	  ./config/ConfigParse/main.cpp \
-	  ./config/ConfigParse/token.cpp \
-	  ./config/ConfigParse/server.cpp \
-	  ./config/ConfigParse/location.cpp \
-	  ./config/ConfigParse/http.cpp \
-	  ./config/ConfigParse/parse.cpp \
-	  ./config/ConfigParse/defaultConfig.cpp
+SRC = ./config/ConfigParse/srcs/lexer.cpp \
+	  ./config/ConfigParse/srcs/main.cpp \
+	  ./config/ConfigParse/srcs/token.cpp \
+	  ./config/ConfigParse/srcs/server.cpp \
+	  ./config/ConfigParse/srcs/location.cpp \
+	  ./config/ConfigParse/srcs/http.cpp \
+	  ./config/ConfigParse/srcs/parse.cpp \
+	  ./config/ConfigParse/srcs/defaultConfig.cpp
 
 FLAGS = -Wall -Werror -Wextra -fsanitize=address
 

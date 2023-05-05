@@ -1,6 +1,6 @@
-#include "server.hpp"
-#include "location.hpp"
-#include "defaultConfig.hpp"
+#include "../inc/server.hpp"
+#include "../inc/location.hpp"
+#include "../inc/defaultConfig.hpp"
 
 Server::Server() :	Http(),
 					_address(DefaulConfig::ADDRESS),

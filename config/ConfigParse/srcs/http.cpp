@@ -1,5 +1,5 @@
-#include "http.hpp"
-#include "defaultConfig.hpp"
+#include "../inc/http.hpp"
+#include "../inc/defaultConfig.hpp"
 
 Http::Http() : 	_erro_log(DefaulConfig::ERROR_LOG),
 				_root(DefaulConfig::ROOT),

@@ -1,4 +1,4 @@
-#include "token.hpp" 
+#include "../inc/token.hpp" 
 
 const std::string Token::HTTP 					= "http";
 const std::string Token::SERVER 				= "server";
