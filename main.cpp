@@ -1,8 +1,8 @@
-#include "../inc/lexer.hpp"
-#include "../inc/token.hpp"
-#include "../inc/http.hpp"
-#include "../inc/parse.hpp"
-#include "../inc/server.hpp"
+#include "config/ConfigParse/inc/lexer.hpp"
+#include "config/ConfigParse/inc/token.hpp"
+#include "config/ConfigParse/inc/http.hpp"
+#include "config/ConfigParse/inc/parse.hpp"
+#include "config/ConfigParse/inc/server.hpp"
 #include <fstream>
 #include <iostream>
 
