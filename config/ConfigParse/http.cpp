@@ -1,6 +1,12 @@
 #include "http.hpp"
+#include "defaultConfig.hpp"
 
-Http::Http(){
+Http::Http() : 	_erro_log(DefaulConfig::ERROR_LOG),
+				_root(DefaulConfig::ROOT),
+				_index(DefaulConfig::INDEX),
+				_autoindex(DefaulConfig::AUTOINDEX),
+				_client_max_body_size(DefaulConfig::CLIENT_MAX_BODY_SIZE)
+{
 
 }
 Http::Http(const Http &http) {

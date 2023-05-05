@@ -6,7 +6,8 @@ SRC = ./config/ConfigParse/lexer.cpp \
 	  ./config/ConfigParse/server.cpp \
 	  ./config/ConfigParse/location.cpp \
 	  ./config/ConfigParse/http.cpp \
-	  ./config/ConfigParse/parse.cpp
+	  ./config/ConfigParse/parse.cpp \
+	  ./config/ConfigParse/defaultConfig.cpp
 
 FLAGS = -Wall -Werror -Wextra -fsanitize=address
 

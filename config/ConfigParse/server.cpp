@@ -1,7 +1,11 @@
 #include "server.hpp"
 #include "location.hpp"
+#include "defaultConfig.hpp"
 
-Server::Server() : Http() {
+Server::Server() :	Http(),
+					_address(DefaulConfig::ADDRESS),
+					_port(DefaulConfig::PORT),
+					_server_name(DefaulConfig::SERVER_NAME) {
 
 }
 
