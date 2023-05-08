@@ -2,7 +2,7 @@
 
 
 
-FILES=main.cpp ListeningSocket.cpp Socket.cpp
+FILES=main.cpp ListeningSocket.cpp Socket.cpp Server.cpp
 
 
 
