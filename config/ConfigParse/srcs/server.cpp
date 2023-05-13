@@ -13,7 +13,10 @@ Server::Server(const Server& server) : Http(server) {
 	*this = server;
 }
 
-Server::Server(const Http& http) :Http(http) {
+Server::Server(const Http& http) :Http(http),
+					_address(DefaulConfig::ADDRESS),
+					_port(DefaulConfig::PORT),
+					_server_name(DefaulConfig::SERVER_NAME)  {
 
 	//this->_erro_log = http.getErroLog();
 	//this->_root = http.getRoot();

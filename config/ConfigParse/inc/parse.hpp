@@ -15,6 +15,8 @@ class  Parse
 		Http				_common_config;
 		std::vector<Server> _servers;	
 		std::vector<Token>	_tokens;
+	public:
+		typedef std::vector<Server>::const_iterator cv_itereator;
 		
 	public:
 		Parse();
@@ -49,6 +51,7 @@ class  Parse
 
 		void addServer(const Server &server);
 		
+		const std::vector<Server> &getServers() const;
 
 
 };

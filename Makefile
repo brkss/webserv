@@ -1,4 +1,4 @@
-NAME = server
+NAME = webserv
 
 SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./config/ConfigParse/srcs/token.cpp \
@@ -7,6 +7,7 @@ SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./config/ConfigParse/srcs/http.cpp \
 	  ./config/ConfigParse/srcs/parse.cpp \
 	  ./config/ConfigParse/srcs/defaultConfig.cpp \
+	  ./Server/ServerDrive.cpp \
 	  main.cpp
 
 FLAGS = -Wall -Werror -Wextra -fsanitize=address

@@ -419,3 +419,7 @@ void Parse::parseFile(const std::string &file_name){
 	addToken(token);
 	parseHttpBlock();
 }
+
+const std::vector<Server> &Parse::getServers() const {
+	return (this->_servers);
+}
