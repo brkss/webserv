@@ -11,6 +11,11 @@ class Response {
 	std::string server;
 	std::string connection;
 	std::string cacheControl;
+	std::string accept;
+	std::string acceptEncoding;
+	std::string host;
+
+
 
 	public:
 		Response();

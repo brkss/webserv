@@ -1,10 +1,8 @@
 
-
 #include "Response.hpp"
 #include <iomanip>
 #include <iostream>
 #include <ctime>
-
 
 /*
  *
@@ -28,12 +26,15 @@ std::string nowHTTP(){
 
 
 Response::Response(){
-	this->contentType = "application/html";
+	this->contentType = "text/html";
 	// add content length 
 	this->date = nowHTTP();
 	this->server = "webserv/1.0 (macos)";
 	this->connection = "Keep-Alive";
 	this->cacheControl = "no-cache, no-store, must-revalidate";
+	this->accept = "*/*";
+	this->acceptEncoding = "gzip, deflate, sdch";
+	this->host = "localhost:89";
 }
 
 std::string Response::generateResponse(std::string body){
@@ -47,8 +48,12 @@ std::string Response::generateResponse(std::string body){
 	response += "Cache-Control: " + this->cacheControl + "\n";
 	response += "Date: " +  this->date  + "\n";
 	response += "Server: " + this->server + "\n";
-	response += "Connection: " + this->connection + "\n\n";
-	response += body;
+	response += "Connection: " + this->connection + "\n";
+	response += "Accept: " + this->accept + "\n";
+	response += "Accept-Encoding: " + this->acceptEncoding + "\n";
+	response += "Host: " + this->host + "\n\n";
+
+	response += body + "\n";
 	
 	return response;
 }
