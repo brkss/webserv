@@ -3,19 +3,16 @@
 
 #include "Response.hpp"
 #include <iostream>
-
-
-
-
+#include <fstream>
 int main(){
 
 
-	Response response;
 
-	std::string resp = response.generateResponse("<h1>testing response</h1>");
+
+	Response response("./test.html");
+
+	std::string resp = response.generateResponse();
 
 	std::cout << resp ;
-
-
 	return (1);
 }

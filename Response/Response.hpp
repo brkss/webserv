@@ -15,11 +15,13 @@ class Response {
 	std::string acceptEncoding;
 	std::string host;
 
+	std::string body;
+
 
 
 	public:
-		Response();
-		std::string generateResponse(std::string body);
+		Response(std::string body);
+		std::string generateResponse();
 
 };
 
