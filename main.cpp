@@ -21,6 +21,7 @@ int main(int ac, char **av)
 		parser.print_config();
 
 		ServerDrive server(parser);
+		server.run();
 		
 	}
 	catch(const std::exception &e){
