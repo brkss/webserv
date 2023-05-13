@@ -5,6 +5,7 @@
 #include "config/ConfigParse/inc/server.hpp"
 #include <fstream>
 #include <iostream>
+#include  "Server/ServerDrive.hpp"
 
 int main(int ac, char **av)
 {
@@ -18,6 +19,9 @@ int main(int ac, char **av)
 	try {
 		parser.parseFile(av[1]);
 		parser.print_config();
+
+		ServerDrive server(parser);
+		
 	}
 	catch(const std::exception &e){
 
