@@ -1,12 +1,14 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP 
 
+#include <netinet/in.h> // sockaddr_in
+
 class Client {
 	private:
 		int 				_server_fd; // server socket 
 		int 				_connection_fd; // data socket 
 		int					_address_len;
-		struct socketaddr_in _client_address;
+		struct sockaddr_in _client_address;
 
 
 	public:

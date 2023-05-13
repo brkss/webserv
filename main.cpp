@@ -20,8 +20,8 @@ int main(int ac, char **av)
 		parser.parseFile(av[1]);
 		parser.print_config();
 
-		ServerDrive server(parser);
-		server.run();
+		//ServerDrive server(parser);
+		//server.run();
 		
 	}
 	catch(const std::exception &e){
