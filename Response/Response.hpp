@@ -22,6 +22,7 @@ class Response {
 	public:
 		Response(std::string body);
 		std::string generateResponse();
+		std::string getContentLength();
 
 };
 

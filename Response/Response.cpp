@@ -5,7 +5,6 @@
 #include <ctime>
 #include <fstream>
 
-
 /*
  *
  * HELPER fucntion that get current date and time in the format required by http !
@@ -32,6 +31,24 @@ std::string nowHTTP(){
  *	HELPER function that read file content !
  *
  */
+
+int get_file_content_length(std::string filename){
+
+	std::ifstream file(filename, std::ios::binary);
+    if (!file) {
+		std::cerr << "Failed to open file: " << filename << std::endl;
+		return 0;
+    }
+
+    // Determine the file size
+    file.seekg(0, std::ios::end);
+    int file_size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    file.close();
+
+	return file_size;
+}
 
 std::string get_file_content(std::string filename){
 
@@ -107,8 +124,11 @@ Response::Response(std::string body){
 
 	std::string file_content = get_file_content(body);
 	std::string content_type = get_file_type(body);
+	int size = get_file_content_length(body);
+	std::cout << "file size : " << std::to_string(get_file_content_length(body)) ;
 
 	this->contentType = content_type;
+	this->contentLength = std::to_string(get_file_content_length(body));
 	// add content length 
 	this->date = nowHTTP();
 	this->server = "webserv/1.0 (macos)";
@@ -129,7 +149,7 @@ std::string Response::generateResponse(){
 	// set header 
 	response += "HTTP/1.1 200 OK\n";
 	response += "Content-Type: " + this->contentType + "\n";
-	response += "Content-Length: " + std::to_string(this->body.length()) + "\n";
+	response += "Content-Length: " + this->contentLength + "\n";
 	response += "Cache-Control: " + this->cacheControl + "\n";
 	response += "Date: " +  this->date  + "\n";
 	response += "Server: " + this->server + "\n";
@@ -143,3 +163,6 @@ std::string Response::generateResponse(){
 	return response;
 }
 
+std::string Response::getContentLength(){
+	return this->contentLength;
+}
