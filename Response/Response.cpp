@@ -25,12 +25,11 @@ std::string nowHTTP(){
 	return http_date;
 }
 
-
 /*
  *
  *	HELPER function that read file content !
  *
- */
+*/
 
 int get_file_content_length(std::string filename){
 
@@ -96,7 +95,8 @@ std::string get_file_content(std::string filename){
  *
  *	Helper function get file content type !
  *
- * */
+ * 
+ */
 
 std::string get_file_type(std::string filename){
 	// Determine the file type based on the file extension
@@ -118,7 +118,6 @@ std::string get_file_type(std::string filename){
 	}
 	return file_type;
 }
-
 
 Response::Response(std::string body){
 
@@ -159,7 +158,10 @@ std::string Response::generateResponse(){
 	response += "Host: " + this->host + "\n\n";
 
 	response += this->body + "\n";
-	
+
+	char* c2 = const_cast<char*>(response.c_str());
+	std::cout << "response : \n" <<  c2;
+
 	return response;
 }
 

@@ -6,9 +6,7 @@
 #include "../Response/Response.hpp"
 
 Server::Server(int domain, int type, int protocol, int port, unsigned long interface, int bklg){
-
 	sock = new ListeningSocket(domain, type, protocol, port, interface, bklg);
-
 }
 
 void Server::accepter(){
@@ -23,14 +21,15 @@ void Server::handler(){
 }
 
 void Server::responder(){
-	Response response("/Users/brkss/Developer/1337/webserv/Response/test.html");
+	Response response("/Users/brkss/Developer/1337/webserv/Response/test-3.jpg");
 
 	std::string resp = response.generateResponse();
 	const char *r = resp.data();
 	//std::cout << resp.length() ;
 	
 	//char *hello = "";
-	int status = write(new_sock, r, std::strlen(r));
+	//int status = write(new_sock, r, std::strlen(r));
+	int status = send(new_sock, r, resp.size(), 0);
 	if (status == -1){
 		perror("write failed : ");
 		exit(EXIT_FAILURE);
