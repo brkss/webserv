@@ -1,11 +1,12 @@
 #include "Client.hpp"
+#include <strings.h>
 
 Client::Client() {
 
 }
 
-Client::Client(int connection_fd) : _connection_fd(connection_fd) {
-	bzero(this->_client_address, sizeof(this->_client_address));
+Client::Client(int connection_fd) : _server_fd(connection_fd) {
+	bzero(&this->_client_address, sizeof(this->_client_address));
 	this->_address_len = 0;
 }
 
@@ -29,10 +30,10 @@ int Client::getServerFd() const {
 }
 
 int Client::getConnectionFd() const {
-	return (this->_server_fd);
+	return (this->_connection_fd);
 }
 
-struct socketaddr_in *Client::getClientAddress() const {
+struct sockaddr_in *Client::getClientAddress()  {
 	return (&this->_client_address);
 }
 
@@ -40,6 +41,6 @@ void Client::setConnectionFd(int fd) {
 	this->_connection_fd = fd;
 }
 
-int *Client::getAddressLen() const {
+socklen_t  *Client::getAddressLen()   {
 	return (&this->_address_len);
 }

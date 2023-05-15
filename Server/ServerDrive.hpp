@@ -28,6 +28,10 @@ class   ServerDrive {
 
 		Client &getClient(int fd);
 
+		void io_select(fd_set &read_copy, fd_set &write_copy);
+		void readFromSocket(fd_set &read_copy);
+		void readRequest(int fd);
+
 
 };
 
