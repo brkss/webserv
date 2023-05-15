@@ -9,9 +9,7 @@ class ErrorLog : public std::exception {
 	public:
 		ErrorLog(const char * error) : _error(error) {
 		}
-		ErrorLog(const ErrorLog &error_log) : _error(error_log._error) {
-		}
-		const char *what() const throw() {
+		ErrorLog(const ErrorLog &error_log) : _error(error_log._error) { } const char *what() const throw() {
 			return  this->_error;
 		}
 };
@@ -72,8 +70,9 @@ namespace Network
 	}
 	
 	void closeConnection(int fd) {
-		if (close(fd) == -1)
-			throw(ErrorLog("Error:  Unalle to close connection"));
+		close(fd);
+		//if (close(fd) == -1)
+		//	throw(ErrorLog("Error:  Unalle to close connection"));
 	}
 
 }

@@ -72,7 +72,9 @@ void ServerDrive::readRequest(int fd) {
 
 	Client &client = getClient(fd) ;
 	bzero(buffer, sizeof(buffer));
-	bytes_recieved = recv(client.getConnectionFd(), buffer, sizeof(buffer), 0);
+	std::cout << sizeof(buffer) << std::endl;
+	//bytes_recieved = recv(client.getConnectionFd(), buffer, sizeof(buffer), 0);
+	bytes_recieved = read(client.getConnectionFd(), buffer, sizeof(buffer)  - 1);
 
 	if (bytes_recieved <= 0)  // error on while reading 
 	{ 	
@@ -102,8 +104,8 @@ void ServerDrive::readFromSocket(fd_set &read_copy) {
 			 {	
 			 	readRequest(fd);
 			 	// response goes here 
-			 	Network::closeConnection(fd);
-			 	FD_CLR(fd, &this->_readset);
+			 	//Network::closeConnection(fd);
+			 	//FD_CLR(fd, &this->_readset);
 			 }
 		}
 	}
@@ -132,4 +134,6 @@ Client &ServerDrive::getClient(int fd) {
 		return (it->second);
 	else 
 		throw(ErrorLog("BUG: Potential   Server  error"));
+
+
 }
