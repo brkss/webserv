@@ -139,8 +139,6 @@ Response::Response(std::string body){
 	this->body = file_content;
 }
 
-
-
 std::string Response::generateResponse(){
 
 	std::string response = "";
