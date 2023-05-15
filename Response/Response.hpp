@@ -17,10 +17,8 @@ class Response {
 
 	std::string body;
 
-
-
 	public:
-		Response(std::string body);
+		Response(std::string body, std::string type, int size);
 		std::string generateResponse();
 		std::string getContentLength();
 
