@@ -18,9 +18,10 @@ int main(int ac, char **av)
 	}
 	try {
 		parser.parseFile(av[1]);
-		parser.print_config();
+		//parser.print_config();
 
 		ServerDrive server(parser);
+		server.run();
 		
 	}
 	catch(const std::exception &e){
