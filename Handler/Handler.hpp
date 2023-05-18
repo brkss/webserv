@@ -15,6 +15,7 @@ class Handler {
     std::string body;
     std::string type;
     int size;
+    int err;
 
 
     public:
