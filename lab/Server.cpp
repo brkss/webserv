@@ -33,7 +33,7 @@ void Server::responder(){
 void Server::launch(){
 
 	while(1){
-		std::cout << "[--] : waiting on 127.0.0.1:88" << std::endl;
+		std::cout << "[--] : waiting on 127.0.0.1:8800" << std::endl;
 		this->accepter();
 		this->handler();
 		this->responder();

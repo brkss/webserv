@@ -11,6 +11,8 @@ SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./Server/Client.cpp \
 	  main.cpp
 
+OBJS=${SRC:.cpp=.o} 
+
 FLAGS = -Wall -Werror -Wextra -fsanitize=address
 
 COMPILER = c++
@@ -19,11 +21,17 @@ STANDARD = -std=c++98
 
 all: $(NAME)
 
-$(NAME): $(SRC)
+%.o: %.cpp
+	$(COMPILER) $(FLAGS) -c $< -o ${<:.cpp=.o}
+
+$(NAME): $(OBJS)
 	$(COMPILER) $(FLAGS) $(STANDARD) $(SRC) -o $@
 
 clean:
+	rm -rf $(OBJS)
+
+fclean: clean
 	rm -rf $(NAME)
 
-re: clean all
+re: fclean all
 

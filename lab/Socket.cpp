@@ -18,6 +18,8 @@ SocketWrapper::SocketWrapper(int domain, int type, int protocol, int port, unsig
 		perror("Cant Create Socker !");
 		exit(EXIT_FAILURE);
 	}
+	int option_yes = 1;
+	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &option_yes, sizeof(int));
 	this->connect_to_network();
 }
 
