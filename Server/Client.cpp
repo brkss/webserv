@@ -50,8 +50,12 @@ socklen_t  *Client::getAddressLen()   {
 	return (&this->_address_len);
 }
 
-void 					Client::saveRequestData(size_t nb_bytes) {
-	std::string str_bytes;
-	str_bytes.assign(this->_buffer, nb_bytes); // USEING ASSIGN AVOID NULL TERMINATION 
+void 	Client::saveRequestData(size_t nb_bytes) {
+	std::string str_bytes(this->_buffer, nb_bytes);
+	//str_bytes.assign(this->_buffer, nb_bytes); // USEING ASSIGN AVOID NULL TERMINATION 
 	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
+}
+
+HttpRequest 			&Client::getRequest() {
+	return (this->_request);
 }

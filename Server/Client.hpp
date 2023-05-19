@@ -35,6 +35,7 @@ class Client {
 		int						getConnectionFd() const ;
 
 		void 					saveRequestData(size_t nb_bytes);
+		HttpRequest 			&getRequest();
 
 
 };

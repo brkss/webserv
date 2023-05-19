@@ -100,8 +100,26 @@ void ServerDrive::readRequest(int fd) {
 	}
 	std::cout << "Recieved bytes: " << bytes_recieved << std::endl;;
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
+	CheckRequestStatus(client);
 }
 
+void ServerDrive::CheckRequestStatus(Client &client) {
+	HttpRequest &client_request = client.getRequest();
+	std::string &request_data = client_request.getRequestData();
+	if (client_request.getRequestState() == HttpRequest::HEADER_STATE) {
+		//ParseHeader();
+		(void) request_data;
+	}
+
+}
+void ServerDrive::CloseConnection(int fd) {
+
+	Network::closeConnection(fd);
+	FD_CLR(fd, &this->_readset);
+	FD_CLR(fd, &this->_writeset);
+	this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
+	this->_clients.erase(fd);
+}
 
 void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
@@ -110,12 +128,9 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 	{
 		if (FD_ISSET(fd, &write_copy)) 		// response 
 		{
-			//send_test_response(fd);
-		 	//Network::closeConnection(fd);
-		 	//FD_CLR(fd, &this->_readset);
-		 	FD_CLR(fd, &this->_writeset);
-			//this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
-			//std::cerr << "Response sent. Closing ..." << std::endl;
+			send_test_response(fd);
+			CloseConnection(fd);
+			std::cerr << "Response sent. Closing ..." << std::endl;
 		}
 		else if (FD_ISSET(fd, &read_copy))
 		{
@@ -147,7 +162,6 @@ void ServerDrive::run() {
 
 Client &ServerDrive::getClient(int fd) {
 	clinetiterator_t it = this->_clients.find(fd);
-
 	if (it != this->_clients.end())
 		return (it->second);
 	else 

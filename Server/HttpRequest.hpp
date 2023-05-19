@@ -6,18 +6,25 @@
 
 class HttpRequest {
 	
+	public:
+		enum REQUEST_STATE
+		{
+			HEADER_STATE,
+			BODY_STATE 
+		};
+		typedef std::map<std::string, std::string> headers_t; // MAP OF HEADERS
+
+
 	private:
-		bool	   							_request_ready;
+		REQUEST_STATE						_request_state;
 		std::string							_request_method;
 		std::string							_request_path;
 		std::string							_http_version;
 		std::map<std::string, std::string>	_request_headers; 
-
 		std::string							_request_data;	
 		
 	
 	public:
-		typedef std::map<std::string, std::string> headers_t; // MAP OF HEADERS
 
 		HttpRequest();
 		~HttpRequest();
@@ -28,10 +35,11 @@ class HttpRequest {
 		const std::string 	&getRequestPath()	const ;
 		const std::string 	&getHttpVersion()	const ;
 		const headers_t		&getHeaders()		const ; 
+		int					getRequestState() const;
 
-		bool 				isReady()			const;
-
+		void				setRequestState(REQUEST_STATE state);
 		void				addRequestData(const std::string &data);
+		std::string			&getRequestData();
 
 };
 

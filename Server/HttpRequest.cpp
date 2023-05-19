@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest() {
+HttpRequest::HttpRequest() : _request_state(HEADER_STATE) {
 
 }
 
@@ -19,7 +19,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_request_path =  request._request_path;
 	this->_http_version = request._http_version;
 	this->_request_headers =  request._request_headers;
-	this->_request_ready =  request._request_ready;
+	this->_request_state =  request._request_state;
 
 	return (*this);
 }
@@ -41,12 +41,18 @@ const HttpRequest::headers_t		&HttpRequest::getHeaders() const {
 	return (this->_request_headers);
 }
 
-bool HttpRequest::isReady() const {
-	return (this->_request_ready);
-}
-
 void HttpRequest::addRequestData(const std::string &data) {
 	this->_request_data = this->_request_data + data; 
-	//std::cout << "Size: "<< this->_request_data.size()<< "\nData: " << this->_request_data << std::endl;
-	//this->_request_data.clear();
+}
+
+std::string			&HttpRequest::getRequestData() {
+	return (this->_request_data);
+}
+
+int	HttpRequest::getRequestState() const {
+	return(this->_request_state);
+}
+
+void				HttpRequest::setRequestState(REQUEST_STATE state) {
+	this->_request_state = state;
 }
