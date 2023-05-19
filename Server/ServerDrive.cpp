@@ -75,13 +75,13 @@ void ServerDrive::addSocketFd(int fd) {
 }
 
 void ServerDrive::readRequest(int fd) {
-	// temp until Request class is created 
-	char buffer[1024];
+	Client &client				= getClient(fd) ;
+	char *buffer				= client._buffer;
+	size_t client_buffer_size	= sizeof(client._buffer);
 	size_t bytes_recieved;
-	Client &client = getClient(fd) ;
 
-	bzero(buffer, sizeof(buffer));
-	bytes_recieved = read(client.getConnectionFd(), buffer, sizeof(buffer)  - 1);
+	bzero(buffer, client_buffer_size);
+	bytes_recieved = read(client.getConnectionFd(), buffer, client_buffer_size - 1);
 	std::cerr << "Receving from client : " << client.getConnectionFd()  << std::endl;
 
 	if (bytes_recieved <= 0)  // error on while reading 
@@ -98,7 +98,8 @@ void ServerDrive::readRequest(int fd) {
 		else 
 			throw(ErrorLog("Error: unable to read form sock"));
 	}
-	std::cout << "Recieved bytes: " << bytes_recieved << "\nData: " << buffer   << std::endl;
+	std::cout << "Recieved bytes: " << bytes_recieved << std::endl;;
+	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 }
 
 
@@ -109,12 +110,12 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 	{
 		if (FD_ISSET(fd, &write_copy)) 		// response 
 		{
-			send_test_response(fd);
-		 	Network::closeConnection(fd);
-		 	FD_CLR(fd, &this->_readset);
+			//send_test_response(fd);
+		 	//Network::closeConnection(fd);
+		 	//FD_CLR(fd, &this->_readset);
 		 	FD_CLR(fd, &this->_writeset);
-			this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
-			std::cerr << "Response sent. Closing ..." << std::endl;
+			//this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
+			//std::cerr << "Response sent. Closing ..." << std::endl;
 		}
 		else if (FD_ISSET(fd, &read_copy))
 		{
@@ -127,7 +128,6 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 			}
 		}
 	}
-
 }
 
 void ServerDrive::run() {
@@ -153,3 +153,4 @@ Client &ServerDrive::getClient(int fd) {
 	else 
 		throw(ErrorLog("BUG: Potential   Server  error"));
 }
+

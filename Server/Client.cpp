@@ -1,6 +1,10 @@
 #include "Client.hpp"
 #include <strings.h>
 
+
+// STATIC SHARED BUFFER 
+char Client::_buffer[1024];
+
 Client::Client() {
 
 }
@@ -22,6 +26,7 @@ Client &Client::operator=(const Client &client) {
 	this->_server_fd = client._server_fd;
 	this->_connection_fd = client._connection_fd;
 	this->_address_len = client._address_len;
+	this->_request = client._request;
 	return (*this);
 }
 
@@ -43,4 +48,10 @@ void Client::setConnectionFd(int fd) {
 
 socklen_t  *Client::getAddressLen()   {
 	return (&this->_address_len);
+}
+
+void 					Client::saveRequestData(size_t nb_bytes) {
+	std::string str_bytes;
+	str_bytes.assign(this->_buffer, nb_bytes); // USEING ASSIGN AVOID NULL TERMINATION 
+	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
 }

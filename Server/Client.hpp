@@ -2,6 +2,7 @@
 # define CLIENT_HPP 
 
 #include <netinet/in.h> // sockaddr_in
+#include "HttpRequest.hpp"
 
 #ifndef BUFFER_SIZE 
 # define BUFFER_SIZE  1024
@@ -15,8 +16,10 @@ class Client {
 		socklen_t 			_address_len;
 		struct sockaddr_in  _client_address;
 
+		HttpRequest			_request;
+
 	public:
-		static char 		_buffer[BUFFER_SIZE]; // SHRED BUFFER
+		static char 		_buffer[BUFFER_SIZE]; // SHARED BUFFER
 		Client();
 		~Client();
 		Client(int connection_fd);
@@ -31,6 +34,11 @@ class Client {
 		int						getServerFd() const;
 		int						getConnectionFd() const ;
 
+		void 					saveRequestData(size_t nb_bytes);
+
+
 };
+
+
 
 #endif /* CLIENT_HPP */

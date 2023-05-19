@@ -9,6 +9,7 @@ SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./config/ConfigParse/srcs/defaultConfig.cpp \
 	  ./Server/ServerDrive.cpp \
 	  ./Server/Client.cpp \
+	  ./Server/HttpRequest.cpp \
 	  main.cpp
 
 OBJS=${SRC:.cpp=.o} 
