@@ -15,6 +15,8 @@ class   ServerDrive {
 		int				_fd_max;
 		std::vector<int> _server_fds;
 		std::map<int, Client> _clients;
+	public:
+		static const std::string HEADER_DELIM;
 			
 	public:
 		typedef std::map<int, Client>::iterator clinetiterator_t ;
@@ -34,6 +36,8 @@ class   ServerDrive {
 
 		void CheckRequestStatus(Client &client);
 		void CloseConnection(int fd);
+
+		void getHeader(HttpRequest &request);
 
 
 };

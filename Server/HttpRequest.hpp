@@ -12,6 +12,10 @@ class HttpRequest {
 			HEADER_STATE,
 			BODY_STATE 
 		};
+		static const std::string GET;
+		static const std::string POST;
+		static const std::string DELETE;
+
 		typedef std::map<std::string, std::string> headers_t; // MAP OF HEADERS
 
 
@@ -40,6 +44,14 @@ class HttpRequest {
 		void				setRequestState(REQUEST_STATE state);
 		void				addRequestData(const std::string &data);
 		std::string			&getRequestData();
+		void				parse(std::string &header);
+		void				parseRequestLine(std::string &request_line);
+		void				parseHedears(const std::string &headers);
+
+		void				setRequestMethod(const std::string &method);
+		void				setRequestPath(const std::string &path)	;
+		void				setHttpVersion(const std::string &method);
+
 
 };
 

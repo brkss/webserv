@@ -1,18 +1,11 @@
 #ifndef NETWORK_HPP
 # define NETWORK_HPP 
-#include <exception>
 #include <iostream>
+#include <arpa/inet.h> // inte_aton
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h>
 
-class ErrorLog : public std::exception {
-	private:
-		const  char *_error;
-	public:
-		ErrorLog(const char * error) : _error(error) {
-		}
-		ErrorLog(const ErrorLog &error_log) : _error(error_log._error) { } const char *what() const throw() {
-			return  this->_error;
-		}
-};
 
 namespace Network
 {

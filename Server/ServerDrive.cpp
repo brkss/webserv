@@ -1,12 +1,11 @@
 #include <iostream> 
 #include "ServerDrive.hpp"
-#include <arpa/inet.h> // inte_aton
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <strings.h>
+#include "ErrorHandler.hpp"
 #include "Network.hpp"
 #include <algorithm>
+
+const std::string ServerDrive::HEADER_DELIM = "\r\n\r\n";
 
 void send_test_response(int fd) {
 
@@ -103,15 +102,33 @@ void ServerDrive::readRequest(int fd) {
 	CheckRequestStatus(client);
 }
 
+void ServerDrive::getHeader(HttpRequest &request)  {
+	std::string &request_data = request.getRequestData();
+	size_t header_pos = request_data.find(HEADER_DELIM);
+
+	if (header_pos != std::string::npos) {
+		std::string header = request_data.substr(0, header_pos);
+		std::string rest = request_data.substr(header_pos + HEADER_DELIM.size());
+		request_data = rest;
+		request.parse(header);
+		//std::cout << "method : " << request.getRequestMethod() << std::endl;
+		//std::cout << "path : " << request.getRequestPath()<< std::endl;
+		//std::cout << "version : " << request.getHttpVersion() << std::endl;
+		
+	}
+	//std::cout << request_data << std::endl;
+
+}
+
 void ServerDrive::CheckRequestStatus(Client &client) {
 	HttpRequest &client_request = client.getRequest();
-	std::string &request_data = client_request.getRequestData();
+
 	if (client_request.getRequestState() == HttpRequest::HEADER_STATE) {
-		//ParseHeader();
-		(void) request_data;
+		getHeader(client_request);
 	}
 
 }
+
 void ServerDrive::CloseConnection(int fd) {
 
 	Network::closeConnection(fd);
