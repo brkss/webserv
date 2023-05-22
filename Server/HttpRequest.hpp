@@ -15,6 +15,7 @@ class HttpRequest {
 		static const std::string GET;
 		static const std::string POST;
 		static const std::string DELETE;
+		static const size_t		URI_MAX_LEN;
 
 		typedef std::map<std::string, std::string> headers_t; // MAP OF HEADERS
 

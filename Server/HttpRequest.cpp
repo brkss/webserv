@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpRequest.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/22 12:30:57 by adriouic          #+#    #+#             */
+/*   Updated: 2023/05/22 12:32:25 by adriouic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HttpRequest.hpp"
 
 #include "ErrorHandler.hpp"
@@ -6,6 +18,8 @@
 const std::string GET = "GET";
 const std::string POST = "POST";
 const std::string DELETE = "DELETE";
+const size_t URI_MAX_LEN = 2000; 
+
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE) {
 
@@ -35,20 +49,32 @@ void	validateMethod(const std::string &method) {
 		if (method != GET &&
 			method != POST &&
 			method != DELETE) {
-			throw (ErrorLog("400 Bad Request"));
+			throw (ErrorLog("400 Bad Request METHOD"));
 		}
 }
 
 void	validatePath(const std::string &path) {
 		// max len should be validated			
-		if (path[0] != '/') throw("400 bad request");
+			// 414 (Request-URI Too Long)
+		if (path[0] != '/') throw("400 bad request URI");
 }
 
-void	validateVersion(const std::string &version) {
-		// invalid 
-		// not sipported 
-		// or requre downgrade 
-		(void) version;
+void	validateVersion(const std::string &http_version) {
+		std::string version_str;
+		const std::string HTTP("HTTP/");
+		char *rest = NULL;
+		double version;
+
+		if (http_version.compare(0, HTTP.size(), HTTP) == 0) {
+			version_str = http_version.substr(HTTP.size());
+			version = std::strtod(version_str.c_str(), &rest);
+			if (*rest) {
+				throw(ErrorLog("400 bad request  invalid version"));
+		}
+	 	if (version > 1.1) {
+				throw(ErrorLog(" 505 (HTTP Version Not Supported)"));
+		}
+	}
 }
 
 void	HttpRequest::parseRequestLine(std::string &request_line) {
@@ -57,7 +83,7 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		std::cout << "request line : " << request_line << std::endl;
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
-			throw(ErrorLog("400 Bad Request"));
+			throw(ErrorLog("400 Bad Request REQUEST_LINE"));
 		}
 		setRequestMethod(values[0]);
 		setRequestPath(values[1]);
@@ -81,7 +107,7 @@ void HttpRequest::parseHedears(const std::string &headers_str) {
 			temp_pair = std::make_pair(line->substr(0, pos) ,line->substr(pos + 1));
 		}
 		else
-			throw(ErrorLog("400 Bad Request"));
+			throw(ErrorLog("400 Bad Request INVALID HEADER"));
 		header_map.insert(temp_pair);
 	}
 	this->_request_headers = header_map;
@@ -102,7 +128,7 @@ void		HttpRequest::parse(std::string &request) {
 		parseHedears(headers);
 	}
 	else {
-		throw(ErrorLog("400 Bad Request"));
+		throw(ErrorLog("400 Bad Request NO REQUEST_LINE"));
 	}
 }
 
