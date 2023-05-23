@@ -92,7 +92,13 @@ std::string Handler::getFileContentType(std::string filename){
 			file_type = "image/png";
 		} else if (extension == "jpg" || extension == "jpeg") {
 			file_type = "image/jpeg";
-		}
+		} else if (extension == "mp4"){
+            file_type = "video/mp4";
+        } else if (extension == "mp3"){
+            file_type = "audio/mpeg";
+        } else if (extension == "pdf"){
+            file_type = "application/pdf";
+        }
 	}
 	return file_type;
 }
