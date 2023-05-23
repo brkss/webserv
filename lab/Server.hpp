@@ -12,6 +12,7 @@ class Server {
 		ListeningSocket *sock;
 		int new_sock;
 		char buffer[30000];
+		std::string path;
 	public:
 		void accepter();
 		void handler();

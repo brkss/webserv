@@ -54,6 +54,7 @@ void CGI::handlePhpCGI(){
 		int exit = WEXITSTATUS(status);
 		
 		this->cgi_response = response;
+		std::cout << "cgi response : " << response;
 	}
 }
 

@@ -32,7 +32,6 @@ class   ServerDrive {
 		void eventHandler(fd_set &read_copy, fd_set &write_copy);
 		void readRequest(int fd);
 
-
 };
 
 #endif /* SERVERDRIVE_HPP */

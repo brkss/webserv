@@ -27,7 +27,6 @@ std::string nowHTTP(){
 
 
 Response::Response(std::string body, std::string type, int size){
-
 	
 	this->contentType = type;
 	this->contentLength = std::to_string(size);

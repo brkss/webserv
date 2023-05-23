@@ -1,17 +1,39 @@
 
 
 #include "Handler.hpp"
+#include "CGI.hpp"
 
-
+bool isPHPScript(std::string path){
+    size_t dot_pos = path.find_last_of(".");
+	if (dot_pos != std::string::npos) {
+		std::string extension = path.substr(dot_pos + 1);
+        if(extension == "php")
+            return true;
+    }
+    return false;
+}
 
 Handler::Handler(std::string path){
     this->path = path;
     // handle 404 file not found response !
-    this->body = this->getFileContent(this->path);
-    this->type = this->getFileContentType(this->path);
-    this->size = this->getFileContentLength(this->path);
-}
+    if(isPHPScript(path)){
+        
+        // handle cgi !
+        CGI cgi(path);
+        cgi.handlePhpCGI();
+        std::string response = cgi.getResponse();
+        std::cout << " >> this is a php file response : " << response << "\n";
 
+        this->body = response;
+        this->type = "text/html";
+        this->size = response.size();
+    }else{
+        // other media
+        this->body = this->getFileContent(this->path);
+        this->type = this->getFileContentType(this->path);
+        this->size = this->getFileContentLength(this->path);
+    }
+}
 
 
 std::string Handler::getFileContent(std::string filename){
