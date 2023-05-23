@@ -4,8 +4,10 @@
 #include "ErrorHandler.hpp"
 #include "Network.hpp"
 #include <algorithm>
+#include "Utils.hpp"
 
 const std::string ServerDrive::HEADER_DELIM = "\r\n\r\n";
+const std::string ServerDrive::CRLF = "\r\n";
 
 void send_test_response(int fd) {
 
@@ -53,7 +55,6 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	timout.tv_usec = 0;
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, &timout);
 	if  (select_stat < 0)  {
-		perror(NULL);
 		throw(ErrorLog("Error: Select failed"));
 	}
 }
@@ -97,7 +98,6 @@ void ServerDrive::readRequest(int fd) {
 		else 
 			throw(ErrorLog("Error: unable to read form sock"));
 	}
-	std::cout << "Recieved bytes: " << bytes_recieved << std::endl;;
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
 }
@@ -109,15 +109,34 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 	if (header_pos != std::string::npos) {
 		std::string header = request_data.substr(0, header_pos);
 		std::string rest = request_data.substr(header_pos + HEADER_DELIM.size());
-		request_data = rest;
 		request.parse(header);
-		//std::cout << "method : " << request.getRequestMethod() << std::endl;
-		//std::cout << "path : " << request.getRequestPath()<< std::endl;
-		//std::cout << "version : " << request.getHttpVersion() << std::endl;
-		
+		request_data = rest;
 	}
-	//std::cout << request_data << std::endl;
+}
 
+void ServerDrive::unchunkBody(HttpRequest &request) {
+	std::string &request_body = request.getRequestData();
+	std::string hex_sting;
+
+	size_t	size_pos;
+	size_t	chunk_size;
+	size_pos = request_body.find(ServerDrive::CRLF);
+
+	if (size_pos == std::string::npos)
+		throw (ErrorLog(ErrorMessage::ERROR_400));
+
+	hex_sting = request_body.substr(0, size_pos);
+	if (!Utils::is_hex(hex_sting))
+		throw (ErrorLog(ErrorMessage::ERROR_400));
+	chunk_size = Utils::hexStringToSizeT(hex_sting);
+	request_body = request_body.substr(size_pos + CRLF.size());
+
+	if (chunk_size == 0) {
+		request.setRequestState(HttpRequest::REQUEST_READY);
+		request_body.clear(); return ;
+	}
+	request.appendChunk(request_body.substr(0, chunk_size)); // STORE CUNKS IN BODY BUFFER
+	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 }
 
 void ServerDrive::CheckRequestStatus(Client &client) {
@@ -126,11 +145,19 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 	if (client_request.getRequestState() == HttpRequest::HEADER_STATE) {
 		getHeader(client_request);
 	}
-
+	if (client_request.getRequestState() == HttpRequest::BODY_STATE)  {
+		if (client_request.getBodyTransferType() == HttpRequest::CHUNKED) {
+			while (!client_request.getRequestData().empty()) {
+				unchunkBody(client_request);
+			}
+		}
+		else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
+			std::cout <<  "Body : \n" << client_request.getRequestData() << std::endl;
+		}
+	}
 }
 
 void ServerDrive::CloseConnection(int fd) {
-
 	Network::closeConnection(fd);
 	FD_CLR(fd, &this->_readset);
 	FD_CLR(fd, &this->_writeset);
@@ -141,20 +168,17 @@ void ServerDrive::CloseConnection(int fd) {
 void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	int fd_max = this->_fd_max;
-	for (int fd = 0; fd <=  fd_max; fd++) 
-	{
-		if (FD_ISSET(fd, &write_copy)) 		// response 
-		{
+
+	for (int fd = 0; fd <=  fd_max; fd++) {
+		if (FD_ISSET(fd, &write_copy)) { 		// response 
 			send_test_response(fd);
 			CloseConnection(fd);
 			std::cerr << "Response sent. Closing ..." << std::endl;
 		}
-		else if (FD_ISSET(fd, &read_copy))
-		{
+		else if (FD_ISSET(fd, &read_copy)) {
 			if (FD_ISSET(fd, &this->_listenset)) 
 				addClient(Network::acceptConnection(fd));	// new connection 
-			else 											// read request 
-			{
+			else { 											// read request 
 				FD_SET(fd, &(this->_writeset)); 
 				readRequest(fd);
 			}
@@ -167,8 +191,7 @@ void ServerDrive::run() {
 	fd_set write_copy;
 
 	std::cerr << "Server Running ..." << std::endl;
-	while (1) 
-	{
+	while (1) {
 		read_copy = this->_readset;
 		write_copy = this->_writeset;
 		this->_fd_max = *std::max_element(this->_server_fds.begin(), this->_server_fds.end());

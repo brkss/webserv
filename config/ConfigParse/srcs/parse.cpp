@@ -1,6 +1,7 @@
 #include "../inc/parse.hpp"
 #include "../inc/location.hpp"
 #include "../inc/lexer.hpp"
+#include "../../../Server/Utils.hpp"
 #include <string>
 #include <arpa/inet.h> // for ip4 wrapper function 
 #include <algorithm> // for find method
@@ -63,14 +64,6 @@ void throw_error(const Token &token, std::string error) throw(std::invalid_argum
 	error = error + " '" +  token.getTokenValue() + "'";
 	error +=  " at  line " + std::to_string(token.getLineNum()) ;
 	throw(std::invalid_argument(error));
-
-}
-
-bool is_number(const std::string &str) {
-	std::string::const_iterator it = str.begin();
-	while (std::isdigit(*it))
-		it++;
-	return ( !str.empty() && it == str.end());
 
 }
 
@@ -148,7 +141,7 @@ void Parse::parseListen(Server &conf) {
 	nextToken();
 	expectToken(Token::VALUE);
 	value = currToken().getTokenValue();
-	if (is_number(value))
+	if (Utils::is_number(value))
 		conf.setPort(std::atoi(value.c_str()));
 	else if (is_valid_ip_address(value))
 		conf.setAddress(value);
@@ -165,7 +158,7 @@ void Parse::parseReturn(Server &conf){
 	nextToken();
 	expectToken(Token::VALUE);
 	curr_token = currToken();
-	if (is_number(curr_token.getTokenValue()))
+	if (Utils::is_number(curr_token.getTokenValue()))
 	{
 		nextToken();
 		expectToken(Token::VALUE);
@@ -321,7 +314,7 @@ void   Parse::parseClientBodySize(Http &config) {
 	nextToken();
 	expectToken(Token::VALUE);
 	value  = currToken().getTokenValue();
-	if (is_number(value))
+	if (Utils::is_number(value))
 		config.setClientMaxBodySize(std::atol(value.c_str()));
 	else
 		throw_error(currToken(), "Bad argument");

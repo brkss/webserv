@@ -10,8 +10,15 @@ class HttpRequest {
 		enum REQUEST_STATE
 		{
 			HEADER_STATE,
-			BODY_STATE 
+			BODY_STATE,
+			REQUEST_READY
 		};
+		enum BODY_TRANSFER {
+			CHUNKED,
+			CONTENT_LENGHT,
+			UNSET
+		};
+
 		static const std::string GET;
 		static const std::string POST;
 		static const std::string DELETE;
@@ -22,13 +29,14 @@ class HttpRequest {
 
 	private:
 		REQUEST_STATE						_request_state;
+		BODY_TRANSFER 						_transfer_type;
 		std::string							_request_method;
 		std::string							_request_path;
 		std::string							_http_version;
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
-		
-	
+		std::string							_request_body;
+			
 	public:
 
 		HttpRequest();
@@ -41,10 +49,12 @@ class HttpRequest {
 		const std::string 	&getHttpVersion()	const ;
 		const headers_t		&getHeaders()		const ; 
 		int					getRequestState() const;
+		int					getBodyTransferType() const;
+		std::string			&getRequestBody();
+		std::string			&getRequestData();
 
 		void				setRequestState(REQUEST_STATE state);
 		void				addRequestData(const std::string &data);
-		std::string			&getRequestData();
 		void				parse(std::string &header);
 		void				parseRequestLine(std::string &request_line);
 		void				parseHedears(const std::string &headers);
@@ -52,6 +62,15 @@ class HttpRequest {
 		void				setRequestMethod(const std::string &method);
 		void				setRequestPath(const std::string &path)	;
 		void				setHttpVersion(const std::string &method);
+		void 				setTransferType(BODY_TRANSFER type);
+		void 				appendChunk(const std::string &chunk);
+		
+		
+		const std::string&	getHeaderValue(const std::string &header);
+
+		void 				CeckContentLength();
+		void 				CheckTransferEncoding() ;
+
 
 
 };

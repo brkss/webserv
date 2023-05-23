@@ -13,5 +13,12 @@ class ErrorLog : public std::exception {
 		}
 };
 
+class  ErrorMessage {
+	public:
+		static 	const char * ERROR_400 ;
+		static 	const char * ERROR_414 ; 
+		static 	const char * ERROR_505 ; 
+
+};
 
 #endif /* ERRORHANDLER_HPP */

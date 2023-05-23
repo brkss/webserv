@@ -8,23 +8,25 @@
 class   ServerDrive {
 
 	private:
-		const Parse &  _config;
-		fd_set		    _readset;
-		fd_set 			_writeset;
-		fd_set 			_listenset;
-		int				_fd_max;
-		std::vector<int> _server_fds;
-		std::map<int, Client> _clients;
+		const Parse &				_config;
+		fd_set						_readset;
+		fd_set 		   				_writeset;
+		fd_set 		   			 	_listenset;
+		int			   				_fd_max;
+		std::vector<int> 			_server_fds;
+		std::map<int, Client> 		_clients;
+
 	public:
 		static const std::string HEADER_DELIM;
-			
+		static const std::string CRLF;
+
 	public:
 		typedef std::map<int, Client>::iterator clinetiterator_t ;
 		ServerDrive(const Parse &conf);
 		ServerDrive(const ServerDrive &server);
 		~ServerDrive();
 
-		void addClient(Client client); //copy 
+		void addClient(Client client);
 		void addSocketFd(int fd);
 		void run();
 
@@ -33,12 +35,12 @@ class   ServerDrive {
 		void io_select(fd_set &read_copy, fd_set &write_copy);
 		void eventHandler(fd_set &read_copy, fd_set &write_copy);
 		void readRequest(int fd);
+		void unchunkBody(HttpRequest &request);
 
 		void CheckRequestStatus(Client &client);
 		void CloseConnection(int fd);
 
 		void getHeader(HttpRequest &request);
-
 
 };
 
