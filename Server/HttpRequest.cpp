@@ -47,7 +47,6 @@ void	validateMethod(const std::string &method) {
 void	validatePath(const std::string &path) {
 		if (path.size() > URI_MAX_LEN) throw(ErrorLog(ErrorMessage::ERROR_414));
 		if (path[0] != '/') throw(ErrorLog(ErrorMessage::ERROR_400));
-
 }
 
 void	validateVersion(const std::string &http_version) {
@@ -162,7 +161,6 @@ const std::string &HttpRequest::getHeaderValue(const std::string &header_key) {
 	if (header !=  this->_request_headers.end()) {
 		return (header->second);
 	}
-	std::cout << "header key:" << header_key << std::endl;
 	return (header_key);
 }
 

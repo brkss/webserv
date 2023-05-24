@@ -92,7 +92,7 @@ void ServerDrive::readRequest(int fd) {
 			FD_CLR(fd, &this->_readset);
 			FD_CLR(fd, &this->_writeset);
 			this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
-			std::cout << "EOF recieved closing..." << std::endl;
+			std::cerr << "EOF recieved closing..." << std::endl;
 			return ;
 		}
 		else 
@@ -114,7 +114,7 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 	}
 }
 
-void ServerDrive::unchunkBody(HttpRequest &request) {
+bool ServerDrive::unchunkBody(HttpRequest &request) {
 	std::string &request_body = request.getRequestData();
 	std::string hex_sting;
 
@@ -123,20 +123,31 @@ void ServerDrive::unchunkBody(HttpRequest &request) {
 	size_pos = request_body.find(ServerDrive::CRLF);
 
 	if (size_pos == std::string::npos)
-		throw (ErrorLog(ErrorMessage::ERROR_400));
+		return (false);
 
 	hex_sting = request_body.substr(0, size_pos);
 	if (!Utils::is_hex(hex_sting))
 		throw (ErrorLog(ErrorMessage::ERROR_400));
-	chunk_size = Utils::hexStringToSizeT(hex_sting);
-	request_body = request_body.substr(size_pos + CRLF.size());
 
+	chunk_size = Utils::hexStringToSizeT(hex_sting);
+
+	if (chunk_size > (request_body.size() - (hex_sting.size() + CRLF.size() )))
+		return false; // READ REST OF CHUNK
+
+	request_body = request_body.substr(size_pos + CRLF.size());
 	if (chunk_size == 0) {
 		request.setRequestState(HttpRequest::REQUEST_READY);
-		request_body.clear(); return ;
+		request_body.clear(); return false;
 	}
+	std::string temp = request_body.substr(0, chunk_size);
+	std::cout << "body size: " << temp.size() << std::endl;
+	std::cout << "chunk size: " << chunk_size << std::endl;
+	assert(chunk_size == temp.size());
+
 	request.appendChunk(request_body.substr(0, chunk_size)); // STORE CUNKS IN BODY BUFFER
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
+
+	return (true);
 }
 
 void ServerDrive::CheckRequestStatus(Client &client) {
@@ -147,13 +158,25 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 	}
 	if (client_request.getRequestState() == HttpRequest::BODY_STATE)  {
 		if (client_request.getBodyTransferType() == HttpRequest::CHUNKED) {
-			while (!client_request.getRequestData().empty()) {
-				unchunkBody(client_request);
+			while (!client_request.getRequestData().empty() && unchunkBody(client_request)) {
+
 			}
 		}
-		else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
-			std::cout <<  "Body : \n" << client_request.getRequestData() << std::endl;
-		}
+	}
+	else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
+			std::cerr <<  "Body : \n" << client_request.getRequestData() << std::endl;
+	}
+
+	if (client_request.getRequestState() == HttpRequest::REQUEST_READY)  {
+		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
+		
+		// TESTING DATA TRANSFER
+		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
+		std::ofstream ofs(out_file_name);
+		if (ofs.is_open())
+			ofs << client.getRequest().getRequestBody() ;
+		else
+			throw(ErrorLog("can't open file for writting" ));
 	}
 }
 
@@ -179,7 +202,6 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 			if (FD_ISSET(fd, &this->_listenset)) 
 				addClient(Network::acceptConnection(fd));	// new connection 
 			else { 											// read request 
-				FD_SET(fd, &(this->_writeset)); 
 				readRequest(fd);
 			}
 		}
@@ -207,4 +229,3 @@ Client &ServerDrive::getClient(int fd) {
 	else 
 		throw(ErrorLog("BUG: Potential   Server  error"));
 }
-

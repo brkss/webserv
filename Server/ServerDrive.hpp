@@ -35,7 +35,7 @@ class   ServerDrive {
 		void io_select(fd_set &read_copy, fd_set &write_copy);
 		void eventHandler(fd_set &read_copy, fd_set &write_copy);
 		void readRequest(int fd);
-		void unchunkBody(HttpRequest &request);
+		bool unchunkBody(HttpRequest &request);
 
 		void CheckRequestStatus(Client &client);
 		void CloseConnection(int fd);

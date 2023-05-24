@@ -36,8 +36,6 @@ class Client {
 
 		void 					saveRequestData(size_t nb_bytes);
 		HttpRequest 			&getRequest();
-
-
 };
 
 

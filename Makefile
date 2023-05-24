@@ -28,7 +28,7 @@ all: $(NAME)
 	$(COMPILER) $(FLAGS) -c $< -o ${<:.cpp=.o}
 
 $(NAME): $(OBJS)
-	$(COMPILER) $(FLAGS) $(STANDARD) $(SRC) -o $@
+	$(COMPILER) $(FLAGS) $(STANDARD) $(OBJS) -o $@
 
 clean:
 	rm -rf $(OBJS)
