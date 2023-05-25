@@ -11,14 +11,14 @@ namespace Network
 {
 
 	int  CreateSocket()  {
-			int sock_fd;
-			sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
-			if (sock_fd < 0) {
-				throw(ErrorLog("could not create socket"));
-			}
-			std::cerr << "Socket create OK!" << std::endl;
-			return (sock_fd);
+		int sock_fd;
+		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
+		if (sock_fd < 0) {
+			throw(ErrorLog("could not create socket"));
 		}
+		std::cerr << "Socket create OK!" << std::endl;
+		return (sock_fd);
+	}
 	
 	void BindSocket(int sock_fd, short port, const std::string &address)  {
 		int bind_stat;

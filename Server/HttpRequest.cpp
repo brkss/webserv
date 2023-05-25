@@ -101,6 +101,10 @@ void HttpRequest::parseHedears(const std::string &headers_str) {
 			throw(ErrorLog(ErrorMessage::ERROR_400));
 	}
 	this->_request_headers = header_map;
+	CheckTransferType();
+}
+
+void HttpRequest::CheckTransferType() {
 	CeckContentLength();
 	CheckTransferEncoding();
 }
@@ -113,6 +117,7 @@ void HttpRequest::CheckTransferEncoding() {
 	if (header_value != transfer_encoding) {
 		if (header_value ==  chunked_transfer){
 			setTransferType(CHUNKED);
+			std::cout << "Transfer    Type: CHUNKED" << std::endl;
 		}
 		else { // UNSUPORTED ENCODING TYPE 
 			throw(ErrorLog(ErrorMessage::ERROR_400));
@@ -128,6 +133,7 @@ void HttpRequest::CeckContentLength() {
 
 		if (Utils::is_number(header_value)) {
 			setTransferType(CONTENT_LENGHT);
+			std::cout << "Transfer    Type: CONTENT_LENGTH" << std::endl;
 		}
 		else { // UNSUPORTED ENCODING TYPE 
 			throw(ErrorLog(ErrorMessage::ERROR_400));
@@ -226,5 +232,3 @@ void	HttpRequest::setHttpVersion(const std::string &version) {
 void 				HttpRequest::appendChunk(const std::string &chunk) {
 	this->_request_body = this->_request_body + chunk;
 }
-
-

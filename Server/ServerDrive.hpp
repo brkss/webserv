@@ -8,13 +8,15 @@
 class   ServerDrive {
 
 	private:
-		const Parse &				_config;
+		const Parse&				_config;
 		fd_set						_readset;
 		fd_set 		   				_writeset;
 		fd_set 		   			 	_listenset;
 		int			   				_fd_max;
 		std::vector<int> 			_server_fds;
 		std::map<int, Client> 		_clients;
+
+		size_t 						_client_timeout;
 
 	public:
 		static const std::string HEADER_DELIM;
@@ -39,8 +41,10 @@ class   ServerDrive {
 
 		void CheckRequestStatus(Client &client);
 		void CloseConnection(int fd);
+		void checkClientTimout(int fd);
 
 		void getHeader(HttpRequest &request);
+		bool getBody(HttpRequest &client_request);
 
 };
 

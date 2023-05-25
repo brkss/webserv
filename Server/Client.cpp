@@ -6,12 +6,13 @@
 char Client::_buffer[1024];
 
 Client::Client() {
-
+	
 }
 
 Client::Client(int connection_fd) : _server_fd(connection_fd) {
 	bzero(&this->_client_address, sizeof(this->_client_address));
 	this->_address_len = 0;
+	this->_client_request_timout = time(NULL);
 }
 
 Client::~Client() {
@@ -52,10 +53,17 @@ socklen_t  *Client::getAddressLen()   {
 
 void 	Client::saveRequestData(size_t nb_bytes) {
 	std::string str_bytes(this->_buffer, nb_bytes);
-	//str_bytes.assign(this->_buffer, nb_bytes); // USEING ASSIGN AVOID NULL TERMINATION 
 	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
 }
 
 HttpRequest 			&Client::getRequest() {
 	return (this->_request);
+}
+
+void	Client::setRequestTimout(time_t  secs) {
+	this->_client_request_timout = secs;
+}
+
+time_t					Client::getClientRequestTimeout() const {
+	return (this->_client_request_timout);
 }

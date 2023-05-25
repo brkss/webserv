@@ -18,6 +18,9 @@ void send_test_response(int fd) {
 }
 
 ServerDrive::ServerDrive(const Parse &conf): _config(conf), _fd_max(0) {
+		
+	this->_client_timeout = 5; // (in seconds should be pulled from config);
+
 	const std::vector<Server>	&servers = this->_config.getServers(); 
 	const int 					true_ = 1;
 	int							sock_fd;
@@ -51,7 +54,7 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	struct timeval timout;
 	int		select_stat;
 
-	timout.tv_sec = 5;
+	timout.tv_sec = 4;
 	timout.tv_usec = 0;
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, &timout);
 	if  (select_stat < 0)  {
@@ -82,6 +85,7 @@ void ServerDrive::readRequest(int fd) {
 
 	bzero(buffer, client_buffer_size);
 	bytes_recieved = read(client.getConnectionFd(), buffer, client_buffer_size - 1);
+	client.setRequestTimout(time(NULL)); // MARK 
 	std::cerr << "Receving from client : " << client.getConnectionFd()  << std::endl;
 
 	if (bytes_recieved <= 0)  // error on while reading 
@@ -112,6 +116,8 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 		request.parse(header);
 		request_data = rest;
 	}
+	if (request_data.empty()) 
+		request.setRequestState(HttpRequest::REQUEST_READY);
 }
 
 bool ServerDrive::unchunkBody(HttpRequest &request) {
@@ -120,8 +126,8 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 
 	size_t	size_pos;
 	size_t	chunk_size;
-	size_pos = request_body.find(ServerDrive::CRLF);
 
+	size_pos = request_body.find(ServerDrive::CRLF);
 	if (size_pos == std::string::npos)
 		return (false);
 
@@ -130,7 +136,6 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 		throw (ErrorLog(ErrorMessage::ERROR_400));
 
 	chunk_size = Utils::hexStringToSizeT(hex_sting);
-
 	if (chunk_size > (request_body.size() - (hex_sting.size() + CRLF.size() )))
 		return false; // READ REST OF CHUNK
 
@@ -139,15 +144,35 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 		request.setRequestState(HttpRequest::REQUEST_READY);
 		request_body.clear(); return false;
 	}
+
 	std::string temp = request_body.substr(0, chunk_size);
-	std::cout << "body size: " << temp.size() << std::endl;
-	std::cout << "chunk size: " << chunk_size << std::endl;
+	//std::cout << "body size: " << temp.size() << std::endl;
+	//std::cout << "chunk size: " << chunk_size << std::endl;
 	assert(chunk_size == temp.size());
 
 	request.appendChunk(request_body.substr(0, chunk_size)); // STORE CUNKS IN BODY BUFFER
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 
 	return (true);
+}
+
+bool	ServerDrive::getBody(HttpRequest &request) {
+
+	const std::string &length_str = request.getHeaderValue("Content-Length");
+	std::string &request_body = request.getRequestData();
+	size_t  content_length =  std::atoi(length_str.c_str());
+	size_t bytes_left;
+
+	bytes_left = content_length - request.getRequestBody().size();
+
+	if (bytes_left <= request_body.size()) {
+		request.appendChunk(request_body.substr(0, bytes_left));
+		//std::cout << "Current BodySize : " << request.getRequestBody().size() << std::endl;
+		//std::cout << "Content-Length : " << content_length << std::endl;
+		assert(request.getRequestBody().size() ==  content_length);
+		return (true);
+	}
+	return (false);
 }
 
 void ServerDrive::CheckRequestStatus(Client &client) {
@@ -162,11 +187,13 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 
 			}
 		}
+		else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
+			if (getBody(client_request))  {
+				client_request.setRequestState(HttpRequest::REQUEST_READY);
+				std::cerr <<  "Body : \n" << client_request.getRequestBody() << std::endl;
+			}
+		}
 	}
-	else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
-			std::cerr <<  "Body : \n" << client_request.getRequestData() << std::endl;
-	}
-
 	if (client_request.getRequestState() == HttpRequest::REQUEST_READY)  {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
 		
@@ -188,11 +215,26 @@ void ServerDrive::CloseConnection(int fd) {
 	this->_clients.erase(fd);
 }
 
+void ServerDrive::checkClientTimout(int fd) {
+	
+	Client &client				= getClient(fd) ;
+	time_t last_event			= client.getClientRequestTimeout();
+	time_t config_timeout 		= this->_client_timeout; // PS: READ HEADER 
+	time_t elapsed				= time(NULL) - last_event;
+	
+	if (elapsed >= config_timeout)
+	{
+		std::cout << "Connection Timout Closing ... " << std::endl;
+		CloseConnection(fd);		
+	}
+	// GOOD BOY :)
+}
+
 void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	int fd_max = this->_fd_max;
 
-	for (int fd = 0; fd <=  fd_max; fd++) {
+	for (int fd = 3; fd <=  fd_max; fd++) {
 		if (FD_ISSET(fd, &write_copy)) { 		// response 
 			send_test_response(fd);
 			CloseConnection(fd);
@@ -204,6 +246,9 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 			else { 											// read request 
 				readRequest(fd);
 			}
+		}
+		else if (!FD_ISSET(fd, &this->_listenset)) { // SHOULD BE CHECKED FOR TIMEOUT
+			checkClientTimout(fd);	
 		}
 	}
 }

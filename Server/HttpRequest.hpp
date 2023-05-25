@@ -13,6 +13,7 @@ class HttpRequest {
 			BODY_STATE,
 			REQUEST_READY
 		};
+
 		enum BODY_TRANSFER {
 			CHUNKED,
 			CONTENT_LENGHT,
@@ -68,6 +69,7 @@ class HttpRequest {
 		
 		const std::string&	getHeaderValue(const std::string &header);
 
+		void 				CheckTransferType();
 		void 				CeckContentLength();
 		void 				CheckTransferEncoding() ;
 
