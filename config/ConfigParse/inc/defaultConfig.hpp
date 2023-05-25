@@ -11,6 +11,7 @@ class DefaulConfig
 		static const std::string INDEX;
 		static const bool		 AUTOINDEX;
 	   	static const size_t 	 CLIENT_MAX_BODY_SIZE;
+	   	static const size_t 	 CLIENT_REQUEST_TIMOUT;
 		static const std::string ADDRESS; 
 		static const short		 PORT;
 	   	static const std::string SERVER_NAME;

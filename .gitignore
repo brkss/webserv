@@ -4,3 +4,4 @@ scratch
 config/ConfigParse/header.vim
 config/ConfigParse/header.vim !
 Server/.*.swp
+tests/*

@@ -5,7 +5,8 @@ Http::Http() : 	_erro_log(DefaulConfig::ERROR_LOG),
 				_root(DefaulConfig::ROOT),
 				_index(DefaulConfig::INDEX),
 				_autoindex(DefaulConfig::AUTOINDEX),
-				_client_max_body_size(DefaulConfig::CLIENT_MAX_BODY_SIZE)
+				_client_max_body_size(DefaulConfig::CLIENT_MAX_BODY_SIZE),
+				_client_request_timout (DefaulConfig::CLIENT_REQUEST_TIMOUT)
 {
 
 }
@@ -22,6 +23,7 @@ Http &Http::operator=(const Http &http) {
 		this->_autoindex = http._autoindex;
 		this->_client_max_body_size = http._client_max_body_size;
 		this->_cgi = http._cgi;
+		this->_client_request_timout = http._client_request_timout;
 	}
 	return (*this);
 }

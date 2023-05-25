@@ -93,9 +93,10 @@ void ServerDrive::readRequest(int fd) {
 		if (bytes_recieved == 0) // Client closed connection
 		{     
 			Network::closeConnection(fd);
-			FD_CLR(fd, &this->_readset);
-			FD_CLR(fd, &this->_writeset);
-			this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
+			CloseConnection(fd);
+			//FD_CLR(fd, &this->_readset);
+			//FD_CLR(fd, &this->_writeset);
+			//this->_server_fds.erase(std::find(this->_server_fds.begin(), this->_server_fds.end(), fd));
 			std::cerr << "EOF recieved closing..." << std::endl;
 			return ;
 		}
@@ -104,6 +105,8 @@ void ServerDrive::readRequest(int fd) {
 	}
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
+
+
 }
 
 void ServerDrive::getHeader(HttpRequest &request)  {
@@ -116,7 +119,7 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 		request.parse(header);
 		request_data = rest;
 	}
-	if (request_data.empty()) 
+	if (request_data.empty() && request.getRequestMethod() == "GET") 
 		request.setRequestState(HttpRequest::REQUEST_READY);
 }
 
@@ -134,6 +137,7 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	hex_sting = request_body.substr(0, size_pos);
 	if (!Utils::is_hex(hex_sting))
 		throw (ErrorLog(ErrorMessage::ERROR_400));
+			
 
 	chunk_size = Utils::hexStringToSizeT(hex_sting);
 	if (chunk_size > (request_body.size() - (hex_sting.size() + CRLF.size() )))
@@ -150,9 +154,14 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	//std::cout << "chunk size: " << chunk_size << std::endl;
 	assert(chunk_size == temp.size());
 
-	request.appendChunk(request_body.substr(0, chunk_size)); // STORE CUNKS IN BODY BUFFER
+	request.appendChunk(temp); // STORE CUNKS IN BODY BUFFER
+	try {
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 
+	}catch (const std::out_of_range& oor) {
+		     std::cerr << "Out of Range error: " << oor.what() << '\n';
+			 exit(1);
+			   }
 	return (true);
 }
 
@@ -190,7 +199,6 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		else if (client_request.getBodyTransferType() == HttpRequest::CONTENT_LENGHT) {
 			if (getBody(client_request))  {
 				client_request.setRequestState(HttpRequest::REQUEST_READY);
-				std::cerr <<  "Body : \n" << client_request.getRequestBody() << std::endl;
 			}
 		}
 	}
@@ -217,6 +225,7 @@ void ServerDrive::CloseConnection(int fd) {
 
 void ServerDrive::checkClientTimout(int fd) {
 	
+	std::cerr << "checking  timout for fd :"  << fd << std::endl;
 	Client &client				= getClient(fd) ;
 	time_t last_event			= client.getClientRequestTimeout();
 	time_t config_timeout 		= this->_client_timeout; // PS: READ HEADER 
@@ -238,16 +247,17 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 		if (FD_ISSET(fd, &write_copy)) { 		// response 
 			send_test_response(fd);
 			CloseConnection(fd);
-			std::cerr << "Response sent. Closing ..." << std::endl;
+			std::cerr << "[" << fd << "]" << "Response sent. Closing ..." << std::endl;
 		}
 		else if (FD_ISSET(fd, &read_copy)) {
 			if (FD_ISSET(fd, &this->_listenset)) 
 				addClient(Network::acceptConnection(fd));	// new connection 
 			else { 											// read request 
+				std::cerr << "reading request for : " << fd << std::endl;
 				readRequest(fd);
 			}
 		}
-		else if (!FD_ISSET(fd, &this->_listenset)) { // SHOULD BE CHECKED FOR TIMEOUT
+		else if (!FD_ISSET(fd, &this->_listenset) && FD_ISSET(fd, &(this->_readset))) { // SHOULD BE CHECKED FOR TIMEOUT
 			checkClientTimout(fd);	
 		}
 	}
@@ -272,5 +282,8 @@ Client &ServerDrive::getClient(int fd) {
 	if (it != this->_clients.end())
 		return (it->second);
 	else 
+	{
+		std::cout << "fd : " << fd << std::endl; 
 		throw(ErrorLog("BUG: Potential   Server  error"));
+	}
 }

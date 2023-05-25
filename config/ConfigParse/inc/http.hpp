@@ -16,6 +16,7 @@ class  Http
 		std::string 						_index;
 		bool								_autoindex;
 		size_t 								_client_max_body_size;
+		size_t 								_client_request_timout; // timout for nly for a period between two successive read operations 
 
 	public:
 		Http();

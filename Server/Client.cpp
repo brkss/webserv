@@ -3,7 +3,7 @@
 
 
 // STATIC SHARED BUFFER 
-char Client::_buffer[1024];
+char Client::_buffer[BUFFER_SIZE];
 
 Client::Client() {
 	
@@ -28,6 +28,7 @@ Client &Client::operator=(const Client &client) {
 	this->_connection_fd = client._connection_fd;
 	this->_address_len = client._address_len;
 	this->_request = client._request;
+	this->_client_request_timout = client._client_request_timout;
 	return (*this);
 }
 
