@@ -322,6 +322,20 @@ void   Parse::parseClientBodySize(Http &config) {
 	expectToken(Token::COLON);
 }
 
+void Parse::parseClientRequestTimout(Http &config) {
+
+	std::string value;
+
+	nextToken();
+	expectToken(Token::VALUE);
+	value  = currToken().getTokenValue();
+	if (Utils::is_number(value))
+		config.setRequestTimout(std::atol(value.c_str()));
+	else
+		throw_error(currToken(), "Bad argument");
+	nextToken();
+}
+
 void Parse::parseCgi(Http &config) {
 	std::string extention;
 	std::string path;
@@ -351,6 +365,8 @@ void Parse::parseGlobalDirective(Http &config) {
 		parseIndex(config);
 	else if (curr_token.getTokenType() == Token::CLIENT_MAX_BODY_SIZE)
 		parseClientBodySize(config);
+	else if (curr_token.getTokenType() == Token::CLIENT_REQUEST_TIMOUT)
+		parseClientRequestTimout(config);
 	else if (curr_token.getTokenType() == Token::CGI)
 		parseCgi(config);
 }

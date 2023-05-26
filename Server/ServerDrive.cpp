@@ -19,7 +19,7 @@ void send_test_response(int fd) {
 
 ServerDrive::ServerDrive(const Parse &conf): _config(conf), _fd_max(0) {
 		
-	this->_client_timeout = 5; // (in seconds should be pulled from config);
+	//this->_client_timeout = 5; // (in seconds should be pulled from config);
 
 	const std::vector<Server>	&servers = this->_config.getServers(); 
 	const int 					true_ = 1;

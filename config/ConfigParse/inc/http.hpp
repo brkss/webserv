@@ -35,6 +35,7 @@ class  Http
 		void setIndex(const std::string &value);
 		void setAutoIndex(bool value);
 		void setClientMaxBodySize(size_t value);
+		void setRequestTimout(size_t timeout);
 		void addCgi(const pair  &cgi);
 
 

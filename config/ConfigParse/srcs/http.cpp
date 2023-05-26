@@ -69,4 +69,7 @@ void Http::setClientMaxBodySize(size_t value) {
 void Http::addCgi(const pair &cgi) {
 	this->_cgi.insert(cgi);
 }
+void Http::setRequestTimout(size_t timeout) {
+	this->_client_request_timout = timeout;
+}
 

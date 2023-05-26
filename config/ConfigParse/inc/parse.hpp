@@ -39,6 +39,7 @@ class  Parse
 		void parseErrorLog(Http &config);
 		void parseIndex(Http &config);
 		void parseClientBodySize(Http &config);
+		void parseClientRequestTimout(Http &config);
 
 		void parseListen(Server &conf);
 		void parseServerName(Server &conf);
