@@ -19,6 +19,7 @@ class Client {
 		struct sockaddr_in  _client_address;
 
 		HttpRequest			_request;
+		short				_request_status;
 
 	public:
 		static char 		_buffer[BUFFER_SIZE]; // SHARED BUFFER
@@ -36,10 +37,12 @@ class Client {
 		int						getServerFd() const;
 		int						getConnectionFd() const ;
 		time_t					getClientRequestTimeout() const;
+		short					getRequestStatus() const;
 
 		void 					saveRequestData(size_t nb_bytes);
 		HttpRequest 			&getRequest();
 		void					setRequestTimout(time_t secs);
+		void					setRequestStatus(short error_num);
 };
 
 

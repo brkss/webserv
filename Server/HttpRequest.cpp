@@ -1,24 +1,33 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpRequest.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/26 22:45:44 by adriouic          #+#    #+#             */
+/*   Updated: 2023/05/26 22:46:06 by adriouic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HttpRequest.hpp"
 
 #include "ErrorHandler.hpp"
 #include "Utils.hpp"
 
-const std::string GET = "GET";
-const std::string POST = "POST";
-const std::string DELETE = "DELETE";
-const size_t URI_MAX_LEN = 2000; 
+const std::string GET		= "GET";
+const std::string POST		= "POST";
+const std::string DELETE	= "DELETE";
+const size_t URI_MAX_LEN	= 2000; 
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET) {
-
 }
 
 HttpRequest::~HttpRequest() {
-
-
 }
-HttpRequest::HttpRequest(const HttpRequest &request) {
 
+HttpRequest::HttpRequest(const HttpRequest &request) {
 	*this = request;
 }
 	
@@ -32,21 +41,23 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_transfer_type = request._transfer_type;
 	this->_request_data = request._request_data;
 	this->_request_body = request._request_body;
-
 	return (*this);
 }
 
 void	validateMethod(const std::string &method) {
-		if (method != GET &&
-			method != POST &&
-			method != DELETE) {
-			throw (ErrorLog(ErrorMessage::ERROR_400));
-		}
+	if (method != GET and
+		method != POST and
+		method != DELETE) {
+			throw (RequestError(ErrorNumbers::_400_BAD_REQUEST));
+			//throw (ErrorLog(ErrorMessage::ERROR_400));
+	}
 }
 
 void	validatePath(const std::string &path) {
-		if (path.size() > URI_MAX_LEN) throw(ErrorLog(ErrorMessage::ERROR_414));
-		if (path[0] != '/') throw(ErrorLog(ErrorMessage::ERROR_400));
+		if (path.size() > URI_MAX_LEN) throw (RequestError(ErrorNumbers::_414_URI_TOO_LONG));
+		//throw(ErrorLog(ErrorMessage::ERROR_414));
+		if (path[0] != '/')	throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
+		//throw(ErrorLog(ErrorMessage::ERROR_400));
 }
 
 void	validateVersion(const std::string &http_version) {
@@ -59,20 +70,22 @@ void	validateVersion(const std::string &http_version) {
 			version_str = http_version.substr(HTTP.size());
 			version = std::strtod(version_str.c_str(), &rest);
 			if (*rest) {
-				throw(ErrorLog(ErrorMessage::ERROR_400));
+				throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
+				//throw(ErrorLog(ErrorMessage::ERROR_400));
 		}
 	 	if (version > 1.1) {
-				throw(ErrorLog(ErrorMessage::ERROR_505));
+			throw(RequestError(ErrorNumbers::_505_HTTP_VERSION_NOT_SUPPORTED));
+			//throw(ErrorLog(ErrorMessage::ERROR_505));
 		}
 	}
 }
 
 void	HttpRequest::parseRequestLine(std::string &request_line) {
 		// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
-		std::cout << "request line : " << request_line << std::endl;
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
-			throw(ErrorLog(ErrorMessage::ERROR_400));
+			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
+			//throw(ErrorLog(ErrorMessage::ERROR_400));
 		}
 		setRequestMethod(values[0]);
 		setRequestPath(values[1]);
@@ -82,23 +95,23 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 void HttpRequest::parseHedears(const std::string &headers_str) { 
 
 	typedef std::vector<std::string>::iterator v_iterator;
-
-	const std::string CRLF("\r\n");
-	HttpRequest::headers_t header_map;
-	std::vector<std::string> headers;
-	std::pair<std::string, std::string> temp_pair;
-	size_t  pos;
+	std::pair<std::string, std::string> 		temp_pair;
+	std::vector<std::string>					headers;
+	HttpRequest::headers_t						header_map;
+	const std::string 							CRLF("\r\n");
+	size_t  									pos;
 
 	headers = Utils::split(headers_str, CRLF);
 	for (v_iterator line = headers.begin() ; line != headers.end(); line++)
 	{
 		if ((pos = line->find(":")) != std::string::npos) {
 			temp_pair = std::make_pair(Utils::trimSpaces(line->substr(0, pos)),Utils::trimSpaces(line->substr(pos + 1)));
-			std::cout << "[" << temp_pair.first << "]" << " " << "[" << temp_pair.second << "]" << std::endl;
 			header_map.insert(temp_pair);
+			//std::cout << "[" << temp_pair.first << "]" << " " << "[" << temp_pair.second << "]" << std::endl;
 		}
 		else
-			throw(ErrorLog(ErrorMessage::ERROR_400));
+			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
+			//throw(ErrorLog(ErrorMessage::ERROR_400));
 	}
 	this->_request_headers = header_map;
 	CheckTransferType();
@@ -112,15 +125,15 @@ void HttpRequest::CheckTransferType() {
 void HttpRequest::CheckTransferEncoding() {
 	const std::string transfer_encoding("Transfer-Encoding");
 	const std::string chunked_transfer("chunked");
-
  	const std::string header_value = getHeaderValue(transfer_encoding);
+
 	if (header_value != transfer_encoding) {
 		if (header_value ==  chunked_transfer){
 			setTransferType(CHUNKED);
-			std::cout << "Transfer    Type: CHUNKED" << std::endl;
 		}
 		else { // UNSUPORTED ENCODING TYPE 
-			throw(ErrorLog(ErrorMessage::ERROR_400));
+			//throw(ErrorLog(ErrorMessage::ERROR_400));
+			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 		}
 	}
 }
@@ -130,13 +143,12 @@ void HttpRequest::CeckContentLength() {
 
  	const std::string header_value = getHeaderValue(content_length);
 	if (header_value != content_length) {
-
 		if (Utils::is_number(header_value)) {
 			setTransferType(CONTENT_LENGHT);
-			std::cout << "Transfer    Type: CONTENT_LENGTH" << std::endl;
 		}
-		else { // UNSUPORTED ENCODING TYPE 
-			throw(ErrorLog(ErrorMessage::ERROR_400));
+		else { 
+			//throw(ErrorLog(ErrorMessage::ERROR_400));
+			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 		}
 	}
 }
@@ -149,14 +161,15 @@ void		HttpRequest::parse(std::string &request) {
 	std::string headers;
 
 	if (delim_pos != std::string::npos) {
-		request_line  = request.substr(0, delim_pos);	
+		request_line = request.substr(0, delim_pos);	
 		headers = request.substr(delim_pos + CRLF.size()); 
 		parseRequestLine(request_line);
 		parseHedears(headers);
 		setRequestState(HttpRequest::BODY_STATE);
 	}
 	else {
-		throw(ErrorLog(ErrorMessage::ERROR_400));
+		throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
+		//throw(ErrorLog(ErrorMessage::ERROR_400));
 	}
 }
 
@@ -196,7 +209,6 @@ void HttpRequest::addRequestData(const std::string &data) {
 std::string			&HttpRequest::getRequestData() {
 	return (this->_request_data);
 }
-
 int	HttpRequest::getRequestState() const {
 	return(this->_request_state);
 }

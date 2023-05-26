@@ -45,6 +45,7 @@ class   ServerDrive {
 
 		void getHeader(HttpRequest &request);
 		bool getBody(HttpRequest &client_request);
+		bool ClientError(int fd);
 
 };
 

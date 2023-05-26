@@ -13,12 +13,39 @@ class ErrorLog : public std::exception {
 		}
 };
 
+
+
 class  ErrorMessage {
 	public:
 		static 	const char * ERROR_400 ;
 		static 	const char * ERROR_414 ; 
 		static 	const char * ERROR_505 ; 
 
+};
+
+class  ErrorNumbers {
+	public:
+		static const short	_400_BAD_REQUEST;
+		static const short 	_408_REQUEST_TIMEOUT; 
+		static const short 	_411_LENGTH_REQUIRED; 
+		static const short 	_414_URI_TOO_LONG;
+		static const short	_413_PAYLOAD_TOO_LARGE;
+		static const short 	_431_REQUEST_HEADER_FIELDS_TOO_LARGE;	
+		static const short	_500_INTERNAL_SERVER_ERROR;
+		static const short	_501_NOT_IMPLEMENTED;	
+		static const short	_505_HTTP_VERSION_NOT_SUPPORTED;
+};
+
+class RequestError {
+	private:
+		int _error_number;
+
+	public:
+		RequestError(int error_number) : _error_number(error_number) {
+		}
+		int getErrorNumber() const  {
+			return (this->_error_number);
+		}
 };
 
 #endif /* ERRORHANDLER_HPP */

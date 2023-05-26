@@ -7,6 +7,8 @@
 class HttpRequest {
 	
 	public:
+		typedef std::map<std::string, std::string> headers_t; //Headers's Map Type
+
 		enum REQUEST_STATE
 		{
 			HEADER_STATE,
@@ -25,9 +27,6 @@ class HttpRequest {
 		static const std::string DELETE;
 		static const size_t		URI_MAX_LEN;
 
-		typedef std::map<std::string, std::string> headers_t; // MAP OF HEADERS
-
-
 	private:
 		REQUEST_STATE						_request_state;
 		BODY_TRANSFER 						_transfer_type;
@@ -37,9 +36,8 @@ class HttpRequest {
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
 		std::string							_request_body;
-			
+		
 	public:
-
 		HttpRequest();
 		~HttpRequest();
 		HttpRequest(const HttpRequest &request);
@@ -48,33 +46,34 @@ class HttpRequest {
 		const std::string 	&getRequestMethod() const ;
 		const std::string 	&getRequestPath()	const ;
 		const std::string 	&getHttpVersion()	const ;
-		const headers_t		&getHeaders()		const ; 
-		int					getRequestState() const;
-		int					getBodyTransferType() const;
+		const std::string&	getHeaderValue(const std::string &header); // Get header value by name,
+																	   // returns "header" if not found 
+	
+		// #Request Proprty Getters 
+		const headers_t		&getHeaders()			const;
+		int					getRequestState()		const;
+		int					getBodyTransferType()	const;
 		std::string			&getRequestBody();
 		std::string			&getRequestData();
 
-		void				setRequestState(REQUEST_STATE state);
+		// #Parse Methods
 		void				addRequestData(const std::string &data);
-		void				parse(std::string &header);
-		void				parseRequestLine(std::string &request_line);
 		void				parseHedears(const std::string &headers);
+		void				parseRequestLine(std::string &request_line);
+		void				parse(std::string &header);
 
+		// # Setters
 		void				setRequestMethod(const std::string &method);
-		void				setRequestPath(const std::string &path)	;
 		void				setHttpVersion(const std::string &method);
+		void				setRequestPath(const std::string &path)	;
 		void 				setTransferType(BODY_TRANSFER type);
-		void 				appendChunk(const std::string &chunk);
-		
-		
-		const std::string&	getHeaderValue(const std::string &header);
+		void				setRequestState(REQUEST_STATE state);
 
+		// #Dtata Trandfer Methods 
+		void 				appendChunk(const std::string &chunk);
+		void 				CheckTransferEncoding();
 		void 				CheckTransferType();
 		void 				CeckContentLength();
-		void 				CheckTransferEncoding() ;
-
-
-
 };
 
 
