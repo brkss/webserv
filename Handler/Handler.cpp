@@ -13,14 +13,15 @@ bool isPHPScript(std::string path){
     return false;
 }
 
-Handler::Handler(std::string path){
+
+Handler::Handler(std::string path, std::string req_body, std::map<std::string, std::string> headers){
     this->path = path;
+    this->req_body = req_body;
     // handle 404 file not found response !
     if(isPHPScript(path)){
-        
         // handle cgi !
         CGI cgi(path);
-        cgi.handlePhpCGI();
+        cgi.handlePhpCGI(this->req_body);
         std::string response = cgi.getResponse();
         std::cout << " >> this is a php file response : " << response << "\n";
 

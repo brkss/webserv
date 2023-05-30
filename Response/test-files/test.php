@@ -9,7 +9,7 @@
 <body>
 <h1>
     <?php 
-        echo "hello";  
+        echo "hello" + $_POST["email"];  
     ?>
 </h1>
 </body>

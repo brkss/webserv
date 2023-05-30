@@ -11,7 +11,6 @@
  *
  */
 std::string nowHTTP(){
-	
  	// Get the current time
     std::time_t current_time = std::time(nullptr);
 

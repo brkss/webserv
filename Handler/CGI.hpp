@@ -1,8 +1,11 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
+#define CGI_ENV_LENGTH 14
+
 #include <string>
 #include <iostream>
+#include <map>
 #include <unistd.h>
 
 class CGI {
@@ -13,10 +16,10 @@ class CGI {
 
 	public:
 		CGI(std::string path);
-		void handlePhpCGI();
+		void handlePhpCGI(std::string req_body);
 		std::string getResponse();
 
-
+		std::map<std::string, std::string> generateCGIEnvironement();
 };
 
 

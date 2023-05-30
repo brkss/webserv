@@ -18,7 +18,6 @@ size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
     while( pos != std::string::npos ) {
         strs.push_back( txt.substr( initialPos, pos - initialPos ) );
         initialPos = pos + 1;
-
         pos = txt.find( ch, initialPos );
     }
 
@@ -55,8 +54,12 @@ void Server::handler(){
 
 void Server::responder(){
 	
+	
 	std::string _root = "/Users/brkss/Developer/1337/webserv/Response/test-files";
 	std::string _path = _root + get_path_from_request(buffer);
+
+	std::cout << "path : " << _path << "\n";
+	std::cout << "req : " << buffer << "\n";
 
 	Handler handler(_path);
 	Response response(handler.getBody(), handler.getType(), handler.getSize());
