@@ -11,8 +11,8 @@ Client::Client() {
 
 Client::Client(int connection_fd) : _server_fd(connection_fd),
 									_client_request_timout(time(NULL)),
-									_address_len(0),
-									_request_status(0) {
+									_request_status(0),
+									_address_len(0) {
 
 	bzero(&this->_client_address, sizeof(this->_client_address));
 }
@@ -31,6 +31,7 @@ Client &Client::operator=(const Client &client) {
 	this->_address_len = client._address_len;
 	this->_request = client._request;
 	this->_client_request_timout = client._client_request_timout;
+	this->_server = client._server;
 	this->_request_status = client._request_status;
 	return (*this);
 }
@@ -79,4 +80,13 @@ void  Client::setRequestStatus(short error_num) {
 
 short Client::getRequestStatus() const {
 	return (this->_request_status);
+}
+
+
+void Client::setServer(const Server &server) {
+	this->_server = server;
+}
+
+const Server&	Client::getServer() const {
+	return (this->_server);
 }

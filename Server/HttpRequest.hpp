@@ -71,6 +71,7 @@ class HttpRequest {
 
 		// #Dtata Trandfer Methods 
 		void 				appendChunk(const std::string &chunk);
+		void				validateHeaders();
 		void 				CheckTransferEncoding();
 		void 				CheckTransferType();
 		void 				CeckContentLength();

@@ -7,7 +7,7 @@
 class Location;
 
 
-class Server : public Http
+class Server : public Http 
 {
 	private:
 		//listen address:port | port  | address 

@@ -66,7 +66,6 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
 			#if DEBUG
-			std::cout << "Request Line " <<    values.size() << std::endl;
 			#endif
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 		}
@@ -96,7 +95,19 @@ void HttpRequest::parseHeaders(const std::string &headers_str) {
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 	}
 	this->_request_headers = header_map;
+	// Header validation may be required !! depends on response 
+
+	validateHeaders();		// checks for presense of required headres 
 	CheckTransferType();
+}
+
+void HttpRequest::validateHeaders() {
+	const std::string host("Host");
+ 	const std::string header_value = getHeaderValue(host);
+
+	if ((header_value == host) or header_value.empty()) {
+			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST)); // Host header required!
+	}	
 }
 
 void HttpRequest::CheckTransferType() {

@@ -429,6 +429,6 @@ void Parse::parseFile(const std::string &file_name){
 	parseHttpBlock();
 }
 
-const std::vector<Server> &Parse::getServers() const {
+const std::vector<Server> &Parse::getVirtualServers() const {
 	return (this->_servers);
 }

@@ -2,6 +2,7 @@
 # define SERVERDRIVE_HPP 
 
 #include  "../config/ConfigParse/inc/parse.hpp"
+#include  "../config/ConfigParse/inc/server.hpp"
 #include "Client.hpp"
 #include <map>
 
@@ -9,13 +10,16 @@ class   ServerDrive {
 
 	private:
 		const Parse&				_config;
+		const std::vector<Server>&	_virtual_servers;
+
 		fd_set						_readset;
 		fd_set 		   				_writeset;
 		fd_set 		   			 	_listenset;
-		int			   				_fd_max;
+
 		std::vector<int> 			_server_fds;
 		std::map<int, Client> 		_clients;
 
+		int			   				_fd_max;
 		size_t 						_client_timeout;
 
 	public:
@@ -46,6 +50,7 @@ class   ServerDrive {
 		void getHeader(HttpRequest &request);
 		bool getBody(HttpRequest &client_request);
 		bool ClientError(int fd);
+		const Server &getServerByName(const std::string &host_name);
 
 };
 

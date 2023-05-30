@@ -45,6 +45,8 @@ size_t hexStringToSizeT(const std::string &hex_str) {
 std::string trimSpaces(const std::string &str) {
 	size_t start  = str.find_first_not_of(' ');
 	size_t end  = str.find_last_not_of(' ');
+	if (start == std::string::npos or end == std::string::npos)
+		return ("");
 	return (str.substr(start, end - start + 1));
 }
 

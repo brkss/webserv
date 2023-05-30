@@ -52,7 +52,7 @@ class  Parse
 
 		void addServer(const Server &server);
 		
-		const std::vector<Server> &getServers() const;
+		const std::vector<Server> &getVirtualServers() const;
 
 
 };

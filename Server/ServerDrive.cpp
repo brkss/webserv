@@ -18,16 +18,17 @@ void send_success(int fd) {
 }
 
 void sendErrorMessage(int fd, short error) {
-	std::string resp = "HTrP/1.1 " + std::to_string(error) + " (Not yet)\r\n\r\n";
+	std::string resp = "HTTP/1.1 " + std::to_string(error) + " (Not yet)\r\n\r\n";
 	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size())
 		throw(ErrorLog("Send error"));
 }
 
-ServerDrive::ServerDrive(const Parse &conf): _config(conf), _fd_max(0) {
+ServerDrive::ServerDrive(const Parse &conf): _config(conf),
+											_virtual_servers(conf.getVirtualServers()) ,
+											_fd_max(0) {
 		
-	this->_client_timeout = 5; // (in seconds should be pulled from config);
-
-	const std::vector<Server>	&servers = this->_config.getServers(); 
+	this->_client_timeout = 5; // (in seconds) should be pulled from config;
+	const std::vector<Server>	&servers = this->_config.getVirtualServers(); 
 	const int 					true_ = 1;
 	int							sock_fd;
 
@@ -46,7 +47,8 @@ ServerDrive::ServerDrive(const Parse &conf): _config(conf), _fd_max(0) {
 	}
 }
 
-ServerDrive::ServerDrive(const ServerDrive &server) : _config(server._config) {
+ServerDrive::ServerDrive(const ServerDrive &server) : _config(server._config),
+													  _virtual_servers(server._virtual_servers){
 	(void) server;
 }
 
@@ -154,10 +156,10 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 
 bool	ServerDrive::getBody(HttpRequest &request) {
 
-	const std::string &length_str = request.getHeaderValue("Content-Length");
-	std::string &request_body = request.getRequestData();
-	size_t  content_length =  std::atoi(length_str.c_str());
-	size_t bytes_left;
+	const std::string	&length_str = request.getHeaderValue("Content-Length");
+	std::string			&request_body = request.getRequestData();
+	size_t				content_length =  std::atoi(length_str.c_str());
+	size_t				bytes_left;
 
 	bytes_left = content_length - request.getRequestBody().size();
 	if (bytes_left <= request_body.size()) {
@@ -189,6 +191,9 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 	}
 	if (client_request.getRequestState() == HttpRequest::REQUEST_READY)  {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
+		const Server & client_server = getServerByName(client_request.getHeaderValue("Host"));
+		client.setServer(client_server);
+		std::cout << "server handeling the request : " << client.getServer().getServerName() << std::endl;
 		
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
@@ -257,7 +262,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 		
 		} catch (const RequestError &error)  {
 			FD_SET(fd, &this->_writeset);		// select before response
-			getClient(fd).setRequestStatus(error.getErrorNumber());
+			//getClient(fd).setRequestStatus(error.getErrorNumber());
 
 			#if DEBUG
 			std::cout << "Error: " << error.getErrorNumber() << std::endl;
@@ -287,4 +292,15 @@ Client &ServerDrive::getClient(int fd) {
 	else {
 		throw(ErrorLog("BUG: Potential Server error"));
 	}
+}
+
+const Server &ServerDrive::getServerByName(const std::string &host_name) {
+	typedef std::vector<Server>::const_iterator cv_iterator;
+	
+	for (cv_iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++) {
+		if (it->getServerName() == host_name) 
+			return (*it);
+	}
+	return (*this->_virtual_servers.begin());
+	
 }
