@@ -1,3 +1,4 @@
+DEBUG = true
 NAME = webserv
 
 SRC = ./config/ConfigParse/srcs/lexer.cpp \
@@ -25,7 +26,7 @@ STANDARD = -std=c++98
 all: $(NAME)
 
 %.o: %.cpp
-	$(COMPILER) $(FLAGS) -c $< -o ${<:.cpp=.o}
+	$(COMPILER) $(FLAGS) -c -D DEBUG=$(DEBUG) $< -o ${<:.cpp=.o}
 
 $(NAME): $(OBJS)
 	$(COMPILER) $(FLAGS) $(STANDARD) $(OBJS) -o $@

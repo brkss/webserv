@@ -58,9 +58,9 @@ class HttpRequest {
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);
-		void				parseHedears(const std::string &headers);
+		void				parseHeaders(const std::string &headers);
 		void				parseRequestLine(std::string &request_line);
-		void				parse(std::string &header);
+		void				parse(std::string &request_header);
 
 		// # Setters
 		void				setRequestMethod(const std::string &method);

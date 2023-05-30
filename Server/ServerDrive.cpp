@@ -18,7 +18,7 @@ void send_success(int fd) {
 }
 
 void sendErrorMessage(int fd, short error) {
-	std::string resp = "HTTP/1.1 " + std::to_string(error) + " (Not yet)\n\n";
+	std::string resp = "HTrP/1.1 " + std::to_string(error) + " (Not yet)\r\n\r\n";
 	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size())
 		throw(ErrorLog("Send error"));
 }
@@ -117,7 +117,7 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 		request.parse(header);
 		request_data = rest;
 	}
-	if (request_data.empty() && request.getRequestMethod() == "GET") 
+	if (request_data.empty() && request.getRequestMethod() == HttpRequest::GET) 
 		request.setRequestState(HttpRequest::REQUEST_READY);
 }
 
@@ -184,6 +184,8 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 				client_request.setRequestState(HttpRequest::REQUEST_READY);
 			}
 		}
+		else
+			throw(RequestError(ErrorNumbers::_411_LENGTH_REQUIRED));
 	}
 	if (client_request.getRequestState() == HttpRequest::REQUEST_READY)  {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
@@ -255,8 +257,11 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 		
 		} catch (const RequestError &error)  {
 			FD_SET(fd, &this->_writeset);		// select before response
-			std::cout << "Error: " << error.getErrorNumber() << std::endl;
 			getClient(fd).setRequestStatus(error.getErrorNumber());
+
+			#if DEBUG
+			std::cout << "Error: " << error.getErrorNumber() << std::endl;
+			#endif
 		}
 	}
 }

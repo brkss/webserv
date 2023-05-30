@@ -1,4 +1,5 @@
 *.swo
+*.swn
 data-*
 scratch
 config/ConfigParse/header.vim

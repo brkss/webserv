@@ -1,24 +1,12 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpRequest.cpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/26 22:45:44 by adriouic          #+#    #+#             */
-/*   Updated: 2023/05/26 22:46:06 by adriouic         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "HttpRequest.hpp"
 
 #include "ErrorHandler.hpp"
 #include "Utils.hpp"
 
-const std::string GET		= "GET";
-const std::string POST		= "POST";
-const std::string DELETE	= "DELETE";
-const size_t URI_MAX_LEN	= 2000; 
+const std::string 	HttpRequest::GET			= "GET";
+const std::string 	HttpRequest::POST			= "POST";
+const std::string 	HttpRequest::DELETE			= "DELETE";
+const size_t		HttpRequest::URI_MAX_LEN	= 2000; 
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET) {
@@ -45,19 +33,16 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 }
 
 void	validateMethod(const std::string &method) {
-	if (method != GET and
-		method != POST and
-		method != DELETE) {
+	if (method != HttpRequest::GET and
+		method != HttpRequest::POST and
+		method != HttpRequest::DELETE) {
 			throw (RequestError(ErrorNumbers::_400_BAD_REQUEST));
-			//throw (ErrorLog(ErrorMessage::ERROR_400));
 	}
 }
 
 void	validatePath(const std::string &path) {
-		if (path.size() > URI_MAX_LEN) throw (RequestError(ErrorNumbers::_414_URI_TOO_LONG));
-		//throw(ErrorLog(ErrorMessage::ERROR_414));
-		if (path[0] != '/')	throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-		//throw(ErrorLog(ErrorMessage::ERROR_400));
+		if (path.size() > HttpRequest::URI_MAX_LEN)	throw (RequestError(ErrorNumbers::_414_URI_TOO_LONG));
+		if (path[0] != '/')				throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 }
 
 void	validateVersion(const std::string &http_version) {
@@ -69,14 +54,10 @@ void	validateVersion(const std::string &http_version) {
 		if (http_version.compare(0, HTTP.size(), HTTP) == 0) {
 			version_str = http_version.substr(HTTP.size());
 			version = std::strtod(version_str.c_str(), &rest);
-			if (*rest) {
+			if (*rest) 
 				throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-				//throw(ErrorLog(ErrorMessage::ERROR_400));
-		}
-	 	if (version > 1.1) {
-			throw(RequestError(ErrorNumbers::_505_HTTP_VERSION_NOT_SUPPORTED));
-			//throw(ErrorLog(ErrorMessage::ERROR_505));
-		}
+		 	if (version > 1.1) 
+				throw(RequestError(ErrorNumbers::_505_HTTP_VERSION_NOT_SUPPORTED));
 	}
 }
 
@@ -84,17 +65,19 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
+			#if DEBUG
+			std::cout << "Request Line " <<    values.size() << std::endl;
+			#endif
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-			//throw(ErrorLog(ErrorMessage::ERROR_400));
 		}
 		setRequestMethod(values[0]);
 		setRequestPath(values[1]);
 		setHttpVersion(values[2]);
 }
 
-void HttpRequest::parseHedears(const std::string &headers_str) { 
+void HttpRequest::parseHeaders(const std::string &headers_str) { 
 
-	typedef std::vector<std::string>::iterator v_iterator;
+	typedef std::vector<std::string>::iterator	v_iterator;
 	std::pair<std::string, std::string> 		temp_pair;
 	std::vector<std::string>					headers;
 	HttpRequest::headers_t						header_map;
@@ -111,7 +94,6 @@ void HttpRequest::parseHedears(const std::string &headers_str) {
 		}
 		else
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-			//throw(ErrorLog(ErrorMessage::ERROR_400));
 	}
 	this->_request_headers = header_map;
 	CheckTransferType();
@@ -128,13 +110,10 @@ void HttpRequest::CheckTransferEncoding() {
  	const std::string header_value = getHeaderValue(transfer_encoding);
 
 	if (header_value != transfer_encoding) {
-		if (header_value ==  chunked_transfer){
+		if (header_value ==  chunked_transfer) 
 			setTransferType(CHUNKED);
-		}
-		else { // UNSUPORTED ENCODING TYPE 
-			//throw(ErrorLog(ErrorMessage::ERROR_400));
+		else									// UNSUPORTED ENCODING TYPE 
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-		}
 	}
 }
 
@@ -143,34 +122,32 @@ void HttpRequest::CeckContentLength() {
 
  	const std::string header_value = getHeaderValue(content_length);
 	if (header_value != content_length) {
-		if (Utils::is_number(header_value)) {
+		if (Utils::is_number(header_value))
 			setTransferType(CONTENT_LENGHT);
-		}
-		else { 
-			//throw(ErrorLog(ErrorMessage::ERROR_400));
+		else 
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-		}
 	}
 }
 
-void		HttpRequest::parse(std::string &request) {
+void		HttpRequest::parse(std::string &request_header) {
 
-	const std::string CRLF("\r\n");
-	size_t  delim_pos = request.find(CRLF);	
-	std::string request_line;
-	std::string headers;
-
-	if (delim_pos != std::string::npos) {
-		request_line = request.substr(0, delim_pos);	
-		headers = request.substr(delim_pos + CRLF.size()); 
-		parseRequestLine(request_line);
-		parseHedears(headers);
-		setRequestState(HttpRequest::BODY_STATE);
-	}
-	else {
+	const	std::string CRLF("\r\n");
+	size_t				delim_pos;
+	std::string			request_line;
+	std::string 		headers;
+	
+	delim_pos = request_header.find(CRLF);	
+	if  (delim_pos == std::string::npos) 
 		throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
-		//throw(ErrorLog(ErrorMessage::ERROR_400));
-	}
+
+	#if DEBUG
+	std::cout << request_header << std::endl;
+	#endif
+	request_line = request_header.substr(0, delim_pos);	
+	headers = request_header.substr(delim_pos + CRLF.size()); 
+	parseRequestLine(request_line);
+	parseHeaders(headers);
+	setRequestState(HttpRequest::BODY_STATE);
 }
 
 // GETTERS 

@@ -8,7 +8,8 @@ namespace Utils {
 	size_t pos, last_pos = 0;
 	while ((pos = str.find(delim, last_pos)) != std::string::npos) {
 		buff = str.substr(last_pos, pos - last_pos);
-		ret.push_back(buff);
+		if (buff.size())
+			ret.push_back(buff);
 		last_pos = pos + delim.size();
 	}
 	ret.push_back(str.substr(last_pos));
