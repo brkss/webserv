@@ -107,6 +107,9 @@ void ServerDrive::readRequest(int fd) {
 	}
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
+#if DEBUG
+	std::cout << "Rreceving from client : " << fd << std::endl;
+#endif 
 }
 
 void ServerDrive::getHeader(HttpRequest &request)  {
@@ -193,7 +196,9 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
 		const Server & client_server = getServerByName(client_request.getHeaderValue("Host"));
 		client.setServer(client_server);
+		#if DEBUG 
 		std::cout << "server handeling the request : " << client.getServer().getServerName() << std::endl;
+		#endif
 		
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
@@ -246,7 +251,11 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 		if (FD_ISSET(fd, &write_copy)) {					// response 
 			if (!ClientError(fd))							// seds error reaponses 
-				send_success(fd);
+			{
+				Client &curr_client = getClient(fd);		// client watting for response
+				(void) curr_client;
+				send_success(fd);							// Response Demo
+			}
 			std::cerr << "Response Sent. Closing..." << std::endl;
 			CloseConnection(fd);
 		}
@@ -262,7 +271,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 		
 		} catch (const RequestError &error)  {
 			FD_SET(fd, &this->_writeset);		// select before response
-			//getClient(fd).setRequestStatus(error.getErrorNumber());
+			getClient(fd).setRequestStatus(error.getErrorNumber());
 
 			#if DEBUG
 			std::cout << "Error: " << error.getErrorNumber() << std::endl;
