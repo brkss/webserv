@@ -1,13 +1,20 @@
 #include "Client.hpp"
 #include <strings.h>
 
-Client::Client() {
 
+// STATIC SHARED BUFFER 
+char Client::_buffer[BUFFER_SIZE];
+
+Client::Client() {
+	
 }
 
-Client::Client(int connection_fd) : _server_fd(connection_fd) {
+Client::Client(int connection_fd) : _server_fd(connection_fd),
+									_client_request_timout(time(NULL)),
+									_request_status(0),
+									_address_len(0) {
+
 	bzero(&this->_client_address, sizeof(this->_client_address));
-	this->_address_len = 0;
 }
 
 Client::~Client() {
@@ -22,6 +29,10 @@ Client &Client::operator=(const Client &client) {
 	this->_server_fd = client._server_fd;
 	this->_connection_fd = client._connection_fd;
 	this->_address_len = client._address_len;
+	this->_request = client._request;
+	this->_client_request_timout = client._client_request_timout;
+	this->_server = client._server;
+	this->_request_status = client._request_status;
 	return (*this);
 }
 
@@ -43,4 +54,39 @@ void Client::setConnectionFd(int fd) {
 
 socklen_t  *Client::getAddressLen()   {
 	return (&this->_address_len);
+}
+
+void 	Client::saveRequestData(size_t nb_bytes) {
+	std::string str_bytes(this->_buffer, nb_bytes);
+	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
+}
+
+HttpRequest 			&Client::getRequest() {
+	return (this->_request);
+}
+
+void	Client::setRequestTimout(time_t  secs) {
+	this->_client_request_timout = secs;
+}
+
+time_t					Client::getClientRequestTimeout() const {
+	return (this->_client_request_timout);
+}
+
+void  Client::setRequestStatus(short error_num) {
+	this->_request_status = error_num;
+}
+
+
+short Client::getRequestStatus() const {
+	return (this->_request_status);
+}
+
+
+void Client::setServer(const Server &server) {
+	this->_server = server;
+}
+
+const Server&	Client::getServer() const {
+	return (this->_server);
 }

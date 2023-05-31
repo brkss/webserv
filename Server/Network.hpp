@@ -1,31 +1,24 @@
 #ifndef NETWORK_HPP
 # define NETWORK_HPP 
-#include <exception>
 #include <iostream>
+#include <arpa/inet.h> // inte_aton
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h>
 
-class ErrorLog : public std::exception {
-	private:
-		const  char *_error;
-	public:
-		ErrorLog(const char * error) : _error(error) {
-		}
-		ErrorLog(const ErrorLog &error_log) : _error(error_log._error) { } const char *what() const throw() {
-			return  this->_error;
-		}
-};
 
 namespace Network
 {
 
 	int  CreateSocket()  {
-			int sock_fd;
-			sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
-			if (sock_fd < 0) {
-				throw(ErrorLog("could not create socket"));
-			}
-			std::cerr << "Socket create OK!" << std::endl;
-			return (sock_fd);
+		int sock_fd;
+		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
+		if (sock_fd < 0) {
+			throw(ErrorLog("could not create socket"));
 		}
+		std::cerr << "Socket create OK!" << std::endl;
+		return (sock_fd);
+	}
 	
 	void BindSocket(int sock_fd, short port, const std::string &address)  {
 		int bind_stat;

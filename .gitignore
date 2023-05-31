@@ -1,3 +1,9 @@
+*.swo
+*.swp
+*.swn
+data-*
 scratch
 config/ConfigParse/header.vim
 config/ConfigParse/header.vim !
+Server/.*.swp
+tests/*

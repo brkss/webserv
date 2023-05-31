@@ -16,6 +16,7 @@ class  Http
 		std::string 						_index;
 		bool								_autoindex;
 		size_t 								_client_max_body_size;
+		size_t 								_client_request_timout; // timout for nly for a period between two successive read operations 
 
 	public:
 		Http();
@@ -34,6 +35,7 @@ class  Http
 		void setIndex(const std::string &value);
 		void setAutoIndex(bool value);
 		void setClientMaxBodySize(size_t value);
+		void setRequestTimout(size_t timeout);
 		void addCgi(const pair  &cgi);
 
 

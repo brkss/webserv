@@ -20,8 +20,9 @@ const std::string Token::RBRACE 				= "}";
 const std::string Token::UNDEFINED				= "undefined";
 const std::string Token::INT_VALUE				= "INT";
 const std::string Token::VALUE 					= "value";
+const std::string Token::CLIENT_REQUEST_TIMOUT  = "client_request_timeout";
 
-const std::string Token::_directives[12][2] = {
+const std::string Token::_directives[13][2] = {
 
 	{"http",		Token::HTTP},
 	{"server",		Token::SERVER},
@@ -34,7 +35,8 @@ const std::string Token::_directives[12][2] = {
 	{"index",		Token::INDEX},
 	{"error_log",		Token::ERROR_LOG},
 	{"limit_except",		Token::LIMIT_EXCEPT},
-	{"client_max_body_size", Token::CLIENT_MAX_BODY_SIZE}
+	{"client_max_body_size", Token::CLIENT_MAX_BODY_SIZE},
+	{"client_request_timoeout", Token::CLIENT_MAX_BODY_SIZE}
 };
 
 const  size_t Token::_nb_directives  = 12;
@@ -54,8 +56,13 @@ const size_t &Token::getLineNum() const {
 bool Token::isGlobalDirective() const {
 	std::string type = this->_type;
 
-	if (type ==  Token::CGI or type  == Token::ROOT or type == Token::ERROR_LOG or 
-		type ==  Token::AUTOINDEX or  type == Token::INDEX or type == Token::CLIENT_MAX_BODY_SIZE )
+	if (type ==  Token::CGI 
+		or type  == Token::ROOT
+		or type == Token::ERROR_LOG 
+		or type ==  Token::AUTOINDEX 
+		or type == Token::INDEX 
+		or type == Token::CLIENT_REQUEST_TIMOUT
+		or type == Token::CLIENT_MAX_BODY_SIZE )
 		return (true);
 	return (false);
 }

@@ -39,6 +39,7 @@ class  Parse
 		void parseErrorLog(Http &config);
 		void parseIndex(Http &config);
 		void parseClientBodySize(Http &config);
+		void parseClientRequestTimout(Http &config);
 
 		void parseListen(Server &conf);
 		void parseServerName(Server &conf);
@@ -51,7 +52,7 @@ class  Parse
 
 		void addServer(const Server &server);
 		
-		const std::vector<Server> &getServers() const;
+		const std::vector<Server> &getVirtualServers() const;
 
 
 };

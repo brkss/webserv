@@ -21,6 +21,7 @@ class Token
 	   	static const std::string SERVER_NAME;
 	   	static const std::string ERROR_LOG;
 	   	static const std::string CLIENT_MAX_BODY_SIZE;
+	   	static const std::string CLIENT_REQUEST_TIMOUT;
 		static const std::string LIMIT_EXCEPT;
 		static const std::string RETURN;
 		static const std::string AUTOINDEX;
@@ -34,7 +35,7 @@ class Token
 		static const std::string INT_VALUE;
 		static const std::string UNDEFINED;
 
-		static const std::string _directives[12][2];
+		static const std::string _directives[13][2];
 		static const size_t		 _nb_directives;
 
 	public:
