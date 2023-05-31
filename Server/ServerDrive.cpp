@@ -18,7 +18,25 @@ void send_success(int fd) {
 }
 
 void sendErrorMessage(int fd, short error) {
-	std::string resp = "HTTP/1.1 " + std::to_string(error) + " (Not yet)\r\n\r\n";
+	std::map<short, std::string> status_message;
+	std::string message;
+
+	std::string templat; 
+	status_message[400] = "400 Bad request",
+	status_message[408] = "408 Request timeout",
+	status_message[411] = "411 Length required",
+	status_message[414] = "414 Uri_too long",
+	status_message[413] = "413 Payload too large",
+	status_message[431] = "431 Request header fields too large",
+	status_message[500] = "500 Internal server error",
+	status_message[501] = "501 No timplemented",
+	status_message[505] = "505 Http version not supported";
+
+	message = status_message[error];
+	std::string resp = "HTTP/1.1 " +  message +  "\r\n";
+	templat  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
+	resp = resp + templat;
+
 	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size())
 		throw(ErrorLog("Send error"));
 }
