@@ -19,11 +19,14 @@ Handler::Handler(Client client){
     HttpRequest request = client.getRequest();
 
 
+	// joined location path with resource name
+	std::string file_path = "/tmp" + request.getRequestPath();
+
     //this->path = path;
     //this->req_body = req_body;
     
     // handle 404 file not found response !
-    if(isPHPScript(request.getRequestPath())){
+    if(isPHPScript(file_path)){
         // handle cgi !
         CGI cgi(client);
         cgi.handlePhpCGI();
@@ -34,10 +37,13 @@ Handler::Handler(Client client){
         this->type = parsed_cgi_response["type"];
         this->size = parsed_cgi_response["body"].size();
     }else{
-        // other media
-        this->body = this->getFileContent(request.getRequestPath());
-        this->type = this->getFileContentType(request.getRequestPath());
-        this->size = this->getFileContentLength(request.getRequestPath());
+		this->body = this->getFileContent(file_path);
+		this->type = this->getFileContentType(file_path);
+		this->size = this->getFileContentLength(file_path);        // other media
+
+        //this->body = this->getFileContent(request.getRequestPath());
+        //this->type = this->getFileContentType(request.getRequestPath());
+        //this->size = this->getFileContentLength(request.getRequestPath());
     }
 }
 

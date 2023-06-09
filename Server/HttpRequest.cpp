@@ -218,7 +218,8 @@ void	HttpRequest::setRequestMethod(const std::string &method) {
 void	HttpRequest::setRequestPath(const std::string &path) {
 
 	validatePath(path);
-	this->_request_path = "/Users/brkss/Developer/1337/webserv-merge/tests" + path;
+	this->_request_path =  path;
+	//this->_request_path = "/Users/brkss/Developer/1337/webserv-merge/tests" + path;
 }
 void 	HttpRequest::setTransferType(BODY_TRANSFER type) {
 		this->_transfer_type =  type;
