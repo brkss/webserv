@@ -4,105 +4,158 @@
 #include "CGI.hpp"
 #include <stdio.h>
 #include <unistd.h>
+#include <filesystem>
 
 
 
-CGI::CGI(std::string path){
-	this->script_path = path;
+CGI::CGI(Client client){
+	this->client = client;
 }
 
-void CGI::handlePhpCGI(std::string req_body){
-	int fd[2];
-	if(pipe(fd) == -1){
-		perror("piping failed : ");
-		return;
-	}
+void CGI::handlePhpCGI(){
+    
+	HttpRequest request = this->client.getRequest();
+	char **env = generateCGIEnvironement();
 
-	int pid = fork();
-	if (pid == -1){
-		perror("fork failed : ");
-	}
-	else if(pid > 0){
-		
-		std::map<std::string, std::string> headers = generateCGIEnvironement();
-		std::map<std::string, std::string>::iterator iter;
-		char *env[CGI_ENV_LENGTH + 1];
-		int i = 0;
-		for(iter= headers.begin(); iter != headers.end(); ++iter){
-			std::string key = iter->first;
-			std::string val = iter->second;
-
-			std::string keyValue = key + "=" + val;
-			env[i] = new char[keyValue.size() + 1];
-			std::strcpy(const_cast<char*>(env[i]), keyValue.c_str());
-			
-			i++;	
-		}
-		env[i] = NULL;
+    FILE *fileIN = ::tmpfile();
+    FILE *fileOUT = ::tmpfile();
+    int fdIN = fileno(fileIN);
+    int fdOUT = fileno(fileOUT);
+    
+    std::string response;
 
 
-		// Child process
-        close(fd[0]); // Close the read end of the pipe
+    write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
+    lseek(fdIN, 0, SEEK_SET);
 
-        // Redirect the output to the write end of the pipe
-        dup2(fd[1], STDOUT_FILENO);
-		dup2(fd[0], STDIN_FILENO);
-		
-		write(fd[0], req_body.c_str(), req_body.size());
-
-
-        // Execute the PHP script using execle()
-        //char* args[] = {const_cast<char*>("/opt/homebrew/bin/php-cgi"), const_cast<char*>(this->script_path.c_str()), nullptr};
-        execve(this->script_path.c_str(), nullptr, env);
-
-		perror("error exec php : ");
-        // Execle() will only return if an error occurred
-        std::cerr << "Error executing PHP script." << std::endl;
-
-	}else if(pid == 0){
-		close(fd[1]);
-
-		char buffer[1024];
-		std::string response;
-		int bread = read(fd[0], buffer, 1024);
-		while(bread > 0){
-			bread = read(fd[0], buffer, 1024);
-			response += buffer;
-		}
-
-		int status;
+    pid_t pid = fork();
+    if(pid == -1){
+        std::cout << "something went wrong forking !\n";
+        exit(0);
+    }else if(pid == 0){
+		// child proc
+        if(dup2(fdIN, STDIN_FILENO) == -1){
+            perror("dup2 stdout failed : ");
+            exit(0);
+        }
+        if(dup2(fdOUT, STDOUT_FILENO) == -1){
+            perror("dup2 stdout failed : ");
+            exit(0);
+        }
+        fclose(fileIN);
+        fclose(fileOUT);
+        close(fdIN);
+        close(fdOUT);
+        
+        execve(request.getRequestPath().c_str(), nullptr, env);
+        perror("execve err : ");
+        std::cerr << "something went wront executing the cgi script !";
+        exit(0);
+    }else if (pid > 0){
+        
+		// main proccess!
+       
+        int status;
 		waitpid(pid, &status, 0);
-		int exit = WEXITSTATUS(status);
+		WEXITSTATUS(status);
+
+        char buffer[1024];
+        lseek(fdOUT, 0, SEEK_SET);
+		int bread = read(fdOUT, buffer, 1024);
+        if(bread == -1){
+            perror("read failed : ");
+            exit(0);
+        } 
+		while(bread > 0){
+            response += buffer;
+			bread = read(fdOUT, buffer, 1024);
+		}
+		fclose(fileIN);
+        fclose(fileOUT);
+        close(fdIN);
+        close(fdOUT);
+
 		
-		this->cgi_response = response;
-		std::cout << "cgi response : " << response;
-	}
+		
+		this->cgi_response = response; 
+		std::cout << "cgi response >>> : " << response; 
+    }
+    
 }
 
 
-std::map<std::string, std::string> CGI::generateCGIEnvironement(){
+char **CGI::generateCGIEnvironement(){
 	
+	Server server = this->client.getServer();
+	HttpRequest request = this->client.getRequest();
+	std::map<std::string, std::string> req_headers = request.getHeaders();
+
 	std::map<std::string, std::string> headers;
 	headers["SERVER_PROTOCOL"] = "HTTP/1.1";
-	headers["SERVER_PORT"] = "88";
-	headers["REQUEST_METHOD"] = "POST";
-	headers["PATH_INFO"] = "/";
-	headers["PATH_TRANSLATED"] = "/";
-	headers["SCRIPT_NAME"] = "test.php";
-	headers["QUERY_STRING"] = "";
+	headers["SERVER_PORT"] = std::to_string(server.getPort());
+	headers["REQUEST_METHOD"] = request.getRequestMethod();
+	headers["PATH_INFO"] = request.getRequestPath();
+	headers["PATH_TRANSLATED"] = request.getRequestPath();
+	headers["SCRIPT_NAME"] = request.getRequestPath();
+	headers["QUERY_STRING"] =request.getRequestPath();
 	headers["REMOTE_HOST"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
 	headers["REMOTE_ADDR"] = "";
 	headers["AUTH_TYPE"] = "";
 	headers["REMOTE_USER"] = "";
 	headers["REMOTE_IDENT"] = "";
-	headers["CONTENT_TYPE"] = "application/x-www-form-urlencoded";
-	headers["CONTENT_LENGTH"] = "32";
+	headers["CONTENT_TYPE"] = req_headers["Content-Type"];
+	headers["CONTENT_LENGTH"] = std::to_string(request.getRequestBody().size());
 	headers["REDIRECT_STATUS"] = "200";
 	
-	return headers;
+	std::map<std::string, std::string>::iterator iter;
+	char **env = new char*[CGI_ENV_LENGTH + 1];
+	int i = 0;
+	for(iter= headers.begin(); iter != headers.end(); ++iter){
+		std::string key = iter->first;
+		std::string val = iter->second;
+
+		std::string keyValue = key + "=" + val;
+		env[i] = new char[keyValue.size() + 1];
+		std::strcpy(const_cast<char*>(env[i]), keyValue.c_str());
+		
+		i++;	
+	}
+	env[i] = NULL;
+	return env;
 }
 
 
+
+std::map<std::string, std::string> CGI::parse_cgi_response(std::string response){
+    
+
+	std::map <std::string, std::string> results;
+    std::string contentType;
+    std::string body;
+
+    std::size_t contentTypeIndex = response.find("Content-type: ");
+    if (contentTypeIndex != std::string::npos) {
+        contentTypeIndex += 14;
+        std::size_t newlineIndex = response.find('\n', contentTypeIndex);
+        if (newlineIndex != std::string::npos) {
+            contentType = response.substr(contentTypeIndex, newlineIndex - contentTypeIndex);
+        }
+    }
+    
+    std::size_t bodyIndex = response.find("\r\n\r\n");
+    if (bodyIndex != std::string::npos) {
+        bodyIndex += 2; 
+        
+        body = response.substr(bodyIndex);
+    }else {
+		std::cout << "body no pos !!\n";
+	}
+
+   
+    results["type"] = contentType;
+    results["body"] = body;
+    return results;
+}
 
 std::string CGI::getResponse(){
 	return this->cgi_response;

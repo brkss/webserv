@@ -14,25 +14,30 @@ bool isPHPScript(std::string path){
 }
 
 
-Handler::Handler(std::string path, std::string req_body, std::map<std::string, std::string> headers){
-    this->path = path;
-    this->req_body = req_body;
-    // handle 404 file not found response !
-    if(isPHPScript(path)){
-        // handle cgi !
-        CGI cgi(path);
-        cgi.handlePhpCGI(this->req_body);
-        std::string response = cgi.getResponse();
-        std::cout << " >> this is a php file response : " << response << "\n";
+Handler::Handler(Client client){
+    this->client = client;
+    HttpRequest request = client.getRequest();
 
-        this->body = response;
-        this->type = "text/html";
-        this->size = response.size();
+
+    //this->path = path;
+    //this->req_body = req_body;
+    
+    // handle 404 file not found response !
+    if(isPHPScript(request.getRequestPath())){
+        // handle cgi !
+        CGI cgi(client);
+        cgi.handlePhpCGI();
+        std::string response = cgi.getResponse();
+        std::map <std::string, std::string> parsed_cgi_response = cgi.parse_cgi_response(response);
+       
+        this->body = parsed_cgi_response["body"];
+        this->type = parsed_cgi_response["type"];
+        this->size = parsed_cgi_response["body"].size();
     }else{
         // other media
-        this->body = this->getFileContent(this->path);
-        this->type = this->getFileContentType(this->path);
-        this->size = this->getFileContentLength(this->path);
+        this->body = this->getFileContent(request.getRequestPath());
+        this->type = this->getFileContentType(request.getRequestPath());
+        this->size = this->getFileContentLength(request.getRequestPath());
     }
 }
 
@@ -44,17 +49,17 @@ std::string Handler::getFileContent(std::string filename){
         return "";
     }
 
-    // Determine the file size
+   
     file.seekg(0, std::ios::end);
     int file_size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    // Read the entire file into memory
+   
     char* buffer = new char[file_size];
     file.read(buffer, file_size);
     file.close();
 
-    // Return the file contents and content type
+    
 	std::string file_contents(buffer, file_size);
     delete[] buffer;
     return file_contents;
@@ -78,8 +83,8 @@ int Handler::getFileContentLength(std::string filename){
 }
 
 std::string Handler::getFileContentType(std::string filename){
-    // Determine the file type based on the file extension
-	std::string file_type = "application/octet-stream"; // Default content type
+
+	std::string file_type = "application/octet-stream"; 
 	size_t dot_pos = filename.find_last_of(".");
 	if (dot_pos != std::string::npos) {
 		std::string extension = filename.substr(dot_pos + 1);

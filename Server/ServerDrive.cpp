@@ -253,8 +253,29 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 			if (!ClientError(fd))							// seds error reaponses 
 			{
 				Client &curr_client = getClient(fd);		// client watting for response
-				(void) curr_client;
-				send_success(fd);							// Response Demo
+				//(void) curr_client;
+
+				Handler handler(curr_client);
+				Response response(handler.getBody(), handler.getType(), handler.getSize());
+
+				std::string resp = response.generateResponse();
+				const char *r = resp.data();
+				(void) r;
+				
+				HttpRequest req = curr_client.getRequest();
+				Server server = curr_client.getServer();
+				//req.setRequestPath( + req.getRequestPath());
+				std::cout << "path : " << req.getRequestPath() << "\n";
+				std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
+				std::cout << handler.getBody();
+				std::cout << "\n----------------------------------------------\n";
+
+				if (send(fd, r, resp.size(), 0) != (ssize_t ) resp.size())
+					throw(ErrorLog("Send error"));
+	
+				close(fd);
+
+				//send_success(fd);							// Response Demo
 			}
 			std::cerr << "Response Sent. Closing..." << std::endl;
 			CloseConnection(fd);

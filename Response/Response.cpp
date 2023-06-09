@@ -58,8 +58,8 @@ std::string Response::generateResponse(){
 
 	response += this->body + "\n";
 
-	char* c2 = const_cast<char*>(response.c_str());
-	std::cout << "response : \n" <<  c2;
+	//char* c2 = const_cast<char*>(response.c_str());
+	//std::cout << "response : \n" <<  c2;
 
 	return response;
 }
