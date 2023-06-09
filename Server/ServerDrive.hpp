@@ -4,6 +4,8 @@
 #include  "../config/ConfigParse/inc/parse.hpp"
 #include  "../config/ConfigParse/inc/server.hpp"
 #include "Client.hpp"
+#include "../Response/Response.hpp"
+#include "../Handler/Handler.hpp"
 #include <map>
 
 class   ServerDrive {
