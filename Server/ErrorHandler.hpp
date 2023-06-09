@@ -2,6 +2,9 @@
 # define ERRORHANDLER_HPP 
 
 #include <exception>
+#include <iostream>
+#include "Colors.h"
+
 class ErrorLog : public std::exception {
 	private:
 		const  char *_error;
@@ -13,6 +16,23 @@ class ErrorLog : public std::exception {
 		}
 };
 
+class ConsoleLog { 
+
+	public:
+		static void Error(const std::string &error) {
+			std::cerr << Color::RED << error << Color::DEFAULT << std::endl;
+		}
+		static void Warning(const std::string &warnig) {
+			std::cerr << Color::YELLOW << warnig << Color::DEFAULT << std::endl;
+		}
+		static void Debug(const std::string &warnig) {
+			std::cerr << Color::YELLOW << warnig << Color::DEFAULT << std::endl;
+		}
+		static void Specs(const std::string &spec) {
+			std::cerr << Color::GREEN << spec << Color::DEFAULT << std::endl;
+		}
+
+};
 
 
 class  ErrorMessage {

@@ -14,9 +14,9 @@ namespace Network
 		int sock_fd;
 		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
 		if (sock_fd < 0) {
+			ConsoleLog::Error("Failed to create Socket !!!");
 			throw(ErrorLog("could not create socket"));
 		}
-		std::cerr << "Socket create OK!" << std::endl;
 		return (sock_fd);
 	}
 	
@@ -28,6 +28,7 @@ namespace Network
 		sock_addr.sin_family = AF_INET;
 		sock_addr.sin_port = htons(port);
 		if (inet_aton(address.c_str(), &sock_addr.sin_addr) == 0) {  //see man inet_aton 
+			ConsoleLog::Error("[::0] Failed to bind On address");
 			throw(ErrorLog("Error: invalid address"));
 		}
 		//	sock_addr.sin_addr.s_addr = inet_addr(address.c_str());
@@ -35,7 +36,6 @@ namespace Network
 		if (bind_stat == -1) {
 			throw(ErrorLog("failed to bind socket"));
 		}
-		std::cerr << "Socket bind OK!" << std::endl; 
 	}
 	
 	
@@ -46,7 +46,6 @@ namespace Network
 		if (listen_stat == -1) {
 			throw(ErrorLog("Error: failed to liten on socket"));
 		}
-		std::cerr << "Socket listen OK!" << std::endl;
 	}
 	
 	Client acceptConnection(int sock_fd) {
@@ -58,7 +57,7 @@ namespace Network
 			throw(ErrorLog("Error: Failed to accept connection"));
 		}
 		new_client.setConnectionFd(connection_fd);
-		std::cerr << "New client connection ACCEPT ok!" << std::endl;
+		ConsoleLog::Debug("New client connection ACCEPT ok!");
 		return (new_client);
 	}
 	

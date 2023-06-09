@@ -38,7 +38,8 @@ void sendErrorMessage(int fd, short error) {
 	resp = resp + templat;
 
 	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size())
-		throw(ErrorLog("Send error"));
+		ConsoleLog::Error("Send error");
+		throw("Send error");
 }
 
 ServerDrive::ServerDrive(const Parse &conf): _config(conf),
@@ -61,7 +62,10 @@ ServerDrive::ServerDrive(const Parse &conf): _config(conf),
 		Network::ListenOnSocket(sock_fd);
 		addSocketFd(sock_fd);
 		FD_SET(sock_fd, &(this->_listenset));
-		std::cerr << "Server Listening On " <<  cit->getAddress() << "[" << cit->getPort() << "]" << std::endl;
+		{
+			const std::string ip_port = cit->getAddress() + ":" +  std::to_string(cit->getPort());
+			ConsoleLog::Specs("Server Listening on :" + ip_port) ;
+		}
 	}
 }
 
@@ -116,7 +120,7 @@ void ServerDrive::readRequest(int fd) {
 		if (bytes_recieved == 0) { // Client closed connection
 			Network::closeConnection(fd);
 			CloseConnection(fd);
-			std::cerr << "EOF recieved closing..." << std::endl;
+			ConsoleLog::Warning("EOF recieved closing...");
 			return ;
 		}
 		else 
@@ -126,7 +130,7 @@ void ServerDrive::readRequest(int fd) {
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
 #if DEBUG
-	std::cout << "Rreceving from client : " << fd << std::endl;
+	ConsoleLog::Warning("Receiving from Client: " + std::to_string(fd));
 #endif 
 }
 
@@ -215,7 +219,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		const Server & client_server = getServerByName(client_request.getHeaderValue("Host"));
 		client.setServer(client_server);
 		#if DEBUG 
-		std::cout << "server handeling the request : " << client.getServer().getServerName() << std::endl;
+		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 		#endif
 		
 		// TESTING DATA TRANSFER
@@ -245,7 +249,7 @@ void ServerDrive::checkClientTimout(int fd) {
 	time_t elapsed				= time (NULL) - last_event;
 	
 	if (elapsed >= config_timeout) {
-		std::cout << "Connection Timout Closing ... " << std::endl;
+		ConsoleLog::Warning("Connection Timout Closing ... ");
 		throw(RequestError(ErrorNumbers::_408_REQUEST_TIMEOUT));
 	}
 }
@@ -283,19 +287,19 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 				HttpRequest req = curr_client.getRequest();
 				Server server = curr_client.getServer();
 				//req.setRequestPath( + req.getRequestPath());
-				std::cout << "path : " << req.getRequestPath() << "\n";
-				std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
-				std::cout << handler.getBody();
-				std::cout << "\n----------------------------------------------\n";
+				//std::cout << "path : " << req.getRequestPath() << "\n";
+				//std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
+				//std::cout << handler.getBody();
+				//std::cout << "\n----------------------------------------------\n";
 
 				if (send(fd, r, resp.size(), 0) != (ssize_t ) resp.size())
 					throw(ErrorLog("Send error"));
 	
-				close(fd);
+				//close(fd);
 
 				//send_success(fd);							// Response Demo
 			}
-			std::cerr << "Response Sent. Closing..." << std::endl;
+			ConsoleLog::Debug("Response Sent!. Closing ..." );
 			CloseConnection(fd);
 		}
 		else if (FD_ISSET(fd, &read_copy)) {
@@ -323,7 +327,6 @@ void ServerDrive::run() {
 	fd_set read_copy;
 	fd_set write_copy;
 
-	std::cerr << "Server Running ..." << std::endl;
 	while (1) {
 		read_copy = this->_readset;
 		write_copy = this->_writeset;
