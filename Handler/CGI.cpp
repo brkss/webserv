@@ -7,7 +7,6 @@
 #include <filesystem>
 
 
-
 CGI::CGI(Client client){
 	this->client = client;
 }
@@ -21,6 +20,7 @@ void CGI::handlePhpCGI(){
     FILE *fileOUT = ::tmpfile();
     int fdIN = fileno(fileIN);
     int fdOUT = fileno(fileOUT);
+    //int err = -1;
     
     std::string response;
 
@@ -28,18 +28,21 @@ void CGI::handlePhpCGI(){
     write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
     lseek(fdIN, 0, SEEK_SET);
 
+    std::cout << " path : " << this->client.getServer().getRoot() << "\n";
+    //std::cout << "request path ::::: " << request.getRequestPath().c_str() << "\n";
+
     pid_t pid = fork();
     if(pid == -1){
         std::cout << "something went wrong forking !\n";
-        exit(0);
+        //exit(0);
     }else if(pid == 0){
 		// child proc
         if(dup2(fdIN, STDIN_FILENO) == -1){
-            perror("dup2 stdout failed : ");
+            // handle 500
             exit(0);
         }
         if(dup2(fdOUT, STDOUT_FILENO) == -1){
-            perror("dup2 stdout failed : ");
+            // handle 500
             exit(0);
         }
         fclose(fileIN);
@@ -47,35 +50,46 @@ void CGI::handlePhpCGI(){
         close(fdIN);
         close(fdOUT);
         
-        execve(request.getRequestPath().c_str(), nullptr, env);
+        // remove this !!!!!!!
+        std::string path = this->client.getServer().getRoot() + request.getRequestPath();
+        // -------------------
+        
+        execve(path.c_str(), nullptr, env);
+        
+        //err = 500;
+        std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Error</h1></body></html>";
+        write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
         perror("execve err : ");
         std::cerr << "something went wront executing the cgi script !";
         exit(0);
     }else if (pid > 0){
         
 		// main proccess!
-       
+
         int status;
 		waitpid(pid, &status, 0);
 		WEXITSTATUS(status);
-
+       
         char buffer[1024];
         lseek(fdOUT, 0, SEEK_SET);
 		int bread = read(fdOUT, buffer, 1024);
+        
         if(bread == -1){
             perror("read failed : ");
             exit(0);
         } 
-		while(bread > 0){
+        while(bread > 0){
+            std::cout << ">>>> buffer : " << buffer << "\n";
             response += buffer;
-			bread = read(fdOUT, buffer, 1024);
-		}
+            bread = read(fdOUT, buffer, 1024);
+        }
+        
 		fclose(fileIN);
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);
 
-		
+        std::cout << ">>>>>response : " << response << "\n";
 		
 		this->cgi_response = response; 
 		std::cout << "cgi response >>> : " << response; 

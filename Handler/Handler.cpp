@@ -3,6 +3,12 @@
 #include "Handler.hpp"
 #include "CGI.hpp"
 
+bool fileExists(std::string filepath){
+    std::fstream file(filepath);
+    return file.good();
+}
+
+
 bool isPHPScript(std::string path){
     size_t dot_pos = path.find_last_of(".");
 	if (dot_pos != std::string::npos) {
@@ -20,13 +26,19 @@ Handler::Handler(Client client){
 
 
 	// joined location path with resource name
-	std::string file_path = "/tmp" + request.getRequestPath();
-
+	std::string file_path = this->client.getServer().getRoot() + request.getRequestPath();
+    std::cout << "file path : " << file_path << "\n";
     //this->path = path;
     //this->req_body = req_body;
     
     // handle 404 file not found response !
-    if(isPHPScript(file_path)){
+    std::cout << "file exists ? " << fileExists(file_path) << "\n";
+    if(!fileExists(file_path)){
+        this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
+        this->type = "text/html";
+        this->size = 91;
+    }
+    else if(isPHPScript(file_path)){
         // handle cgi !
         CGI cgi(client);
         cgi.handlePhpCGI();
