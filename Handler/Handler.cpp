@@ -2,12 +2,64 @@
 
 #include "Handler.hpp"
 #include "CGI.hpp"
+#include <dirent.h>
+#include <sys/stat.h>
 
 bool fileExists(std::string filepath){
     std::fstream file(filepath);
     return file.good();
 }
 
+bool directoryExits(std::string path){
+    DIR *directory = ::opendir(path.c_str());
+    if(directory != NULL){
+        closedir(directory);
+        return true;
+    }
+    return false;
+}
+
+std::string ListFile(std::string path){
+    DIR *directory = ::opendir(path.c_str());
+    std::string response = "<!DOCTYPE html><html lang='en'><head><title>index of</title></head><body><h1>Index of</h1><table style='table-layout:fixed;width: 100%;'><tr><td><b>Name</b></td><td><b>Date</b></td><td><b>Size</b></td></tr>";
+
+    if(directory == NULL){
+        std::cout << ">>listing files<< : error invalid directory \n";
+        return "";
+    }
+    struct dirent *entry;
+    while((entry = readdir(directory)) != NULL){
+        std::string filename = entry->d_name;
+        std::string fullPath = path + "/" + filename;
+        
+        struct stat fileInfo;
+        if (stat(fullPath.c_str(), &fileInfo) == -1)
+        {
+            std::cerr << "Error getting file info for: " << fullPath << std::endl;
+            continue;
+        }
+
+        if(S_ISDIR(fileInfo.st_mode)){
+            // directory !
+            response += "<tr style='margin-top: 10px;'><td><a href='"+filename+"/'>" + filename + "/</a></td><td>" + std::to_string(fileInfo.st_atime) + "</td><td>--</td></tr>";
+        }else {
+            // file ! 
+            response += "<tr style='margin-top: 10px;'><td><a href='"+filename+"'>" + filename + "</a></td><td>" + std::to_string(fileInfo.st_atime) + "</td><td>" + std::to_string(fileInfo.st_size / 1000000) + " M</td></tr>";
+        }
+
+    }
+     closedir(directory);
+    response += "</table></body></html>";
+    return response;
+}
+
+bool isDirectory(std::string path){
+    size_t slash_pos = path.find_last_of("/");
+    if(slash_pos != std::string::npos && slash_pos == path.length() -1){
+        return true;
+    }
+    return false;
+}
 
 bool isPHPScript(std::string path){
     size_t dot_pos = path.find_last_of(".");
@@ -24,21 +76,20 @@ Handler::Handler(Client client){
     this->client = client;
     HttpRequest request = client.getRequest();
 
-
 	// joined location path with resource name
-	std::string file_path = this->client.getServer().getRoot() + request.getRequestPath();
-    std::cout << "file path : " << file_path << "\n";
-    //this->path = path;
-    //this->req_body = req_body;
+	std::string path = this->client.getServer().getRoot() + request.getRequestPath();
     
     // handle 404 file not found response !
-    std::cout << "file exists ? " << fileExists(file_path) << "\n";
-    if(!fileExists(file_path)){
+    if(!fileExists(path) && !directoryExits(path)){
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
-    }
-    else if(isPHPScript(file_path)){
+    }else if (isDirectory(path)){
+        std::string autoIndexResponse = ListFile(path);
+        this->body = autoIndexResponse;
+        this->type = "text/html";
+        this->size = autoIndexResponse.size();
+    }else if(isPHPScript(path)){
         // handle cgi !
         CGI cgi(client);
         cgi.handlePhpCGI();
@@ -49,13 +100,9 @@ Handler::Handler(Client client){
         this->type = parsed_cgi_response["type"];
         this->size = parsed_cgi_response["body"].size();
     }else{
-		this->body = this->getFileContent(file_path);
-		this->type = this->getFileContentType(file_path);
-		this->size = this->getFileContentLength(file_path);        // other media
-
-        //this->body = this->getFileContent(request.getRequestPath());
-        //this->type = this->getFileContentType(request.getRequestPath());
-        //this->size = this->getFileContentLength(request.getRequestPath());
+		this->body = this->getFileContent(path);
+		this->type = this->getFileContentType(path);
+		this->size = this->getFileContentLength(path);
     }
 }
 
@@ -67,17 +114,14 @@ std::string Handler::getFileContent(std::string filename){
         return "";
     }
 
-   
     file.seekg(0, std::ios::end);
     int file_size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-   
     char* buffer = new char[file_size];
     file.read(buffer, file_size);
     file.close();
 
-    
 	std::string file_contents(buffer, file_size);
     delete[] buffer;
     return file_contents;
