@@ -23,56 +23,58 @@ void sendErrorMessage(int fd, short error) {
 
 	std::string templat; 
 	status_message[400] = "400 Bad request",
-	status_message[408] = "408 Request timeout",
-	status_message[411] = "411 Length required",
-	status_message[414] = "414 Uri_too long",
-	status_message[413] = "413 Payload too large",
-	status_message[431] = "431 Request header fields too large",
-	status_message[500] = "500 Internal server error",
-	status_message[501] = "501 No timplemented",
-	status_message[505] = "505 Http version not supported";
+		status_message[408] = "408 Request timeout",
+		status_message[411] = "411 Length required",
+		status_message[414] = "414 Uri_too long",
+		status_message[413] = "413 Payload too large",
+		status_message[431] = "431 Request header fields too large",
+		status_message[500] = "500 Internal server error",
+		status_message[501] = "501 No timplemented",
+		status_message[505] = "505 Http version not supported";
 
 	message = status_message[error];
 	std::string resp = "HTTP/1.1 " +  message +  "\r\n";
 	templat  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
 	resp = resp + templat;
 
-	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size())
+	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size()) {
 		ConsoleLog::Error("Send error");
-		throw("Send error");
-}
-
-ServerDrive::ServerDrive(const Parse &conf): _config(conf),
-											_virtual_servers(conf.getVirtualServers()) ,
-											_fd_max(0) {
-		
-	this->_client_timeout = 5; // (in seconds) should be pulled from config;
-	const std::vector<Server>	&servers = this->_config.getVirtualServers(); 
-	const int 					true_ = 1;
-	int							sock_fd;
-
-	FD_ZERO(&(this->_readset));
-	FD_ZERO(&(this->_writeset));
-	FD_ZERO(&(this->_listenset));
-	for (Parse::cv_itereator cit = servers.begin(); cit != servers.end(); cit++)
-	{
-		sock_fd = Network::CreateSocket();
-		setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
-		Network::BindSocket(sock_fd, cit->getPort(), cit->getAddress() );
-		Network::ListenOnSocket(sock_fd);
-		addSocketFd(sock_fd);
-		FD_SET(sock_fd, &(this->_listenset));
-		{
-			const std::string ip_port = cit->getAddress() + ":" +  std::to_string(cit->getPort());
-			ConsoleLog::Specs("Server Listening on :" + ip_port) ;
-		}
+		perror(NULL);
+		throw(ErrorLog("Send error message"));
 	}
 }
 
+ServerDrive::ServerDrive(const Parse &conf): _config(conf),
+	_virtual_servers(conf.getVirtualServers()) ,
+	_fd_max(0) {
+
+		this->_client_timeout = 5; // (in seconds) should be pulled from config;
+		const std::vector<Server>	&servers = this->_config.getVirtualServers(); 
+		const int 					true_ = 1;
+		int							sock_fd;
+
+		FD_ZERO(&(this->_readset));
+		FD_ZERO(&(this->_writeset));
+		FD_ZERO(&(this->_listenset));
+		for (Parse::cv_itereator cit = servers.begin(); cit != servers.end(); cit++)
+		{
+			sock_fd = Network::CreateSocket();
+			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
+			Network::BindSocket(sock_fd, cit->getPort(), cit->getAddress() );
+			Network::ListenOnSocket(sock_fd);
+			addSocketFd(sock_fd);
+			FD_SET(sock_fd, &(this->_listenset));
+			{
+				const std::string ip_port = cit->getAddress() + ":" +  std::to_string(cit->getPort());
+				ConsoleLog::Specs("Server Listening on :" + ip_port) ;
+			}
+		}
+	}
+
 ServerDrive::ServerDrive(const ServerDrive &server) : _config(server._config),
-													  _virtual_servers(server._virtual_servers){
-	(void) server;
-}
+	_virtual_servers(server._virtual_servers){
+		(void) server;
+	}
 
 ServerDrive::~ServerDrive() {
 	for(std::vector<int>::iterator it = _server_fds.begin(); it != _server_fds.end(); it++)
@@ -125,7 +127,7 @@ void ServerDrive::readRequest(int fd) {
 		}
 		else 
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
-			//throw(ErrorLog("Error: unable to read form sock"));
+		//throw(ErrorLog("Error: unable to read form sock"));
 	}
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
@@ -153,7 +155,7 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	size_t		chunk_size;
 	std::string hex_sting;
 	std::string &request_body = request.getRequestData();
-	
+
 	size_pos = request_body.find(ServerDrive::CRLF);
 	if (size_pos == std::string::npos)
 		return (false);
@@ -161,7 +163,7 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	hex_sting = request_body.substr(0, size_pos);
 	if (!Utils::is_hex(hex_sting))
 		throw (RequestError(ErrorNumbers::_400_BAD_REQUEST));
-		//throw (ErrorLog(ErrorMessage::ERROR_400));
+	//throw (ErrorLog(ErrorMessage::ERROR_400));
 
 	chunk_size = Utils::hexStringToSizeT(hex_sting);
 	if (chunk_size > (request_body.size() - (hex_sting.size() + CRLF.size() )))
@@ -218,10 +220,10 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
 		const Server & client_server = getServerByName(client_request.getHeaderValue("Host"));
 		client.setServer(client_server);
-		#if DEBUG 
+#if DEBUG 
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
-		#endif
-		
+#endif
+
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
 		std::ofstream ofs(out_file_name);
@@ -229,7 +231,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 			ofs << client.getRequest().getRequestBody() ;
 		else
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
-			// should add log error 
+		// should add log error 
 	}
 }
 
@@ -242,14 +244,15 @@ void ServerDrive::CloseConnection(int fd) {
 }
 
 void ServerDrive::checkClientTimout(int fd) {
-	
+
 	Client &client				= getClient(fd) ;
 	time_t last_event			= client.getClientRequestTimeout();
 	time_t config_timeout 		= this->_client_timeout; // PS: READ HEADER 
 	time_t elapsed				= time (NULL) - last_event;
-	
+
 	if (elapsed >= config_timeout) {
 		ConsoleLog::Warning("Connection Timout Closing ... ");
+		std::cout << "fd " << fd << std::endl;
 		throw(RequestError(ErrorNumbers::_408_REQUEST_TIMEOUT));
 	}
 }
@@ -264,54 +267,76 @@ bool ServerDrive::ClientError(int fd) {
 	return (false);
 }
 
+void PrepareResponse(Client &client)  {
+	Handler	handler(client);
+	Response response(handler.getBody(), handler.getType(), handler.getSize());
+
+	std::string resp = response.generateResponse();
+	const char *r = resp.c_str();
+	char *resp_copy = new char [resp.size()];
+
+	memmove(resp_copy, r, resp.size());
+	client.setResponse(resp_copy, resp.size());
+	//HttpRequest req = client.getRequest();
+	//Server server = client.getServer();
+	//req.setRequestPath( + req.getRequestPath());
+	//std::cout << "path : " << req.getRequestPath() << "\n";
+	//std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
+	//std::cout << handler.getBody();
+	//#if DEBUG
+	////std::cout << "\n----------------------------------------------\n";
+	////std::cout << resp << std::endl;
+	////std::cout << "\n----------------------------------------------end\n";
+	//#endif
+}
+
+void ServerDrive::SendResponse(Client &client) {
+
+	size_t		reponse_size = client.getResponseSize();
+	char *		reponse = client.getResponse();
+	size_t		socket_buffer_size = Network::getSocketBufferSize(client.getConnectionFd(), SO_RCVBUF);
+	size_t		size_to_send = reponse_size;
+	bool		close_connection = true;
+
+	if (reponse_size > socket_buffer_size) {
+		size_to_send = socket_buffer_size ;
+		client.setResponse(reponse + size_to_send, reponse_size - size_to_send);
+		close_connection = false;
+	}
+	if (int ss = send(client.getConnectionFd(), reponse, size_to_send, 0) != (ssize_t ) size_to_send) {
+		std::cout << "size sent : " << ss << std::endl;
+		throw(ErrorLog("Send error_"));
+	}
+
+	if (close_connection) {
+		ConsoleLog::Debug("Response Sent!. Closing ..." );
+		CloseConnection(client.getConnectionFd());
+	}
+}
+
 void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	int fd_max = this->_fd_max;
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-
-		if (FD_ISSET(fd, &write_copy)) {					// response 
-			if (!ClientError(fd))							// seds error reaponses 
-			{
-				Client &curr_client = getClient(fd);		// client watting for response
-				//(void) curr_client;
-
-				Handler handler(curr_client);
-				Response response(handler.getBody(), handler.getType(), handler.getSize());
-
-				std::string resp = response.generateResponse();
-				const char *r = resp.data();
-				(void) r;
-				
-				HttpRequest req = curr_client.getRequest();
-				Server server = curr_client.getServer();
-				//req.setRequestPath( + req.getRequestPath());
-				//std::cout << "path : " << req.getRequestPath() << "\n";
-				//std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
-				//std::cout << handler.getBody();
-				//std::cout << "\n----------------------------------------------\n";
-
-				if (send(fd, r, resp.size(), 0) != (ssize_t ) resp.size())
-					throw(ErrorLog("Send error"));
-	
-				//close(fd);
-
-				//send_success(fd);							// Response Demo
+			if (FD_ISSET(fd, &write_copy) and !ClientError(fd)) {					// response 
+				Client &client = getClient(fd);
+				if (client.getResponseSize() == 0)
+					PrepareResponse(client);
+				SendResponse(client);
 			}
-			ConsoleLog::Debug("Response Sent!. Closing ..." );
-			CloseConnection(fd);
-		}
-		else if (FD_ISSET(fd, &read_copy)) {
-			if (FD_ISSET(fd, &this->_listenset)) 
-				addClient(Network::acceptConnection(fd));	// new connection 
-			else {											// read request 
+			else if (FD_ISSET(fd, &read_copy)) {
+				if (FD_ISSET(fd, &this->_listenset))  {
+					addClient(Network::acceptConnection(fd));	// new connection 
+				}
+				else {											// read request 
 					readRequest(fd);
+				}
 			}
-		}
-		else if (!FD_ISSET(fd, &this->_listenset) && FD_ISSET(fd, &(this->_readset))) // CLIENT SHOULD BE CHECKED FOR TIMEOUT
-			checkClientTimout(fd);	
-		
+			else if (!FD_ISSET(fd, &this->_listenset) && FD_ISSET(fd, &(this->_readset)) && !FD_ISSET(fd, &this->_writeset)) // CLIENT SHOULD BE CHECKED FOR TIMEOUT
+				checkClientTimout(fd);	
+
 		} catch (const RequestError &error)  {
 			FD_SET(fd, &this->_writeset);		// select before response
 			getClient(fd).setRequestStatus(error.getErrorNumber());
@@ -347,11 +372,11 @@ Client &ServerDrive::getClient(int fd) {
 
 const Server &ServerDrive::getServerByName(const std::string &host_name) {
 	typedef std::vector<Server>::const_iterator cv_iterator;
-	
+
 	for (cv_iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++) {
 		if (it->getServerName() == host_name) 
 			return (*it);
 	}
 	return (*this->_virtual_servers.begin());
-	
+
 }

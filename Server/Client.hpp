@@ -5,6 +5,7 @@
 #include "HttpRequest.hpp"
 #include "../config/ConfigParse/inc/server.hpp"
 #include <time.h>
+#include <stdlib.h>
 
 #ifndef BUFFER_SIZE 
 # define BUFFER_SIZE   2050
@@ -22,6 +23,9 @@ class Client {
 
 		HttpRequest			_request;				// client request 
 		Server				_server;				// server should iterpret the request
+		char *				_response;
+		char *				_response_cpy;
+		size_t				_response_size;
 
 	public:
 		static char 		_buffer[BUFFER_SIZE]; 	// SHARED BUFFER
@@ -46,6 +50,12 @@ class Client {
 		void					setRequestTimout(time_t secs);
 		void					setRequestStatus(short error_num);
 		void					setServer(const Server &server);
+
+		char *					getResponse() const;
+		size_t					getResponseSize() const ;
+		void					setResponse(char *response, size_t size);
+
+
 };
 
 

@@ -12,16 +12,20 @@ Client::Client() {
 Client::Client(int connection_fd) : _server_fd(connection_fd),
 									_client_request_timout(time(NULL)),
 									_request_status(0),
-									_address_len(0) {
+									_address_len(0),
+									_response(NULL),
+									_response_cpy(NULL),
+									_response_size(0) {
 
 	bzero(&this->_client_address, sizeof(this->_client_address));
 }
 
 Client::~Client() {
-
+	delete (this->_response_cpy);
 }
 
-Client::Client(const Client &client) {
+Client::Client(const Client &client): _response(NULL),
+									  _response_cpy(NULL) {
 	*this = client;
 }
 
@@ -33,6 +37,9 @@ Client &Client::operator=(const Client &client) {
 	this->_client_request_timout = client._client_request_timout;
 	this->_server = client._server;
 	this->_request_status = client._request_status;
+	this->_response_size = client._response_size;
+	this->_response = client._response;
+	this->_response_cpy = client._response_cpy;
 	return (*this);
 }
 
@@ -73,6 +80,14 @@ time_t					Client::getClientRequestTimeout() const {
 	return (this->_client_request_timout);
 }
 
+char *Client::getResponse() const {
+	return (this->_response);
+}
+
+size_t Client::getResponseSize() const {
+	return (this->_response_size);
+}
+
 void  Client::setRequestStatus(short error_num) {
 	this->_request_status = error_num;
 }
@@ -89,4 +104,9 @@ void Client::setServer(const Server &server) {
 
 const Server&	Client::getServer() const {
 	return (this->_server);
+}
+
+void Client::setResponse(char *response, size_t size) {
+	this->_response = response;
+	this->_response_size = size;
 }
