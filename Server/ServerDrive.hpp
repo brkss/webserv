@@ -49,6 +49,8 @@ class   ServerDrive {
 		void CloseConnection(int fd);
 		void checkClientTimout(int fd);
 
+		void SendResponse(Client &client);
+
 		void getHeader(HttpRequest &request);
 		bool getBody(HttpRequest &client_request);
 		bool ClientError(int fd);
