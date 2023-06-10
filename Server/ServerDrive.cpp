@@ -321,6 +321,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
 			if (FD_ISSET(fd, &write_copy) and !ClientError(fd)) {					// response 
+				FD_CLR(fd, &(this->_readset));
 				Client &client = getClient(fd);
 				if (client.getResponseSize() == 0)
 					PrepareResponse(client);
@@ -338,6 +339,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 				checkClientTimout(fd);	
 
 		} catch (const RequestError &error)  {
+			FD_CLR(fd, &(this->_listenset));
 			FD_SET(fd, &this->_writeset);		// select before response
 			getClient(fd).setRequestStatus(error.getErrorNumber());
 

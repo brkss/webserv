@@ -63,6 +63,7 @@ namespace Network
 		}
 		new_client.setConnectionFd(connection_fd);
 		ConsoleLog::Debug("New client connection ACCEPT ok!");
+		std::cout << "New connection accepted with  fd : " << connection_fd << std::endl;
 		return (new_client);
 	}
 	
