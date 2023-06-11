@@ -294,18 +294,23 @@ void PrepareResponse(Client &client)  {
 
 void ServerDrive::SendResponse(Client &client) {
 
-	size_t		reponse_size = client.getResponseSize();
-	char *		reponse = client.getResponse();
+	size_t		response_size = client.getResponseSize();
+	char *		response = client.getResponse();
 	size_t		socket_buffer_size = Network::getSocketBufferSize(client.getConnectionFd(), SO_RCVBUF);
-	size_t		size_to_send = reponse_size;
+	size_t		size_to_send = response_size;
 	bool		close_connection = true;
 
-	if (reponse_size > socket_buffer_size) {
+	if (response_size > socket_buffer_size) {
 		size_to_send = socket_buffer_size ;
-		client.setResponse(reponse + size_to_send, reponse_size - size_to_send);
+		client.setResponse(response + size_to_send, response_size - size_to_send);
 		close_connection = false;
 	}
-	if (int ss = send(client.getConnectionFd(), reponse, size_to_send, 0) != (ssize_t ) size_to_send) {
+	#if DEBUG
+	std::cerr << "response size : " << response_size  << std::endl;
+	std::cerr << "size to send : " << size_to_send << std::endl;
+	std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
+	#endif 
+	if (int ss = send(client.getConnectionFd(), response, size_to_send, 0) != (ssize_t ) size_to_send) {
 		std::cout << "size sent : " << ss << std::endl;
 		throw(ErrorLog("Send error_"));
 	}
@@ -327,6 +332,9 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 				Client &client = getClient(fd);
 				if (client.getResponseSize() == 0)
 					PrepareResponse(client);
+#if DEBUG
+				ConsoleLog::Debug("Sending response ...");
+#endif 
 				SendResponse(client);
 			}
 			else if (FD_ISSET(fd, &read_copy)) {

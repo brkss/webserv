@@ -72,11 +72,12 @@ namespace Network
 		//if (close(fd) == -1)
 		//	throw(ErrorLog("Error:  Unalle to close connection"));
 	}
-	size_t getSocketBufferSize(int socket_fd, int io_type) {
+	int getSocketBufferSize(int socket_fd, int io_type) {
 
-		size_t size;
+		int size;
 		socklen_t type_size = sizeof(size);
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
+		std::cout << "size of socket buffer : " << size << std::endl;
 		return (size);
 }
 
