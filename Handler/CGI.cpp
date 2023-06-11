@@ -104,15 +104,26 @@ char **CGI::generateCGIEnvironement(){
 	HttpRequest request = this->client.getRequest();
 	std::map<std::string, std::string> req_headers = request.getHeaders();
 
+    /*
+    std::map<std::string, std::string>::iterator tmp_iter;
+	for(tmp_iter= req_headers.begin(); tmp_iter != req_headers.end(); ++tmp_iter){
+		std::string key = tmp_iter->first;
+		std::string val = tmp_iter->second;
+
+		std::string keyValue = key + "=" + val;
+        std::cout << keyValue << "\n";
+	}
+    */
+
 	std::map<std::string, std::string> headers;
 	headers["SERVER_PROTOCOL"] = "HTTP/1.1";
 	headers["SERVER_PORT"] = std::to_string(server.getPort());
 	headers["REQUEST_METHOD"] = request.getRequestMethod();
-	headers["PATH_INFO"] = request.getRequestPath();
-	headers["PATH_TRANSLATED"] = request.getRequestPath();
-	headers["SCRIPT_NAME"] = request.getRequestPath();
-	headers["QUERY_STRING"] =request.getRequestPath();
-	headers["REMOTE_HOST"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
+	headers["PATH_INFO"] = this->client.getServer().getRoot() + request.getRequestPath();
+	headers["PATH_TRANSLATED"] = this->client.getServer().getRoot() + request.getRequestPath();
+	headers["SCRIPT_NAME"] = this->client.getServer().getRoot() + request.getRequestPath();
+	headers["QUERY_STRING"] = "";
+	headers["REMOTE_HOST"] = req_headers["User-Agent"];
 	headers["REMOTE_ADDR"] = "";
 	headers["AUTH_TYPE"] = "";
 	headers["REMOTE_USER"] = "";
