@@ -262,6 +262,8 @@ bool ServerDrive::ClientError(int fd) {
 	short 	error				= client.getRequestStatus();
 	if (error != 0) {
 		sendErrorMessage(fd, error);
+		ConsoleLog::Debug("Error Response Sent!. Closing ..." );
+		CloseConnection(client.getConnectionFd());
 		return (true);
 	}
 	return (false);
