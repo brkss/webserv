@@ -295,29 +295,33 @@ void PrepareResponse(Client &client)  {
 void ServerDrive::SendResponse(Client &client) {
 
 	size_t		response_size = client.getResponseSize();
+	short 		client_fd = client.getConnectionFd();
 	char *		response = client.getResponse();
-	size_t		socket_buffer_size = Network::getSocketBufferSize(client.getConnectionFd(), SO_RCVBUF);
+	size_t		socket_buffer_size = Network::getSocketBufferSize(client_fd, SO_RCVBUF);
 	size_t		size_to_send = response_size;
 	bool		close_connection = true;
 
+	//std::cout << "number of bytes written not yet sent by the protocol : " << Network::getFullSpaceSize(client_fd) << std::endl;
 	if (response_size > socket_buffer_size) {
 		size_to_send = socket_buffer_size ;
 		client.setResponse(response + size_to_send, response_size - size_to_send);
 		close_connection = false;
 	}
-	#if DEBUG
+#if DEBUG
 	std::cerr << "response size : " << response_size  << std::endl;
 	std::cerr << "size to send : " << size_to_send << std::endl;
 	std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
-	#endif 
-	if (int ss = send(client.getConnectionFd(), response, size_to_send, 0) != (ssize_t ) size_to_send) {
-		std::cout << "size sent : " << ss << std::endl;
-		throw(ErrorLog("Send error_"));
+#endif 
+	if (int ss = send(client_fd, response, size_to_send, 0) != (ssize_t ) size_to_send) {
+		std::cout << "------: size sent : " << ss << std::endl;
+		client.setResponse(response + ss , response_size - ss);
+		perror(NULL);
+		//throw(ErrorLog("Send error_"));
 	}
-
+	ConsoleLog::Debug("Response Portion  Sent!" );
 	if (close_connection) {
 		ConsoleLog::Debug("Response Sent!. Closing ..." );
-		CloseConnection(client.getConnectionFd());
+		CloseConnection(client_fd);
 	}
 }
 
@@ -328,13 +332,13 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
 			if (FD_ISSET(fd, &write_copy) and !ClientError(fd)) {					// response 
-				FD_CLR(fd, &(this->_readset));
+				//FD_CLR(fd, &(this->_readset));
 				Client &client = getClient(fd);
 				if (client.getResponseSize() == 0)
 					PrepareResponse(client);
-#if DEBUG
+			#if DEBUG
 				ConsoleLog::Debug("Sending response ...");
-#endif 
+			#endif 
 				SendResponse(client);
 			}
 			else if (FD_ISSET(fd, &read_copy)) {
@@ -353,9 +357,9 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 			FD_SET(fd, &this->_writeset);		// select before response
 			getClient(fd).setRequestStatus(error.getErrorNumber());
 
-			#if DEBUG
+#if DEBUG
 			std::cout << "Error: " << error.getErrorNumber() << std::endl;
-			#endif
+#endif
 		}
 	}
 }

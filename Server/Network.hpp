@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <netinet/ip.h> // has definition of SO_RCVBUF; 
+#include <fcntl.h>
 
 
 namespace Network
@@ -14,6 +15,7 @@ namespace Network
 	int  CreateSocket()  {
 		int sock_fd;
 		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
+		fcntl(sock_fd, F_SETFL, O_NONBLOCK);
 		if (sock_fd < 0) {
 			ConsoleLog::Error("Failed to create Socket !!!");
 			throw(ErrorLog("could not create socket"));
@@ -58,6 +60,7 @@ namespace Network
 	
 		Client new_client(sock_fd) ;
 		connection_fd = accept(sock_fd, (struct sockaddr *) new_client.getClientAddress(), new_client.getAddressLen());
+		fcntl(connection_fd, F_SETFL, O_NONBLOCK);
 		if (connection_fd == -1) {
 			throw(ErrorLog("Error: Failed to accept connection"));
 		}
@@ -79,7 +82,13 @@ namespace Network
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
 		std::cout << "size of socket buffer : " << size << std::endl;
 		return (size);
-}
+	}
+	int getFullSpaceSize(int sock_fd) {
+		int full_space;
+		socklen_t type_size = sizeof(int);
+		getsockopt(sock_fd, SOL_SOCKET, SO_NWRITE, (void *)&full_space, &type_size);
+		return (full_space);
+	}
 
 }
 
