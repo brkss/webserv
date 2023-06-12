@@ -16,7 +16,7 @@ class  Parse
 		std::vector<Server> _servers;	
 		std::vector<Token>	_tokens;
 	public:
-		typedef std::vector<Server>::const_iterator cv_itereator;
+		typedef std::vector<Server>::const_iterator cv_iterator;
 		
 	public:
 		Parse();
@@ -47,6 +47,8 @@ class  Parse
 		void parseLocation(Server &server_conf);
 		void parseCgi(Http &Conf);
 		void parseAcceptedMethods(Location &location);
+
+		void ValidateConfigRequirements();
 
 		void print_config();
 

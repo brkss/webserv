@@ -56,7 +56,7 @@ ServerDrive::ServerDrive(const Parse &conf): _config(conf),
 		FD_ZERO(&(this->_readset));
 		FD_ZERO(&(this->_writeset));
 		FD_ZERO(&(this->_listenset));
-		for (Parse::cv_itereator cit = servers.begin(); cit != servers.end(); cit++)
+		for (Parse::cv_iterator cit = servers.begin(); cit != servers.end(); cit++)
 		{
 			sock_fd = Network::CreateSocket();
 			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
@@ -88,7 +88,7 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 
 	timout.tv_sec = 4;
 	timout.tv_usec = 0;
-	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, &timout);
+	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, NULL);//&timout);
 	if  (select_stat < 0)  {
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		//throw(ErrorLog("Error: Select failed"));
@@ -147,7 +147,8 @@ void ServerDrive::getHeader(HttpRequest &request)  {
 		request.parse(header);
 		request_data = rest;
 	}
-	if (request_data.empty() && request.getRequestMethod() == HttpRequest::GET) 
+	if (request_data.empty() && (request.getRequestMethod() == HttpRequest::GET 
+								|| request.getRequestMethod() == HttpRequest::DELETE) )
 		request.setRequestState(HttpRequest::REQUEST_READY);
 }
 
@@ -224,6 +225,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 #if DEBUG 
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 #endif
+		return ;
 
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
@@ -400,5 +402,4 @@ const Server &ServerDrive::getServerByName(const std::string &host_name) {
 			return (*it);
 	}
 	return (*this->_virtual_servers.begin());
-
 }

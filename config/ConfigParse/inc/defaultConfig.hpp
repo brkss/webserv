@@ -2,6 +2,7 @@
 # define DEFAULTCONFIG_HPP 
 
 #include <iostream>
+#define REQUIRED -1
 
 class DefaulConfig
 {
