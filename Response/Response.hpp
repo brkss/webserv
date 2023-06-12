@@ -14,13 +14,16 @@ class Response {
 	std::string accept;
 	std::string acceptEncoding;
 	std::string host;
+	std::string status;
+	std::string status_message;
 
 	std::string body;
 
 	public:
-		Response(std::string body, std::string type, int size);
+		Response(std::string body, std::string type, int size, int status);
 		std::string generateResponse();
 		std::string getContentLength();
+		std::string generateStatusMessage(int status);
 
 };
 
