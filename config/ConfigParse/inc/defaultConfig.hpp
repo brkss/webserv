@@ -16,6 +16,7 @@ class DefaulConfig
 		static const std::string ADDRESS; 
 		static const short		 PORT;
 	   	static const std::string SERVER_NAME;
+		static const std::string UPLOAD_STORE;
 };
 
 #endif /* DEFAULTCONFIG_HPP */

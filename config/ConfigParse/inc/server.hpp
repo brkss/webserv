@@ -14,6 +14,7 @@ class Server : public Http
 		std::string 				_address;
 		short						_port;
 		std::string 				_server_name;
+		std::string					_upload_store;
 		std::vector<Location>		_locations;
 			
 
@@ -42,6 +43,8 @@ class Server : public Http
 		void 						setReturnURL(const std::string &url);
 		void						addLocation(const Location &location);
 		bool						isValidServer() const;
+		void 						SetUploadStore(const std::string &path);
+		const std::string&			getUploadStore() const;
 
 };
 

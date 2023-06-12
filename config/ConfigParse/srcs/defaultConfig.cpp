@@ -9,3 +9,4 @@ const size_t 	  DefaulConfig::CLIENT_REQUEST_TIMOUT	= 60; // in seconds
 const std::string DefaulConfig::ADDRESS					= "__REQUIRED"; 
 const short		  DefaulConfig::PORT 					= REQUIRED;
 const std::string DefaulConfig::SERVER_NAME				= "__REQUIRED" ;
+const std::string DefaulConfig::UPLOAD_STORE			= "/tmp";
