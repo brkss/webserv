@@ -34,6 +34,7 @@ void Parse::print_config() {
 		std::cout << "-----:server:" << "Port: " << (*it).getPort() << std::endl;
 		std::cout << "-----:server:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
 		std::cout << "-----:server:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
+		std::cout << "-----:server:" << "UploadStore: " << (*it).getUploadStore() << std::endl;
 		for (cl_iterator lit = it->getLocations().begin(); lit != it->getLocations().end(); lit++)
 		{
 			std::cout << "			>>> Location <<< " << std::endl;
@@ -48,6 +49,7 @@ void Parse::print_config() {
 			std::cout << "-----------:Location:" << "Port: " << (*lit).getPort() << std::endl;
 			std::cout << "-----------:Location:" << "ReturnCode: " << (*lit).getReturnCode() << std::endl;
 			std::cout << "-----------:Location:" << "ReturnURL: " << (*lit).getReturnURL() << std::endl;
+			std::cout << "-----------:Location::" << "UploadStore: " << (*it).getUploadStore() << std::endl;
 			std::cout << "-----------:Allowed Methods: " ;
 			for (std::vector<std::string>::const_iterator m = lit->getAllowedMethods().begin();
 				m != lit->getAllowedMethods().end(); m++) {
@@ -137,6 +139,14 @@ void	Parse::parseServerName(Server &conf)
 	expectToken(Token::COLON);
 }
 
+void Parse::parseUploadStore(Server &server) {
+	nextToken();
+	expectToken(Token::VALUE);
+	server.SetUploadStore(currToken().getTokenValue());
+	nextToken();
+	expectToken(Token::COLON);
+}
+
 void Parse::parseListen(Server &conf) {
 	std::string value;
 
@@ -218,6 +228,8 @@ void Parse::parseLocation(Server &server_conf) {
 			parseReturn(location_conf);
 		else if (curr_token.getTokenType() == Token::LIMIT_EXCEPT) 
 			parseAcceptedMethods(location_conf);
+		else if (curr_token.getTokenType() == Token::UPLOAD_STORE)
+			parseUploadStore(location_conf);
 		else 
 		{
 
@@ -256,6 +268,8 @@ void Parse::parseServer() {
 			parseListen(server_conf);
 		else if (curr_token.getTokenType() == Token::RETURN)
 			parseReturn(server_conf);
+		else if (curr_token.getTokenType() == Token::UPLOAD_STORE)
+			parseUploadStore(server_conf);
 		else 
 			throw_error(curr_token, "Unexpected Token");
 		nextToken();

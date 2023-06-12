@@ -6,7 +6,8 @@
 Server::Server() :	Http(),
 					_address(DefaulConfig::ADDRESS),
 					_port(DefaulConfig::PORT),
-					_server_name(DefaulConfig::SERVER_NAME) {
+					_server_name(DefaulConfig::SERVER_NAME),
+					_upload_store(DefaulConfig::UPLOAD_STORE) {
 
 }
 
@@ -17,7 +18,8 @@ Server::Server(const Server& server) : Http(server) {
 Server::Server(const Http& http) :Http(http),
 					_address(DefaulConfig::ADDRESS),
 					_port(DefaulConfig::PORT),
-					_server_name(DefaulConfig::SERVER_NAME)  {
+					_server_name(DefaulConfig::SERVER_NAME),
+					_upload_store(DefaulConfig::UPLOAD_STORE) {
 
 	//this->_erro_log = http.getErroLog();
 	//this->_root = http.getRoot();
@@ -37,6 +39,7 @@ Server &Server::operator=(const Server & server) {
 		this->_locations = server._locations;
 		this->_return_URL = server._return_URL;
 		this->_return_code = server._return_code;
+		this->_upload_store =  server._upload_store;
 	}
 	return (*this);
 }
@@ -87,6 +90,10 @@ const short					&Server::getReturnCode() const {
 	return (this->_return_code);
 }
 
+const std::string&			Server::getUploadStore() const {
+		return (this->_upload_store);
+}
+
 void	Server::setAddress(const std::string &address) {
 	this->_address = address;
 }
@@ -109,6 +116,6 @@ void 	Server::setReturnURL(const std::string &url) {
 	this->_return_URL = url;
 }
 
-
-
-
+void 	Server::SetUploadStore(const std::string &path) {
+	this->_upload_store = path;
+}

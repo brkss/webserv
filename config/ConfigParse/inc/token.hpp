@@ -34,8 +34,9 @@ class Token
 		static const std::string VALUE;
 		static const std::string INT_VALUE;
 		static const std::string UNDEFINED;
+		static const std::string UPLOAD_STORE;
 
-		static const std::string _directives[13][2];
+		static const std::string _directives[14][2];
 		static const size_t		 _nb_directives;
 
 	public:

@@ -47,6 +47,7 @@ class  Parse
 		void parseLocation(Server &server_conf);
 		void parseCgi(Http &Conf);
 		void parseAcceptedMethods(Location &location);
+		void parseUploadStore(Server &server);
 
 		void ValidateConfigRequirements();
 
