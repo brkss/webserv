@@ -82,6 +82,7 @@ ServerDrive::~ServerDrive() {
 }
 
 void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
+	ConsoleLog::Debug("Selecting socket fds ");
 	struct timeval timout;
 	int		select_stat;
 
@@ -300,7 +301,7 @@ void ServerDrive::SendResponse(Client &client) {
 	size_t		socket_buffer_size = Network::getSocketBufferSize(client_fd, SO_RCVBUF);
 	size_t		size_to_send = response_size;
 	bool		close_connection = true;
-
+	
 	//std::cout << "number of bytes written not yet sent by the protocol : " << Network::getFullSpaceSize(client_fd) << std::endl;
 	if (response_size > socket_buffer_size) {
 		size_to_send = socket_buffer_size ;
@@ -313,14 +314,19 @@ void ServerDrive::SendResponse(Client &client) {
 	std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
 #endif 
 	if (int ss = send(client_fd, response, size_to_send, 0) != (ssize_t ) size_to_send) {
-		std::cout << "------: size sent : " << ss << std::endl;
-		client.setResponse(response + ss , response_size - ss);
+			close_connection = true;
 		perror(NULL);
+		//close_connection = true;
+		std::cerr << "------: size sent : " << ss << "  ----- very bad  ? ----------"  << std::endl;
+		client.setResponse(response + ss , response_size - ss);
 		//throw(ErrorLog("Send error_"));
 	}
 	ConsoleLog::Debug("Response Portion  Sent!" );
+	//sleep(2);
 	if (close_connection) {
-		ConsoleLog::Debug("Response Sent!. Closing ..." );
+		std::string debug_log = "Response Sent!. Closing fd :...";
+		debug_log = debug_log +  std::to_string(client_fd);
+		ConsoleLog::Debug(debug_log);
 		CloseConnection(client_fd);
 	}
 }

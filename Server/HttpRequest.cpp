@@ -152,7 +152,7 @@ void		HttpRequest::parse(std::string &request_header) {
 		throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 
 	#if DEBUG
-	std::cout << request_header << std::endl;
+	std::cerr << request_header << std::endl;
 	#endif
 	request_line = request_header.substr(0, delim_pos);	
 	headers = request_header.substr(delim_pos + CRLF.size()); 
