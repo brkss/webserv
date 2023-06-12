@@ -2,9 +2,11 @@
 #include "../inc/location.hpp"
 #include "../inc/lexer.hpp"
 #include "../../../Server/Utils.hpp"
+#include "../../../Server/ErrorHandler.hpp"
 #include <string>
 #include <arpa/inet.h> // for ip4 wrapper function 
 #include <algorithm> // for find method
+
 
 
 void Parse::print_config() {
@@ -427,6 +429,14 @@ void Parse::parseFile(const std::string &file_name){
 	token.setLineNum(line_num);
 	addToken(token);
 	parseHttpBlock();
+	ValidateConfigRequirements();
+}
+
+void Parse::ValidateConfigRequirements() {
+	if (!this->_servers.size()) throw(ErrorLog("Missing Server config! QUITING ..."));
+	for (cv_iterator server = this->_servers.begin(); server != this->_servers.end(); server++)
+		 if (!server->isValidServer()) 
+				throw(ErrorLog("Ivalid Config File. QUITTING ..."));
 }
 
 const std::vector<Server> &Parse::getVirtualServers() const {

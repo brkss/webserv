@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #ifndef BUFFER_SIZE 
-# define BUFFER_SIZE   2050
+# define BUFFER_SIZE   0xFF
 #endif 
 
 class Client {

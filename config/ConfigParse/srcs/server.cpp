@@ -1,6 +1,7 @@
 #include "../inc/server.hpp"
 #include "../inc/location.hpp"
 #include "../inc/defaultConfig.hpp"
+#include "../../../Server/ErrorHandler.hpp"
 
 Server::Server() :	Http(),
 					_address(DefaulConfig::ADDRESS),
@@ -42,6 +43,24 @@ Server &Server::operator=(const Server & server) {
 
 Server::~Server() {
 
+}
+
+bool	Server::isValidServer() const {
+
+	bool ret = true;
+	if (this->_server_name == "__REQUIRED") {
+		std::cerr << "[server_name] __REQUIRED" << std::endl;
+		ret = false;
+	}
+	if (this->_address == "__REQUIRED") {
+		std::cerr << "[listen address] __REQUIRED" << std::endl;
+		ret = false;
+	}
+	if (this->_port == REQUIRED) {
+		std::cerr << "[listen port] __REQUIRED" << std::endl;
+		ret = false;
+	}
+	return (ret);
 }
 
 const std::string			&Server::getAddress() const {

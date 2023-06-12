@@ -41,6 +41,7 @@ class Server : public Http
 		void 						setReturnCode(short code);
 		void 						setReturnURL(const std::string &url);
 		void						addLocation(const Location &location);
+		bool						isValidServer() const;
 
 };
 
