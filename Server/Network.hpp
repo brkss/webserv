@@ -63,10 +63,9 @@ namespace Network
 		fcntl(connection_fd, F_SETFL, O_NONBLOCK);
 		if (connection_fd == -1) 
 			throw(ErrorLog("Error: Failed to accept connection"));
-		}
 		new_client.setConnectionFd(connection_fd);
 		ConsoleLog::Debug("New client connection ACCEPT ok!");
-		std::cout << "New connection accepted with  fd : " << connection_fd << std::endl;
+		std::cerr << "New connection accepted with  fd : " << connection_fd << std::endl;
 		return (new_client);
 	}
 	
