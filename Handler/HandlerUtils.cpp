@@ -1,8 +1,5 @@
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
+#include "utils.h"
 
 int write_file(std::string path, std::string content){
 

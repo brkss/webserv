@@ -65,7 +65,6 @@ void CGI::handlePhpCGI(){
     }else if (pid > 0){
         
 		// main proccess!
-
         int status;
 		waitpid(pid, &status, 0);
 		WEXITSTATUS(status);
@@ -184,4 +183,8 @@ std::map<std::string, std::string> CGI::parse_cgi_response(std::string response)
 
 std::string CGI::getResponse(){
 	return this->cgi_response;
+}
+
+int CGI::getStatus(){
+    return this->status;
 }

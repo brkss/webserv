@@ -13,11 +13,11 @@ class Handler {
 
     Client client;
 
-    int size;
-
+    
     std::string body;
     std::string type;
-    
+    int status;
+    int size;
 
 
     public:
@@ -31,6 +31,7 @@ class Handler {
         int getSize();
         std::string getBody();
         std::string getType();
+        int getStatus();
         
 
 };

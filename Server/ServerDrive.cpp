@@ -274,7 +274,7 @@ bool ServerDrive::ClientError(int fd) {
 
 void PrepareResponse(Client &client)  {
 	Handler	handler(client);
-	Response response(handler.getBody(), handler.getType(), handler.getSize());
+	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus());
 
 	std::string resp = response.generateResponse();
 	const char *r = resp.c_str();

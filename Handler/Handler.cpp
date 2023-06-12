@@ -4,6 +4,7 @@
 #include "CGI.hpp"
 #include <dirent.h>
 #include <sys/stat.h>
+#include "utils.h"
 
 bool fileExists(std::string filepath){
     std::fstream file(filepath);
@@ -79,14 +80,39 @@ Handler::Handler(Client client){
 	// joined location path with resource name
 	std::string path = this->client.getServer().getRoot() + request.getRequestPath();
     
-    // handle 404 file not found response !
-    if((!fileExists(path) && !directoryExits(path)) || (isDirectory(path) && !this->client.getServer().getAutoIndex())){
+    std::string method = request.getRequestMethod();
+    
+    if((method == "POST" || method == "DELETE") && !isPHPScript(path)){
+        // handle POST / DELETE
+        int status = -1;
+        std::string filepath = client.getServer().getUploadStore() + request.getRequestPath();
+        if(method == "POST"){
+            status = write_file(filepath, request.getRequestBody());
+        }else{
+            status = delete_file(filepath);
+        }
+        // check if any of the methods above failed ! 
+        if(!status){
+            this->status = 500;
+            this->body = "";
+            this->type = "";
+            this->size = 0;
+        }else if(status){
+            this->status = 201;
+            this->body = "";
+            this->type = "";
+            this->size = 0;
+        }
+    }
+    else if((!fileExists(path) && !directoryExits(path)) || (isDirectory(path) && !this->client.getServer().getAutoIndex())){
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
+        this->status = 404;
     }else if (isDirectory(path)){
         std::string autoIndexResponse = ListFile(path);
         this->body = autoIndexResponse;
+        this->status = 200;
         this->type = "text/html";
         this->size = autoIndexResponse.size();
     }else if(isPHPScript(path)){
@@ -99,10 +125,12 @@ Handler::Handler(Client client){
         this->body = parsed_cgi_response["body"];
         this->type = parsed_cgi_response["type"];
         this->size = parsed_cgi_response["body"].size();
+        this->status = 200;
     }else{
 		this->body = this->getFileContent(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
+        this->status = 200;
     }
 }
 
@@ -184,4 +212,8 @@ std::string Handler::getBody(){
 
 std::string Handler::getType(){
     return this->type;
+}
+
+int Handler::getStatus(){
+    return this->status;
 }

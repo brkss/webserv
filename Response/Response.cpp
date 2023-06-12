@@ -24,9 +24,10 @@ std::string nowHTTP(){
 	return http_date;
 }
 
-
-Response::Response(std::string body, std::string type, int size){
+Response::Response(std::string body, std::string type, int size, int status){
 	
+	this->status = std::to_string(status);
+	this->status_message = generateStatusMessage(status);
 	this->contentType = type;
 	this->contentLength = std::to_string(size);
 	// add content length 
@@ -45,25 +46,38 @@ std::string Response::generateResponse(){
 	std::string response = "";
 
 	// set header 
-	response += "HTTP/1.1 200 OK\n";
-	response += "Content-Type: " + this->contentType + "\n";
-	response += "Content-Length: " + this->contentLength + "\n";
-	response += "Cache-Control: " + this->cacheControl + "\n";
-	response += "Date: " +  this->date  + "\n";
+	response += "HTTP/1.1 " + this->status +  " " + this->status_message + "\r\n";
+	response += "Content-Type: " + this->contentType + "\r\n";
+	response += "Content-Length: " + this->contentLength + "\r\n";
+	response += "Cache-Control: " + this->cacheControl + "\r\n";
+	response += "Date: " +  this->date  + "\r\n";
 	response += "Server: " + this->server + "\n";
-	response += "Connection: " + this->connection + "\n";
-	response += "Accept: " + this->accept + "\n";
-	response += "Accept-Encoding: " + this->acceptEncoding + "\n";
-	response += "Host: " + this->host + "\n\n";
+	response += "Connection: " + this->connection + "\r\n";
+	response += "Accept: " + this->accept + "\r\n";
+	response += "Accept-Encoding: " + this->acceptEncoding + "\r\n";
+	response += "Host: " + this->host + "\r\n\r\n";
 
-	response += this->body + "\n";
-
-	//char* c2 = const_cast<char*>(response.c_str());
-	//std::cout << "response : \n" <<  c2;
+	response += this->body + "\r\n";
 
 	return response;
 }
 
 std::string Response::getContentLength(){
 	return this->contentLength;
+}
+
+
+std::string Response::generateStatusMessage(int status){
+	if(status == 404)
+		return "Not Found";
+	else if (status == 500)
+		return "Internal Server Error";
+	else if (status == 403)
+		return "Forbidden";
+	else if (status == 401)
+		return "Unauthorized";
+	else if (status == 503)
+		return "Service Unavailable"; 
+	else
+		return "OK";
 }
