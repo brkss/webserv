@@ -6,6 +6,7 @@
 #include <string>
 #include <arpa/inet.h> // for ip4 wrapper function 
 #include <algorithm> // for find method
+#include <unistd.h>
 
 
 
@@ -13,7 +14,7 @@ void Parse::print_config() {
 	typedef  std::vector<Server>::const_iterator cv_iterator;
 	typedef  std::vector<Location>::const_iterator cl_iterator;
 	std::cerr << "--- Common config ---"    << std::endl;
-	std::cout << "Error log : " << this->_common_config.getErroLog() << std::endl;
+//	std::cout << "Error log : " << this->_common_config.getErroLog() << std::endl;
 	std::cout << "Index		: " << this->_common_config.getIndex()  << std::endl;
 	std::cout << "Auto index: " << this->_common_config.getAutoIndex()  << std::endl;
 	std::cout << "Root		: " << this->_common_config.getRoot() << std::endl;
@@ -24,7 +25,7 @@ void Parse::print_config() {
 	{
 		std::cout << ">>> server <<< " << std::endl;
 
-		std::cout << "-----:server:" << "Error log : " << (*it).getErroLog() << std::endl;
+	//	std::cout << "-----:server:" << "Error log : " << (*it).getErroLog() << std::endl;
 		std::cout << "-----:server:" << "Index		: " << (*it).getIndex()  << std::endl;
 		std::cout << "-----:server:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
 		std::cout << "-----:server:" << "Root		: " << (*it).getRoot() << std::endl;
@@ -39,7 +40,7 @@ void Parse::print_config() {
 		{
 			std::cout << "			>>> Location <<< " << std::endl;
 			std::cout << "-----------:Location:" << "Location endpoint : " << (*lit).getEndpoint() << std::endl;
-			std::cout << "-----------:Location:" << "Error log : " << (*lit).getErroLog() << std::endl;
+	////		std::cout << "-----------:Location:" << "Error log : " << (*lit).getErroLog() << std::endl;
 			std::cout << "-----------:Location:" << "Index		: " << (*lit).getIndex()  << std::endl;
 			std::cout << "-----------:Location:" << "Auto index: " << (*lit).getAutoIndex()  << std::endl;
 			std::cout << "-----------:Location:" << "Root		: " << (*lit).getRoot() << std::endl;
@@ -304,14 +305,29 @@ void Parse::parseAutoIndex(Http &config) {
 	expectToken(Token::COLON);
 }
 
-void   Parse::parseErrorLog(Http &config) {
+void   Parse::parseErrorPage(Http &config) {
+
+	std::string  error_code;
+	std::string	file_path;
 
 	nextToken();
 	expectToken(Token::VALUE);
-	config.setErroLog(currToken().getTokenValue());
+	error_code = currToken().getTokenValue();
+	if (!Utils::is_number(error_code)) {
+		throw_error(currToken(), "Bad argument! http_error_code expected ");
+	}
+
+	nextToken();
+	expectToken(Token::VALUE);
+	file_path = currToken().getTokenValue();
+	if (0 && access(file_path.c_str(), F_OK | W_OK)) {
+		throw_error(currToken(), "Unable to access File!");
+	}
 	nextToken();
 	expectToken(Token::COLON);
+	config.addErrorPaage(std::atoi(error_code.c_str()), file_path);
 }
+
 void   Parse::parseIndex(Http &config) {
 
 	nextToken();
@@ -321,7 +337,6 @@ void   Parse::parseIndex(Http &config) {
 	nextToken();
 	expectToken(Token::COLON);
 }
-
 	
 void   Parse::parseClientBodySize(Http &config) {
 
@@ -375,8 +390,8 @@ void Parse::parseGlobalDirective(Http &config) {
 		parseRoot(config);
 	else if (curr_token.getTokenType() == Token::AUTOINDEX)
 		parseAutoIndex(config);
-	else if (curr_token.getTokenType() == Token::ERROR_LOG)
-		parseErrorLog(config);
+	else if (curr_token.getTokenType() == Token::ERROR_PAGE)
+		parseErrorPage(config);
 	else if (curr_token.getTokenType() == Token::INDEX)
 		parseIndex(config);
 	else if (curr_token.getTokenType() == Token::CLIENT_MAX_BODY_SIZE)
@@ -444,6 +459,7 @@ void Parse::parseFile(const std::string &file_name){
 	addToken(token);
 	parseHttpBlock();
 	ValidateConfigRequirements();
+	//validateEveryFilePath();
 }
 
 void Parse::ValidateConfigRequirements() {
@@ -451,6 +467,11 @@ void Parse::ValidateConfigRequirements() {
 	for (cv_iterator server = this->_servers.begin(); server != this->_servers.end(); server++)
 		 if (!server->isValidServer()) 
 				throw(ErrorLog("Ivalid Config File. QUITTING ..."));
+}
+
+void validateEveryFilePath() {
+	
+
 }
 
 const std::vector<Server> &Parse::getVirtualServers() const {

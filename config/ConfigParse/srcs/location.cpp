@@ -25,7 +25,7 @@ Location::~Location() {
 }
 
 Location::Location(const Server &server_conf) : Server(server_conf) {
-
+	this->_error_pages.clear(); // never inherit 
 }
 void Location::setEndpoint(const std::string &endpoint) {
 	this->_endpoint = endpoint;

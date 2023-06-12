@@ -6,7 +6,7 @@ const std::string Token::LOCATION				= "location";
 const std::string Token::ROOT 					= "root";
 const std::string Token::LISTEN 				= "listen";
 const std::string Token::SERVER_NAME 			= "server_name";
-const std::string Token::ERROR_LOG 				= "error_log";
+const std::string Token::ERROR_PAGE 			= "error_page";
 const std::string Token::RETURN 				= "return";
 const std::string Token::AUTOINDEX				= "autoindex";
 const std::string Token::INDEX 					= "index";
@@ -34,7 +34,7 @@ const std::string Token::_directives[14][2] = {
 	{"return",		Token::RETURN},
 	{"autoindex",	Token::AUTOINDEX},
 	{"index",		Token::INDEX},
-	{"error_log",		Token::ERROR_LOG},
+	{"error_page",		Token::ERROR_PAGE},
 	{"limit_except",		Token::LIMIT_EXCEPT},
 	{"client_max_body_size", Token::CLIENT_MAX_BODY_SIZE},
 	{"client_request_timoeout", Token::CLIENT_MAX_BODY_SIZE},
@@ -60,7 +60,7 @@ bool Token::isGlobalDirective() const {
 
 	if (type ==  Token::CGI 
 		or type  == Token::ROOT
-		or type == Token::ERROR_LOG 
+		or type == Token::ERROR_PAGE 
 		or type ==  Token::AUTOINDEX 
 		or type == Token::INDEX 
 		or type == Token::CLIENT_REQUEST_TIMOUT
@@ -95,4 +95,3 @@ Token & Token::operator=(const Token& token_) {
 
 Token::~Token() {
 }
-

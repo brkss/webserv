@@ -8,10 +8,11 @@ class  Http
 {
 	private:
 		typedef std::map<std::string, std::string>::value_type pair;
+		typedef std::map<short, std::string>::value_type page_pair_t;
 
 	protected:
 		std::map<std::string, std::string>	_cgi;
-		std::string 						_erro_log;
+		std::map<short, std::string>		_error_pages;
 		std::string 						_root;
 		std::string 						_index;
 		bool								_autoindex;
@@ -24,13 +25,13 @@ class  Http
 		Http &operator=(const Http &parse);
 		virtual ~Http();
 
-		const std::string &getErroLog() const ;
+		const std::map<short, std::string> &getErroPages() const ;
 		const std::string &getRoot() const ;
 		const std::string &getIndex() const ;
 		const bool		  &getAutoIndex() const ;
 		const size_t	  &getClientMaxBodySize() const ;
 
-		void setErroLog(const std::string &value);
+		void addErrorPaage(short error_code, const std::string &path);
 		void setRoot(const std::string &value);
 		void setIndex(const std::string &value);
 		void setAutoIndex(bool value);

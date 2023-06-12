@@ -1,8 +1,7 @@
 #include "../inc/http.hpp"
 #include "../inc/defaultConfig.hpp"
 
-Http::Http() : 	_erro_log(DefaulConfig::ERROR_LOG),
-				_root(DefaulConfig::ROOT),
+Http::Http() : 	_root(DefaulConfig::ROOT),
 				_index(DefaulConfig::INDEX),
 				_autoindex(DefaulConfig::AUTOINDEX),
 				_client_max_body_size(DefaulConfig::CLIENT_MAX_BODY_SIZE),
@@ -10,6 +9,7 @@ Http::Http() : 	_erro_log(DefaulConfig::ERROR_LOG),
 {
 
 }
+
 Http::Http(const Http &http) {
 
 	*this = http;
@@ -17,7 +17,7 @@ Http::Http(const Http &http) {
 Http &Http::operator=(const Http &http) {
 	if (this != &http)
 	{
-		this->_erro_log = http._erro_log;
+		this->_error_pages = http._error_pages;
 		this->_root = http._root;
 		this->_index = http._index;
 		this->_autoindex = http._autoindex;
@@ -31,8 +31,9 @@ Http::~Http() {
 
 }
 
-const std::string &Http::getErroLog() const {
-	return (this->_erro_log);
+const std::map<short, std::string>  &Http::getErroPages() const {
+
+	return (this->_error_pages);
 }
 
 const std::string &Http::getRoot() const {
@@ -50,8 +51,10 @@ const size_t	  &Http::getClientMaxBodySize() const {
 	return (this->_client_max_body_size);
 }
 
-void Http::setErroLog(const std::string &value) {
-	this->_erro_log = value;
+void Http::addErrorPaage(short error_code, const std::string &path) {
+
+	//page_pair_t error_path(error_code, path);
+	this->_error_pages[error_code] = path;
 }
 void Http::setRoot(const std::string &value) {
 	this->_root = value;
