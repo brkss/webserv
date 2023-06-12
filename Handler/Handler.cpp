@@ -12,6 +12,7 @@ bool fileExists(std::string filepath){
 
 bool directoryExits(std::string path){
     DIR *directory = ::opendir(path.c_str());
+    
     if(directory != NULL){
         closedir(directory);
         return true;
@@ -46,9 +47,8 @@ std::string ListFile(std::string path){
             // file ! 
             response += "<tr style='margin-top: 10px;'><td><a href='"+filename+"'>" + filename + "</a></td><td>" + std::to_string(fileInfo.st_atime) + "</td><td>" + std::to_string(fileInfo.st_size / 1000000) + " M</td></tr>";
         }
-
     }
-     closedir(directory);
+    closedir(directory);
     response += "</table></body></html>";
     return response;
 }
@@ -80,7 +80,7 @@ Handler::Handler(Client client){
 	std::string path = this->client.getServer().getRoot() + request.getRequestPath();
     
     // handle 404 file not found response !
-    if(!fileExists(path) && !directoryExits(path)){
+    if((!fileExists(path) && !directoryExits(path)) || (isDirectory(path) && !this->client.getServer().getAutoIndex())){
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
@@ -148,8 +148,9 @@ int Handler::getFileContentLength(std::string filename){
 std::string Handler::getFileContentType(std::string filename){
 
 	std::string file_type = "application/octet-stream"; 
-	size_t dot_pos = filename.find_last_of(".");
-	if (dot_pos != std::string::npos) {
+	size_t      dot_pos = filename.find_last_of(".");
+	
+    if (dot_pos != std::string::npos) {
 		std::string extension = filename.substr(dot_pos + 1);
 		if (extension == "html") {
 			file_type = "text/html";
