@@ -5,6 +5,26 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "utils.h"
+#include "../config/ConfigParse/inc/location.hpp"
+
+int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
+    int longestMatchIndex = -1;
+    int longestMatchLength = 0;
+
+    for (int i = 0; i < locations.size(); i++) {
+        std::string endpoint = locations[i].getEndpoint();
+        int endpointLength = endpoint.length();
+
+        if (requestPath.length() >= endpointLength && requestPath.substr(0, endpointLength) == endpoint) {
+            if (endpointLength > longestMatchLength) {
+                longestMatchIndex = i;
+                longestMatchLength = endpointLength;
+            }
+        }
+    }
+
+    return longestMatchIndex;
+}
 
 bool fileExists(std::string filepath){
     std::fstream file(filepath);
@@ -76,9 +96,18 @@ bool isPHPScript(std::string path){
 Handler::Handler(Client client){
     this->client = client;
     HttpRequest request = client.getRequest();
+    std::vector<Location> locations;
+    std::string rootPath = this->client.getServer().getRoot();
+    std::vector<Location> locations = client.getServer().getLocations();
 
-	// joined location path with resource name
-	std::string path = this->client.getServer().getRoot() + request.getRequestPath();
+    // find location 
+    int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
+    if(locationIndex > -1){
+        rootPath = locations[locationIndex].getRoot();
+    }
+
+	// joined location path with resource name 
+	std::string path = rootPath + request.getRequestPath();
     
     std::string method = request.getRequestMethod();
     
