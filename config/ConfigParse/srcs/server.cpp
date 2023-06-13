@@ -20,12 +20,8 @@ Server::Server(const Http& http) :Http(http),
 					_port(DefaulConfig::PORT),
 					_server_name(DefaulConfig::SERVER_NAME),
 					_upload_store(DefaulConfig::UPLOAD_STORE) {
-
-	//this->_erro_log = http.getErroLog();
-	//this->_root = http.getRoot();
-	//this->_index = http.getIndex();
-	//this->_autoindex = http.getAutoIndex();
-	//this->_client_max_body_size = http.getClientMaxBodySize();
+		
+	this->_error_pages.clear(); // Error  pages are never inherited 
 }
 
 Server &Server::operator=(const Server & server) {

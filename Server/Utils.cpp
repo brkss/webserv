@@ -16,6 +16,7 @@ namespace Utils {
 	return (ret);
 }
 
+// check if str is a postive numeric value 
 bool is_number(const std::string &str) {
 	std::string::const_iterator it = str.begin();
 	while (std::isdigit(*it))
