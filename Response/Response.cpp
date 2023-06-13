@@ -78,6 +78,8 @@ std::string Response::generateStatusMessage(int status){
 		return "Unauthorized";
 	else if (status == 503)
 		return "Service Unavailable"; 
+	else if (status == 405)
+		return "Method Not Allowed";
 	else
 		return "OK";
 }

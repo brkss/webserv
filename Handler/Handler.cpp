@@ -5,6 +5,38 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "utils.h"
+#include "../config/ConfigParse/inc/location.hpp"
+
+bool checkAllowedMethods(Location location, std::string method){
+    std::vector<std::string> allowedMethods = location.getAllowedMethods();
+    if (allowedMethods.size() == 0)
+        return true;
+    for(size_t i = 0; i < allowedMethods.size(); i++){
+        if(method == allowedMethods[i]){
+            return true;
+        }
+    }
+    return false;
+}
+
+int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
+    int longestMatchIndex = -1;
+    size_t longestMatchLength = 0;
+
+    for (size_t i = 0; i < locations.size(); i++) {
+        std::string endpoint = locations[i].getEndpoint();
+        size_t endpointLength = endpoint.length();
+
+        if (requestPath.length() >= endpointLength && requestPath.substr(0, endpointLength) == endpoint) {
+            if (endpointLength > longestMatchLength) {
+                longestMatchIndex = i;
+                longestMatchLength = endpointLength;
+            }
+        }
+    }
+
+    return longestMatchIndex;
+}
 
 bool fileExists(std::string filepath){
     std::fstream file(filepath);
@@ -76,10 +108,24 @@ bool isPHPScript(std::string path){
 Handler::Handler(Client client){
     this->client = client;
     HttpRequest request = client.getRequest();
+    std::string rootPath = this->client.getServer().getRoot();
+    std::vector<Location> locations = client.getServer().getLocations();
 
-	// joined location path with resource name
-	std::string path = this->client.getServer().getRoot() + request.getRequestPath();
-    
+    // find location 
+    int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
+    if(locationIndex > -1){
+        rootPath = locations[locationIndex].getRoot();
+        // check allowed methods !
+        if(!checkAllowedMethods(locations[locationIndex], request.getRequestMethod())){
+            this->body = "<html><body style='text-align: center'><h1>405 Method Not Allowed</h1></body></html>";
+            this->size = 85;
+            this->status = 405;
+            this->type = "text/html";
+            return;
+        }
+    }
+	// joined location path with resource name 
+	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
     
     if((method == "POST" || method == "DELETE") && !isPHPScript(path)){
