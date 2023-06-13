@@ -9,11 +9,11 @@
 
 int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
     int longestMatchIndex = -1;
-    int longestMatchLength = 0;
+    size_t longestMatchLength = 0;
 
-    for (int i = 0; i < locations.size(); i++) {
+    for (size_t i = 0; i < locations.size(); i++) {
         std::string endpoint = locations[i].getEndpoint();
-        int endpointLength = endpoint.length();
+        size_t endpointLength = endpoint.length();
 
         if (requestPath.length() >= endpointLength && requestPath.substr(0, endpointLength) == endpoint) {
             if (endpointLength > longestMatchLength) {
@@ -96,7 +96,6 @@ bool isPHPScript(std::string path){
 Handler::Handler(Client client){
     this->client = client;
     HttpRequest request = client.getRequest();
-    std::vector<Location> locations;
     std::string rootPath = this->client.getServer().getRoot();
     std::vector<Location> locations = client.getServer().getLocations();
 
