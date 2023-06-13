@@ -15,7 +15,7 @@ SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./Server/ErrorHandler.cpp \
 	  ./Server/Colors.cpp \
 	  ./Response/Response.cpp \
-	  ./Handler/Handler.cpp \
+	  ./Handler/Handler.cpp \	
 	  ./Handler/CGI.cpp \
 	  ./Handler/HandlerUtils.cpp \
 	  main.cpp
