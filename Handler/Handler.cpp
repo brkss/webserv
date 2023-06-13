@@ -108,7 +108,6 @@ Handler::Handler(Client client){
 
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
-    
     std::string method = request.getRequestMethod();
     
     if((method == "POST" || method == "DELETE") && !isPHPScript(path)){
