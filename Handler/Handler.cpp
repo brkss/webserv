@@ -7,6 +7,18 @@
 #include "utils.h"
 #include "../config/ConfigParse/inc/location.hpp"
 
+bool checkAllowedMethods(Location location, std::string method){
+    std::vector<std::string> allowedMethods = location.getAllowedMethods();
+    if (allowedMethods.size() == 0)
+        return true;
+    for(size_t i = 0; i < allowedMethods.size(); i++){
+        if(method == allowedMethods[i]){
+            return true;
+        }
+    }
+    return false;
+}
+
 int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
     int longestMatchIndex = -1;
     size_t longestMatchLength = 0;
@@ -103,8 +115,15 @@ Handler::Handler(Client client){
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
     if(locationIndex > -1){
         rootPath = locations[locationIndex].getRoot();
+        // check allowed methods !
+        if(!checkAllowedMethods(locations[locationIndex], request.getRequestMethod())){
+            this->body = "<html><body style='text-align: center'><h1>405 Method Not Allowed</h1></body></html>";
+            this->size = 85;
+            this->status = 405;
+            this->type = "text/html";
+            return;
+        }
     }
-
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
