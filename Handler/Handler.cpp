@@ -19,6 +19,15 @@ bool checkAllowedMethods(Location location, std::string method){
     return false;
 }
 
+std::string getFilenameFromRequestPath(std::string requestPath){
+    size_t slash_pos = requestPath.find_last_of("/");
+	if (slash_pos != std::string::npos) {
+		std::string filename = requestPath.substr(slash_pos + 1);
+        return filename;
+    }
+    return "";
+}
+
 int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
     int longestMatchIndex = -1;
     size_t longestMatchLength = 0;
@@ -110,11 +119,15 @@ Handler::Handler(Client client){
     HttpRequest request = client.getRequest();
     std::string rootPath = this->client.getServer().getRoot();
     std::vector<Location> locations = client.getServer().getLocations();
+    std::string upload_location = client.getServer().getUploadStore();
 
     // find location 
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
     if(locationIndex > -1){
         rootPath = locations[locationIndex].getRoot();
+        if(locations[locationIndex].getUploadStore().size() > 0){
+            upload_location = locations[locationIndex].getUploadStore();
+        }
         // check allowed methods !
         if(!checkAllowedMethods(locations[locationIndex], request.getRequestMethod())){
             this->body = "<html><body style='text-align: center'><h1>405 Method Not Allowed</h1></body></html>";
@@ -128,10 +141,17 @@ Handler::Handler(Client client){
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
     
-    if((method == "POST" || method == "DELETE") && !isPHPScript(path)){
+    if((method == "POST" || method == "DELETE") && !isPHPScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
-        std::string filepath = client.getServer().getUploadStore() + request.getRequestPath();
+        std::string filepath = upload_location + getFilenameFromRequestPath(request.getRequestPath());
+        if(filepath.length() == 0){
+            this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
+            this->type = "text/html";
+            this->size = 91;
+            this->status = 404;
+            return;
+        }
         if(method == "POST"){
             status = write_file(filepath, request.getRequestBody());
         }else{
@@ -140,14 +160,14 @@ Handler::Handler(Client client){
         // check if any of the methods above failed ! 
         if(!status){
             this->status = 500;
-            this->body = "";
-            this->type = "";
-            this->size = 0;
+            this->body = "<html><body style='text-align:center'><h1>500 Internal Server error</h1><h3>webserv</h3></body></html>";
+            this->type = "text/html";
+            this->size = 103;
         }else if(status){
             this->status = 201;
-            this->body = "";
-            this->type = "";
-            this->size = 0;
+            this->body = "<html><body style='text-align:center'><h1>201 Created</h1><h3>webserv</h3></body></html>";
+            this->type = "text/html";
+            this->size = 89;
         }
     }
     else if((!fileExists(path) && !directoryExits(path)) || (isDirectory(path) && !this->client.getServer().getAutoIndex())){

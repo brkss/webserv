@@ -17,6 +17,7 @@ int write_file(std::string path, std::string content){
 int delete_file(std::string path){
 
 	int status = ::remove(path.c_str());
+	
 	if (status != 0) 
     	return 0;
 
