@@ -64,6 +64,11 @@ socklen_t  *Client::getAddressLen()   {
 }
 
 void 	Client::saveRequestData(size_t nb_bytes) {
+	
+	size_t max_body_size = this->_server.getClientMaxBodySize();
+	if (this->_request.getRequestData().size() + nb_bytes > max_body_size)
+		throw(RequestError(ErrorNumbers::_413_PAYLOAD_TOO_LARGE));
+
 	std::string str_bytes(this->_buffer, nb_bytes);
 	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
 }

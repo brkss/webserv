@@ -4,11 +4,12 @@
 #include <netinet/in.h> // sockaddr_in
 #include "HttpRequest.hpp"
 #include "../config/ConfigParse/inc/server.hpp"
+#include "ErrorHandler.hpp"
 #include <time.h>
 #include <stdlib.h>
 
 #ifndef BUFFER_SIZE 
-# define BUFFER_SIZE   0xFF
+# define BUFFER_SIZE   0xFFF
 #endif 
 
 class Client {

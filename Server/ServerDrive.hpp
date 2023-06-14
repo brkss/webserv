@@ -11,7 +11,7 @@
 class   ServerDrive {
 
 	private:
-		const Parse&				_config;
+		Parse&				_config;
 		const std::vector<Server>&	_virtual_servers;
 
 		fd_set						_readset;
@@ -30,7 +30,7 @@ class   ServerDrive {
 
 	public:
 		typedef std::map<int, Client>::iterator clinetiterator_t ;
-		ServerDrive(const Parse &conf);
+		ServerDrive(Parse &conf);
 		ServerDrive(const ServerDrive &server);
 		~ServerDrive();
 
@@ -55,6 +55,7 @@ class   ServerDrive {
 		bool getBody(HttpRequest &client_request);
 		bool ClientError(int fd);
 		const Server &getServerByName(const std::string &host_name);
+		const Server &getServerByFd(int fd);
 
 };
 

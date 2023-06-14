@@ -83,7 +83,6 @@ void Server::validateUplodeStore(const Server &scop) const {
 		const std::string error = "[Config Error][Server: " + scop.getServerName() + "]" + "[Upload Dir] : " +  path_name ;
 		throw(std::invalid_argument(error));
 	}
-
 }
 
 const std::string			&Server::getAddress() const {
@@ -114,9 +113,14 @@ const std::string&			Server::getUploadStore() const {
 		return (this->_upload_store);
 }
 
+int Server::getSocketFd() const {
+	return (this->_server_sockfd);
+}
+
 void	Server::setAddress(const std::string &address) {
 	this->_address = address;
 }
+
 void 	Server::setPort(short server_port) {
 	this->_port =  server_port;
 }
@@ -139,6 +143,10 @@ void 	Server::setReturnURL(const std::string &url) {
 void 	Server::setUploadStore(const std::string &path) {	
 	this->_allow_upload  = true;
 	this->_upload_store = path;
+}
+
+void	 Server::setSocketFd(int fd) {
+	this->_server_sockfd = fd;
 }
 
 bool	Server::allowUpload() const {

@@ -470,6 +470,6 @@ void Parse::ValidateConfigRequirements() {
 				throw(ErrorLog("Ivalid Config File. QUITTING ..."));
 }
 
-const std::vector<Server> &Parse::getVirtualServers() const {
+ std::vector<Server> &Parse::getVirtualServers()  {
 	return (this->_servers);
 }
