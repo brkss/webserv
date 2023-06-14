@@ -143,7 +143,7 @@ void	Parse::parseServerName(Server &conf)
 void Parse::parseUploadStore(Server &server) {
 	nextToken();
 	expectToken(Token::VALUE);
-	server.SetUploadStore(currToken().getTokenValue());
+	server.setUploadStore(currToken().getTokenValue());
 	nextToken();
 	expectToken(Token::COLON);
 }
@@ -276,7 +276,7 @@ void Parse::parseServer() {
 		nextToken();
 		curr_token = currToken();
 	}
-	expectToken(Token::RBRACE);
+	expectToken(Token::RBRACE);	
 	addServer(server_conf);
 }
 
@@ -459,7 +459,6 @@ void Parse::parseFile(const std::string &file_name){
 	addToken(token);
 	parseHttpBlock();
 	ValidateConfigRequirements();
-	//validateEveryFilePath();
 }
 
 void Parse::ValidateConfigRequirements() {
@@ -467,11 +466,6 @@ void Parse::ValidateConfigRequirements() {
 	for (cv_iterator server = this->_servers.begin(); server != this->_servers.end(); server++)
 		 if (!server->isValidServer()) 
 				throw(ErrorLog("Ivalid Config File. QUITTING ..."));
-}
-
-void validateEveryFilePath() {
-	
-
 }
 
 const std::vector<Server> &Parse::getVirtualServers() const {

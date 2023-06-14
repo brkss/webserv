@@ -7,7 +7,8 @@ Server::Server() :	Http(),
 					_address(DefaulConfig::ADDRESS),
 					_port(DefaulConfig::PORT),
 					_server_name(DefaulConfig::SERVER_NAME),
-					_upload_store(DefaulConfig::UPLOAD_STORE) {
+					_upload_store(DefaulConfig::UPLOAD_STORE),
+					_allow_upload(DefaulConfig::ALLOW_UPLOADS) {
 
 }
 
@@ -19,7 +20,8 @@ Server::Server(const Http& http) :Http(http),
 					_address(DefaulConfig::ADDRESS),
 					_port(DefaulConfig::PORT),
 					_server_name(DefaulConfig::SERVER_NAME),
-					_upload_store(DefaulConfig::UPLOAD_STORE) {
+					_upload_store(DefaulConfig::UPLOAD_STORE),
+					_allow_upload(DefaulConfig::ALLOW_UPLOADS) {
 		
 	this->_error_pages.clear(); // Error  pages are never inherited 
 }
@@ -36,6 +38,7 @@ Server &Server::operator=(const Server & server) {
 		this->_return_URL = server._return_URL;
 		this->_return_code = server._return_code;
 		this->_upload_store =  server._upload_store;
+		this->_allow_upload = server._allow_upload;
 	}
 	return (*this);
 }
@@ -59,7 +62,28 @@ bool	Server::isValidServer() const {
 		std::cerr << "[listen port] __REQUIRED" << std::endl;
 		ret = false;
 	}
+	if (this->_root == "__REQUIRED") {
+		std::cerr << "[" << this->_server_name << "]" <<  "[Webroot] __REQUIRED" << std::endl;
+		ret = false;
+	}
+	if (this->allowUpload())
+		validateUplodeStore(*this);
+	for (std::vector<Location>::const_iterator cit = this->_locations.begin(); cit != this->_locations.end(); cit++)
+		if (cit->allowUpload())
+			validateUplodeStore(*cit);
 	return (ret);
+}
+
+void Server::validateUplodeStore(const Server &scop) const {
+	if (scop.getUploadStore().empty())
+		return ;
+	const std::string &path_name = scop.getRoot() + scop.getUploadStore();
+	if (!path_name.empty() and access(path_name.c_str(), F_OK | W_OK) ){ 
+		perror(NULL);
+		const std::string error = "[Config Error][Server: " + scop.getServerName() + "]" + "[Upload Dir] : " +  path_name ;
+		throw(std::invalid_argument(error));
+	}
+
 }
 
 const std::string			&Server::getAddress() const {
@@ -112,6 +136,12 @@ void 	Server::setReturnURL(const std::string &url) {
 	this->_return_URL = url;
 }
 
-void 	Server::SetUploadStore(const std::string &path) {
+void 	Server::setUploadStore(const std::string &path) {	
+	this->_upload_store = true;
 	this->_upload_store = path;
+}
+
+bool	Server::allowUpload() const {
+
+	return (this->_allow_upload);
 }

@@ -17,6 +17,7 @@ class DefaulConfig
 		static const short		 PORT;
 	   	static const std::string SERVER_NAME;
 		static const std::string UPLOAD_STORE;
+		static const bool		ALLOW_UPLOADS;
 };
 
 #endif /* DEFAULTCONFIG_HPP */

@@ -2,6 +2,7 @@
 # define SERVER_HPP 
 
 #include "http.hpp"
+#include <unistd.h>
 #include <vector> 
 
 class Location;
@@ -15,6 +16,7 @@ class Server : public Http
 		short						_port;
 		std::string 				_server_name;
 		std::string					_upload_store;
+		bool						_allow_upload;
 		std::vector<Location>		_locations;
 			
 
@@ -43,8 +45,10 @@ class Server : public Http
 		void 						setReturnURL(const std::string &url);
 		void						addLocation(const Location &location);
 		bool						isValidServer() const;
-		void 						SetUploadStore(const std::string &path);
+		void 						setUploadStore(const std::string &path);
 		const std::string&			getUploadStore() const;
+		virtual void 				validateUplodeStore(const Server &scop) const;
+		bool						allowUpload() const;
 
 };
 
