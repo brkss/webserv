@@ -272,27 +272,31 @@ bool ServerDrive::ClientError(int fd) {
 	return (false);
 }
 
-void PrepareResponse(Client &client)  {
-	Handler	handler(client);
-	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus());
-
-	std::string resp = response.generateResponse();
+char *moveToHeap(const std::string &resp) {
 	const char *r = resp.c_str();
 	char *resp_copy = new char [resp.size()];
-
 	memmove(resp_copy, r, resp.size());
+	return (resp_copy);
+}
+
+void PrepareResponse(Client &client)  {
+
+	/*  error pages sould be checked and this is already crap
+	if (ClientError(client.getConnectionFd())) {
+		std::string	 message = Response::generateStatusMessage();
+		std::string body  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
+		Response response(body, "text/html", body.szie(), status_code);
+		std::string resp = response.generateResponse();
+		char * resp_copy = moveToHeap(resp);
+		client.setResponse(resp_copy, resp.size());
+		return;
+	}
+	*/
+	Handler	handler(client);
+	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus());
+	std::string resp = response.generateResponse();
+	char * resp_copy = moveToHeap(resp);
 	client.setResponse(resp_copy, resp.size());
-	//HttpRequest req = client.getRequest();
-	//Server server = client.getServer();
-	//req.setRequestPath( + req.getRequestPath());
-	//std::cout << "path : " << req.getRequestPath() << "\n";
-	//std::cout << "\n-------------------- RESPONSE BODY -------------------------\n";
-	//std::cout << handler.getBody();
-	//#if DEBUG
-	////std::cout << "\n----------------------------------------------\n";
-	////std::cout << resp << std::endl;
-	////std::cout << "\n----------------------------------------------end\n";
-	//#endif
 }
 
 void ServerDrive::SendResponse(Client &client) {

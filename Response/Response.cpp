@@ -80,6 +80,19 @@ std::string Response::generateStatusMessage(int status){
 		return "Service Unavailable"; 
 	else if (status == 405)
 		return "Method Not Allowed";
-	else
-		return "OK";
+	switch  (status) { 
+		case (400): return   "Bad request";
+		case (408): return   "Request timeout";
+		case (411): return   "Length required";
+		case (414): return   "Uri_too long";
+		case (413): return   "Payload too large";
+		case (431): return   "Request header fields too large";
+		case (500): return   "Internal server error";
+		case (501): return   "No timplemented";
+		case (505): return   "Http version not supported";
+		default:
+			return "OK";
+	}
+
+
 }
