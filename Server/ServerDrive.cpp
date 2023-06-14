@@ -10,7 +10,6 @@ const std::string ServerDrive::HEADER_DELIM = "\r\n\r\n";
 const std::string ServerDrive::CRLF			= "\r\n";
 
 void send_success(int fd) {
-
 	const char * resp =  "HTTP/1.1 200 OK\nDate: Mon, 27 Jul 2009 12:28:53 GMT\nServer: Apache/2.2.14 (Win32)\nLast-Modified: Wed, 22 Jul 2009 19:15:56 GMT\nContent-Length: 52\nContent-Type: text/html\nConnection: Closed\n\n<html>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>\n";
 
 	if (send(fd, resp, strlen(resp), 0) != (ssize_t ) strlen(resp))
@@ -308,27 +307,23 @@ void ServerDrive::SendResponse(Client &client) {
 	size_t		size_to_send = response_size;
 	bool		close_connection = true;
 	
-	//std::cout << "number of bytes written not yet sent by the protocol : " << Network::getFullSpaceSize(client_fd) << std::endl;
 	if (response_size > socket_buffer_size) {
 		size_to_send = socket_buffer_size ;
 		client.setResponse(response + size_to_send, response_size - size_to_send);
 		close_connection = false;
 	}
-#if DEBUG
-	std::cerr << "response size : " << response_size  << std::endl;
-	std::cerr << "size to send : " << size_to_send << std::endl;
-	std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
-#endif 
 	if (int ss = send(client_fd, response, size_to_send, 0) != (ssize_t ) size_to_send) {
 			close_connection = true;
 		perror(NULL);
-		//close_connection = true;
+		#if DEBUG
+		std::cerr << "response size : " << response_size  << std::endl;
+		std::cerr << "size to send : " << size_to_send << std::endl;
+		std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
 		std::cerr << "------: size sent : " << ss << "  ----- very bad  ? ----------"  << std::endl;
+		#endif 
 		client.setResponse(response + ss , response_size - ss);
-		//throw(ErrorLog("Send error_"));
 	}
 	ConsoleLog::Debug("Response Portion  Sent!" );
-	//sleep(2);
 	if (close_connection) {
 		std::string debug_log = "Response Sent!. Closing fd :...";
 		debug_log = debug_log +  std::to_string(client_fd);
