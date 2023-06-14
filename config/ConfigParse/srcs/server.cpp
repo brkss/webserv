@@ -137,7 +137,7 @@ void 	Server::setReturnURL(const std::string &url) {
 }
 
 void 	Server::setUploadStore(const std::string &path) {	
-	this->_upload_store = true;
+	this->_allow_upload  = true;
 	this->_upload_store = path;
 }
 

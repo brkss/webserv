@@ -35,6 +35,7 @@ void Parse::print_config() {
 		std::cout << "-----:server:" << "Port: " << (*it).getPort() << std::endl;
 		std::cout << "-----:server:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
 		std::cout << "-----:server:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
+		std::cout << "-----:server:" << "Upload allow : " << (*it).allowUpload() << std::endl;
 		std::cout << "-----:server:" << "UploadStore: " << (*it).getUploadStore() << std::endl;
 		for (cl_iterator lit = it->getLocations().begin(); lit != it->getLocations().end(); lit++)
 		{
@@ -51,6 +52,7 @@ void Parse::print_config() {
 			std::cout << "-----------:Location:" << "ReturnCode: " << (*lit).getReturnCode() << std::endl;
 			std::cout << "-----------:Location:" << "ReturnURL: " << (*lit).getReturnURL() << std::endl;
 			std::cout << "-----------:Location::" << "UploadStore: " << (*it).getUploadStore() << std::endl;
+			std::cout << "-----------:Location::" << "Upload Alow ? : " << (*it).allowUpload() << std::endl;
 			std::cout << "-----------:Allowed Methods: " ;
 			for (std::vector<std::string>::const_iterator m = lit->getAllowedMethods().begin();
 				m != lit->getAllowedMethods().end(); m++) {
