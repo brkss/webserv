@@ -81,16 +81,18 @@ ServerDrive::~ServerDrive() {
 }
 
 void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
-	ConsoleLog::Debug("Selecting socket fds ");
+	
 	struct timeval timout;
 	int		select_stat;
 
 	timout.tv_sec = 4;
 	timout.tv_usec = 0;
+#if DEBUG
+	ConsoleLog::Debug("Selecting socket fds ");
+#endif 
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, NULL);//&timout);
 	if  (select_stat < 0)  {
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
-		//throw(ErrorLog("Error: Select failed"));
 	}
 }
 
@@ -118,8 +120,8 @@ void ServerDrive::readRequest(int fd) {
 	bzero(buffer, client_buffer_size);
 	bytes_recieved = read(client.getConnectionFd(), buffer, client_buffer_size - 1);
 	client.setRequestTimout(time(NULL));
-	if (bytes_recieved <= 0) {	// error on while reading 
-		if (bytes_recieved == 0) { // Client closed connection
+	if (bytes_recieved <= 0) {			// error on while reading 
+		if (bytes_recieved == 0) { 		// Client closed connection
 			Network::closeConnection(fd);
 			CloseConnection(fd);
 			ConsoleLog::Warning("EOF recieved closing...");
@@ -127,13 +129,12 @@ void ServerDrive::readRequest(int fd) {
 		}
 		else 
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
-		//throw(ErrorLog("Error: unable to read form sock"));
 	}
 	client.saveRequestData(bytes_recieved); // PUSH BUFFER TO REQUEST MASTER BUFFER 
 	CheckRequestStatus(client);
-#if DEBUG
+	#if DEBUG
 	ConsoleLog::Warning("Receiving from Client: " + std::to_string(fd));
-#endif 
+	#endif 
 }
 
 void ServerDrive::getHeader(HttpRequest &request)  {
