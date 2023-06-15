@@ -20,9 +20,9 @@ class CGI {
 		
 		CGI(Client client);
 		
-		void handlePhpCGI();
+		void handlePhpCGI(std::string path);
 		std::map<std::string, std::string> parse_cgi_response(std::string response);
-		char **generateCGIEnvironement();
+		char **generateCGIEnvironement(std::string path);
 
 		std::string getResponse();
 		int getStatus();

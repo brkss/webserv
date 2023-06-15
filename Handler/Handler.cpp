@@ -182,7 +182,7 @@ Handler::Handler(Client client){
             path = rootPath + client.getServer().getIndex();
             std::cout << "---------------------------\n";
             std::cout << path;
-            std::cout << "---------------------------\n";
+            std::cout << "\n---------------------------\n";
         }else {
              std::string autoIndexResponse = ListFile(path);
             this->body = autoIndexResponse;
@@ -196,7 +196,7 @@ Handler::Handler(Client client){
     if(isPHPScript(path)){
         // handle cgi !
         CGI cgi(client);
-        cgi.handlePhpCGI();
+        cgi.handlePhpCGI(path);
         std::string response = cgi.getResponse();
         std::map <std::string, std::string> parsed_cgi_response = cgi.parse_cgi_response(response);
        
