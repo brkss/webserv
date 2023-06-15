@@ -117,7 +117,7 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["PATH_INFO"] = path;
 	headers["PATH_TRANSLATED"] = path;
 	headers["SCRIPT_NAME"] = path;
-	headers["QUERY_STRING"] = "";
+	headers["QUERY_STRING"] = path;
 	headers["REMOTE_HOST"] = req_headers["User-Agent"];
 	headers["REMOTE_ADDR"] = "";
 	headers["AUTH_TYPE"] = "";
