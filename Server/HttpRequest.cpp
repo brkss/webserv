@@ -226,6 +226,7 @@ void	HttpRequest::setRequestPath(const std::string &path) {
 	if (pos != std::string::npos) {
 		this->_request_path = path.substr(0, pos);
 	//this->_request_path = "/tmp" + path;
+	}
 }
 
 const std::string &HttpRequest::getQueryString() const  {
