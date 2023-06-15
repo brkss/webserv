@@ -11,10 +11,10 @@ CGI::CGI(Client client){
 	this->client = client;
 }
 
-void CGI::handlePhpCGI(){
+void CGI::handlePhpCGI(std::string path){
     
 	HttpRequest request = this->client.getRequest();
-	char **env = generateCGIEnvironement();
+	char **env = generateCGIEnvironement(path);
 
     FILE *fileIN = ::tmpfile();
     FILE *fileOUT = ::tmpfile();
@@ -28,7 +28,7 @@ void CGI::handlePhpCGI(){
     write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
     lseek(fdIN, 0, SEEK_SET);
 
-    std::cout << " path : " << this->client.getServer().getRoot() << "\n";
+    std::cout << " path : " << path << "\n";
     //std::cout << "request path ::::: " << request.getRequestPath().c_str() << "\n";
 
     pid_t pid = fork();
@@ -49,10 +49,6 @@ void CGI::handlePhpCGI(){
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);
-        
-        // remove this !!!!!!!
-        std::string path = this->client.getServer().getRoot() + request.getRequestPath();
-        // -------------------
         
         execve(path.c_str(), nullptr, env);
         
@@ -97,7 +93,7 @@ void CGI::handlePhpCGI(){
 }
 
 
-char **CGI::generateCGIEnvironement(){
+char **CGI::generateCGIEnvironement(std::string path){
 	
 	Server server = this->client.getServer();
 	HttpRequest request = this->client.getRequest();
@@ -118,10 +114,10 @@ char **CGI::generateCGIEnvironement(){
 	headers["SERVER_PROTOCOL"] = "HTTP/1.1";
 	headers["SERVER_PORT"] = std::to_string(server.getPort());
 	headers["REQUEST_METHOD"] = request.getRequestMethod();
-	headers["PATH_INFO"] = this->client.getServer().getRoot() + request.getRequestPath();
-	headers["PATH_TRANSLATED"] = this->client.getServer().getRoot() + request.getRequestPath();
-	headers["SCRIPT_NAME"] = this->client.getServer().getRoot() + request.getRequestPath();
-	headers["QUERY_STRING"] = "";
+	headers["PATH_INFO"] = path;
+	headers["PATH_TRANSLATED"] = path;
+	headers["SCRIPT_NAME"] = path;
+	headers["QUERY_STRING"] = path;
 	headers["REMOTE_HOST"] = req_headers["User-Agent"];
 	headers["REMOTE_ADDR"] = "";
 	headers["AUTH_TYPE"] = "";

@@ -169,22 +169,34 @@ Handler::Handler(Client client){
             this->type = "text/html";
             this->size = 89;
         }
+        return;
     }
-    else if((!fileExists(path) && !directoryExits(path)) || (isDirectory(path) && !this->client.getServer().getAutoIndex())){
+    else if(!fileExists(path) && !directoryExits(path)){
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
         this->status = 404;
+        return;
     }else if (isDirectory(path)){
-        std::string autoIndexResponse = ListFile(path);
-        this->body = autoIndexResponse;
-        this->status = 200;
-        this->type = "text/html";
-        this->size = autoIndexResponse.size();
-    }else if(isPHPScript(path)){
+        if(!client.getServer().getAutoIndex()){
+            path = rootPath + client.getServer().getIndex();
+            std::cout << "---------------------------\n";
+            std::cout << path;
+            std::cout << "\n---------------------------\n";
+        }else {
+             std::string autoIndexResponse = ListFile(path);
+            this->body = autoIndexResponse;
+            this->status = 200;
+            this->type = "text/html";
+            this->size = autoIndexResponse.size();
+            return;
+        }
+    }
+    
+    if(isPHPScript(path)){
         // handle cgi !
         CGI cgi(client);
-        cgi.handlePhpCGI();
+        cgi.handlePhpCGI(path);
         std::string response = cgi.getResponse();
         std::map <std::string, std::string> parsed_cgi_response = cgi.parse_cgi_response(response);
        
