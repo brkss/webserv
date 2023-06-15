@@ -35,8 +35,8 @@ class HttpRequest {
 		std::string							_http_version;
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
-		std::string							_request_body;
-		
+		std::string							_request_body; // request body is now on disk at fd -->
+		int									_data_file;	
 	public:
 		HttpRequest();
 		~HttpRequest();

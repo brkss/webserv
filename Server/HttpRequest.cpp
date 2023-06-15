@@ -9,7 +9,7 @@ const std::string 	HttpRequest::DELETE			= "DELETE";
 const size_t		HttpRequest::URI_MAX_LEN	= 2000; 
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
-							 _transfer_type(UNSET) {
+							 _transfer_type(UNSET),
 }
 
 HttpRequest::~HttpRequest() {
@@ -231,5 +231,7 @@ void	HttpRequest::setHttpVersion(const std::string &version) {
 }
 
 void 				HttpRequest::appendChunk(const std::string &chunk) {
+	// writting  data to disk
+	write(
 	this->_request_body = this->_request_body + chunk;
 }

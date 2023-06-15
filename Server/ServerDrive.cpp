@@ -26,14 +26,14 @@ ServerDrive::ServerDrive(Parse &conf): _config(conf),
 		{
 			sock_fd = Network::CreateSocket();
 			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
-			try {
+			//try {
 				Network::BindSocket(sock_fd, server->getPort(), server->getAddress() );
-			}
-			catch (const std::exception &e) {
-				close(sock_fd);
-				ConsoleLog::Warning("Server Address reused!. Using Virtual Host");
-				continue;
-			}
+			//}
+			//catch (const std::exception &e) {
+			//	close(sock_fd);
+			//	ConsoleLog::Warning("Server Address reused!. Using Virtual Host");
+			//	continue;
+			//}
 			Network::ListenOnSocket(sock_fd);
 			addSocketFd(sock_fd);
 			FD_SET(sock_fd, &(this->_listenset)); {
@@ -194,7 +194,7 @@ bool	ServerDrive::getBody(HttpRequest &request) {
 	bytes_left = content_length - request.getRequestBody().size();
 	if (bytes_left <= request_body.size()) {
 		request.appendChunk(request_body.substr(0, bytes_left));
-		assert(request.getRequestBody().size() ==  content_length);
+		assert(request.getRequestBody().size() == content_length);
 		return (true);
 	}
 	return (false);
@@ -227,6 +227,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 		#endif
 
+		return ;
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = client.getServer().getRoot() +  client.getServer().getUploadStore() + "/oupload"  + std::to_string(client.getConnectionFd());
 		std::ofstream ofs(out_file_name);
@@ -258,7 +259,6 @@ void ServerDrive::checkClientTimout(int fd) {
 
 	if (elapsed >= config_timeout) {
 		ConsoleLog::Warning("Connection Timout Closing ... ");
-		std::cout << "fd " << fd << std::endl;
 		throw(RequestError(ErrorNumbers::_408_REQUEST_TIMEOUT));
 	}
 }
