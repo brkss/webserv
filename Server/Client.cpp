@@ -73,7 +73,7 @@ void 	Client::saveRequestData(size_t nb_bytes) {
 	this->_request.addRequestData(str_bytes); // CAN'T RELY ON INPLICIT CONVERSION 
 }
 
-HttpRequest 			&Client::getRequest() {
+HttpRequest 	&Client::getRequest() {
 	return (this->_request);
 }
 

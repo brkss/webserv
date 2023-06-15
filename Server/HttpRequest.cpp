@@ -29,6 +29,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_transfer_type = request._transfer_type;
 	this->_request_data = request._request_data;
 	this->_request_body = request._request_body;
+	this->_query_string =  request._query_string;
 	return (*this);
 }
 
@@ -71,6 +72,7 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		}
 		setRequestMethod(values[0]);
 		setRequestPath(values[1]);
+		setQueryString(this->_request_path);
 		setHttpVersion(values[2]);
 }
 
@@ -215,12 +217,26 @@ void	HttpRequest::setRequestMethod(const std::string &method) {
 	validateMethod(method);
 	this->_request_method = method;
 }
+
 void	HttpRequest::setRequestPath(const std::string &path) {
 
 	validatePath(path);
 	this->_request_path =  path;
 	//this->_request_path = "/tmp" + path;
 }
+
+const std::string &HttpRequest::getQueryString() const  {
+	return (this->_query_string);
+}
+
+void HttpRequest::setQueryString(const std::string &url) {
+   std::size_t pos = url.find('?');
+   this->_query_string  = ""; 
+   if (pos != std::string::npos) {
+	   this->_query_string  = url.substr(pos + 1);
+   }
+}
+
 void 	HttpRequest::setTransferType(BODY_TRANSFER type) {
 		this->_transfer_type =  type;
 }
@@ -231,5 +247,7 @@ void	HttpRequest::setHttpVersion(const std::string &version) {
 }
 
 void 				HttpRequest::appendChunk(const std::string &chunk) {
+	// writting  data to disk
+	//write(
 	this->_request_body = this->_request_body + chunk;
 }
