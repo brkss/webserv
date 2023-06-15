@@ -9,11 +9,48 @@
 const std::string ServerDrive::HEADER_DELIM = "\r\n\r\n";
 const std::string ServerDrive::CRLF			= "\r\n";
 
-void send_success(int fd) {
-	const char * resp =  "HTTP/1.1 200 OK\nDate: Mon, 27 Jul 2009 12:28:53 GMT\nServer: Apache/2.2.14 (Win32)\nLast-Modified: Wed, 22 Jul 2009 19:15:56 GMT\nContent-Length: 52\nContent-Type: text/html\nConnection: Closed\n\n<html>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>\n";
+// Constructors 
+ServerDrive::ServerDrive(Parse &conf): _config(conf),
+											_virtual_servers(conf.getVirtualServers()),
+											_fd_max(0),
+											_client_timeout(5) {
 
-	if (send(fd, resp, strlen(resp), 0) != (ssize_t ) strlen(resp))
-		throw(ErrorLog("Send error"));
+		std::vector<Server>	&servers = this->_config.getVirtualServers(); 
+		const int 					true_ = 1;
+		int							sock_fd;
+
+		FD_ZERO(&(this->_readset));
+		FD_ZERO(&(this->_writeset));
+		FD_ZERO(&(this->_listenset));
+		for (Parse::v_iterator server = servers.begin(); server != servers.end(); server++)
+		{
+			sock_fd = Network::CreateSocket();
+			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
+			try {
+				Network::BindSocket(sock_fd, server->getPort(), server->getAddress() );
+			}
+			catch (const std::exception &e) {
+				close(sock_fd);
+				ConsoleLog::Warning("Server Address reused!. Using Virtual Host");
+				continue;
+			}
+			Network::ListenOnSocket(sock_fd);
+			addSocketFd(sock_fd);
+			FD_SET(sock_fd, &(this->_listenset)); {
+				const std::string ip_port = server->getAddress() + ":" +  std::to_string(server->getPort());
+				ConsoleLog::Specs("Server Listening on :" + ip_port) ;
+			}
+			server->setSocketFd(sock_fd);
+		}
+}
+
+ServerDrive::ServerDrive(const ServerDrive &server) :_config(server._config),
+													 _virtual_servers(server._virtual_servers){
+}
+
+ServerDrive::~ServerDrive() {
+	for(std::vector<int>::iterator it = _server_fds.begin(); it != _server_fds.end(); it++)
+		close(*it);
 }
 
 void sendErrorMessage(int fd, short error) {
@@ -22,15 +59,14 @@ void sendErrorMessage(int fd, short error) {
 
 	std::string templat; 
 	status_message[400] = "400 Bad request",
-		status_message[408] = "408 Request timeout",
-		status_message[411] = "411 Length required",
-		status_message[414] = "414 Uri_too long",
-		status_message[413] = "413 Payload too large",
-		status_message[431] = "431 Request header fields too large",
-		status_message[500] = "500 Internal server error",
-		status_message[501] = "501 No timplemented",
-		status_message[505] = "505 Http version not supported";
-
+	status_message[408] = "408 Request timeout",
+	status_message[411] = "411 Length required",
+	status_message[414] = "414 Uri_too long",
+	status_message[413] = "413 Payload too large",
+	status_message[431] = "431 Request header fields too large",
+	status_message[500] = "500 Internal server error",
+	status_message[501] = "501 No timplemented",
+	status_message[505] = "505 Http version not supported";
 	message = status_message[error];
 	std::string resp = "HTTP/1.1 " +  message +  "\r\n";
 	templat  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
@@ -43,43 +79,6 @@ void sendErrorMessage(int fd, short error) {
 	}
 }
 
-ServerDrive::ServerDrive(const Parse &conf): _config(conf),
-	_virtual_servers(conf.getVirtualServers()) ,
-	_fd_max(0) {
-
-		this->_client_timeout = 5; // (in seconds) should be pulled from config;
-		const std::vector<Server>	&servers = this->_config.getVirtualServers(); 
-		const int 					true_ = 1;
-		int							sock_fd;
-
-		FD_ZERO(&(this->_readset));
-		FD_ZERO(&(this->_writeset));
-		FD_ZERO(&(this->_listenset));
-		for (Parse::cv_iterator cit = servers.begin(); cit != servers.end(); cit++)
-		{
-			sock_fd = Network::CreateSocket();
-			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
-			Network::BindSocket(sock_fd, cit->getPort(), cit->getAddress() );
-			Network::ListenOnSocket(sock_fd);
-			addSocketFd(sock_fd);
-			FD_SET(sock_fd, &(this->_listenset));
-			{
-				const std::string ip_port = cit->getAddress() + ":" +  std::to_string(cit->getPort());
-				ConsoleLog::Specs("Server Listening on :" + ip_port) ;
-			}
-		}
-	}
-
-ServerDrive::ServerDrive(const ServerDrive &server) : _config(server._config),
-	_virtual_servers(server._virtual_servers){
-		(void) server;
-	}
-
-ServerDrive::~ServerDrive() {
-	for(std::vector<int>::iterator it = _server_fds.begin(); it != _server_fds.end(); it++)
-		close(*it);
-}
-
 void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	
 	struct timeval timout;
@@ -87,9 +86,10 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 
 	timout.tv_sec = 4;
 	timout.tv_usec = 0;
-#if DEBUG
+
+	#if DEBUG
 	ConsoleLog::Debug("Selecting socket fds ");
-#endif 
+	#endif 
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, NULL);//&timout);
 	if  (select_stat < 0)  {
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
@@ -101,7 +101,9 @@ void ServerDrive::addClient(Client client) {
 	typedef std::map<int, Client>::value_type pair_t;
 
 	int sock_fd = client.getConnectionFd();
+	int server_fd = client.getServerFd();
 	pair_t pair(sock_fd, client);
+	client.setServer(getServerByFd(server_fd));
 	this->_clients.insert(pair);
 	addSocketFd(sock_fd);
 }
@@ -165,7 +167,6 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	hex_sting = request_body.substr(0, size_pos);
 	if (!Utils::is_hex(hex_sting))
 		throw (RequestError(ErrorNumbers::_400_BAD_REQUEST));
-	//throw (ErrorLog(ErrorMessage::ERROR_400));
 
 	chunk_size = Utils::hexStringToSizeT(hex_sting);
 	if (chunk_size > (request_body.size() - (hex_sting.size() + CRLF.size() )))
@@ -220,20 +221,22 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 	}
 	if (client_request.getRequestState() == HttpRequest::REQUEST_READY)  {
 		FD_SET(client.getConnectionFd() , &(this->_writeset)); 
-		const Server & client_server = getServerByName(client_request.getHeaderValue("Host"));
+		const Server & client_server = getServerByName(client_request.getHeaderValue("Host")); // Supports virtual hosting 
 		client.setServer(client_server);
-#if DEBUG 
+		#if DEBUG 
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
-#endif
-		return ;
+		#endif
 
 		// TESTING DATA TRANSFER
-		const std::string out_file_name = "./tests/out_file" + std::to_string(client.getConnectionFd());
+		const std::string out_file_name = client.getServer().getRoot() +  client.getServer().getUploadStore() + "/oupload"  + std::to_string(client.getConnectionFd());
 		std::ofstream ofs(out_file_name);
 		if (ofs.is_open())
 			ofs << client.getRequest().getRequestBody() ;
-		else
+		else {
+			std::cout << "upload dir" << out_file_name << std::endl;
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
+		}
+		ConsoleLog::Specs("Data uploaded to :" + out_file_name);
 		// should add log error 
 	}
 }
@@ -265,8 +268,8 @@ bool ServerDrive::ClientError(int fd) {
 	short 	error				= client.getRequestStatus();
 	if (error != 0) {
 		sendErrorMessage(fd, error);
-		ConsoleLog::Debug("Error Response Sent!. Closing ..." );
 		CloseConnection(client.getConnectionFd());
+		ConsoleLog::Debug("Client Error Response Sent!. Closing fd : " + std::to_string(fd));
 		return (true);
 	}
 	return (false);
@@ -317,18 +320,19 @@ void ServerDrive::SendResponse(Client &client) {
 			close_connection = true;
 		perror(NULL);
 		#if DEBUG
-		std::cerr << "response size : " << response_size  << std::endl;
-		std::cerr << "size to send : " << size_to_send << std::endl;
-		std::cerr << "socket buffer size : " << socket_buffer_size << std::endl;
-		std::cerr << "------: size sent : " << ss << "  ----- very bad  ? ----------"  << std::endl;
+		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
 		client.setResponse(response + ss , response_size - ss);
 	}
+	#if DEBUG
 	ConsoleLog::Debug("Response Portion  Sent!" );
+	#endif 
 	if (close_connection) {
+		#if DEBUG
 		std::string debug_log = "Response Sent!. Closing fd :...";
 		debug_log = debug_log +  std::to_string(client_fd);
 		ConsoleLog::Debug(debug_log);
+		#endif 
 		CloseConnection(client_fd);
 	}
 }
@@ -339,35 +343,33 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-			if (FD_ISSET(fd, &write_copy) and !ClientError(fd)) {					// response 
-				//FD_CLR(fd, &(this->_readset));
+			if (FD_ISSET(fd, &write_copy) && not ClientError(fd)) {					// response 
 				Client &client = getClient(fd);
 				if (client.getResponseSize() == 0)
 					PrepareResponse(client);
-			#if DEBUG
+				#if DEBUG
 				ConsoleLog::Debug("Sending response ...");
-			#endif 
+				#endif 
 				SendResponse(client);
 			}
 			else if (FD_ISSET(fd, &read_copy)) {
-				if (FD_ISSET(fd, &this->_listenset))  {
+				if (FD_ISSET(fd, &this->_listenset)) 
 					addClient(Network::acceptConnection(fd));	// new connection 
-				}
-				else {											// read request 
+				else 											// read request 
 					readRequest(fd);
-				}
 			}
-			else if (!FD_ISSET(fd, &this->_listenset) && FD_ISSET(fd, &(this->_readset)) && !FD_ISSET(fd, &this->_writeset)) // CLIENT SHOULD BE CHECKED FOR TIMEOUT
+			else if (!FD_ISSET(fd, &this->_listenset) 
+					&& FD_ISSET(fd, &(this->_readset)) 
+					&& !FD_ISSET(fd, &this->_writeset)) // CLIENT SHOULD BE CHECKED FOR TIMEOUT
 				checkClientTimout(fd);	
 
 		} catch (const RequestError &error)  {
-			FD_CLR(fd, &(this->_listenset));
+			#if DEBUG
+			ConsoleLog::Error("Request Error: status code : " + std::to_string(error.getErrorNumber()));
+			#endif
+			FD_CLR(fd, &(this->_readset));
 			FD_SET(fd, &this->_writeset);		// select before response
 			getClient(fd).setRequestStatus(error.getErrorNumber());
-
-#if DEBUG
-			std::cout << "Error: " << error.getErrorNumber() << std::endl;
-#endif
 		}
 	}
 }
@@ -400,6 +402,16 @@ const Server &ServerDrive::getServerByName(const std::string &host_name) {
 	for (cv_iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++) {
 		if (it->getServerName() == host_name) 
 			return (*it);
+	}
+	return (*this->_virtual_servers.begin());
+}
+
+const Server &ServerDrive::getServerByFd(int fd) {
+	typedef std::vector<Server>::const_iterator cv_iterator;
+
+	for (cv_iterator server = this->_virtual_servers.begin(); server != this->_virtual_servers.end(); server++) {
+		if (server->getSocketFd() == fd) 
+			return (*server);
 	}
 	return (*this->_virtual_servers.begin());
 }

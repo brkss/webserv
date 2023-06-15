@@ -17,6 +17,7 @@ class  Parse
 		std::vector<Token>	_tokens;
 	public:
 		typedef std::vector<Server>::const_iterator cv_iterator;
+		typedef std::vector<Server>::iterator  v_iterator;
 		
 	public:
 		Parse();
@@ -55,7 +56,7 @@ class  Parse
 
 		void addServer(const Server &server);
 		
-		const std::vector<Server> &getVirtualServers() const;
+		std::vector<Server> &getVirtualServers();
 };
 
 

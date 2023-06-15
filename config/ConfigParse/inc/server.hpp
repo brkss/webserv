@@ -18,6 +18,7 @@ class Server : public Http
 		std::string					_upload_store;
 		bool						_allow_upload;
 		std::vector<Location>		_locations;
+		int	 						_server_sockfd; // gets assigned binding socket
 			
 
 	protected:
@@ -38,6 +39,7 @@ class Server : public Http
 		const std::vector<Location> &getLocations() const;
 		const std::string			&getReturnURL() const ;
 		const short					&getReturnCode() const ;
+		int 						getSocketFd() const;
 		void						setAddress(const std::string &address);
 		void 						setPort(short server_port);
 		void 						setServerName(const std::string &server_name);
@@ -49,6 +51,8 @@ class Server : public Http
 		const std::string&			getUploadStore() const;
 		virtual void 				validateUplodeStore(const Server &scop) const;
 		bool						allowUpload() const;
+		void	 					setSocketFd(int fd);
+				
 
 };
 
