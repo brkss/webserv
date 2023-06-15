@@ -72,7 +72,7 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		}
 		setRequestMethod(values[0]);
 		setRequestPath(values[1]);
-		setQueryString(this->_request_path);
+		setQueryString(values[1]);
 		setHttpVersion(values[2]);
 }
 

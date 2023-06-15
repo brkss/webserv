@@ -99,17 +99,6 @@ char **CGI::generateCGIEnvironement(std::string path){
 	HttpRequest request = this->client.getRequest();
 	std::map<std::string, std::string> req_headers = request.getHeaders();
 
-    /*
-    std::map<std::string, std::string>::iterator tmp_iter;
-	for(tmp_iter= req_headers.begin(); tmp_iter != req_headers.end(); ++tmp_iter){
-		std::string key = tmp_iter->first;
-		std::string val = tmp_iter->second;
-
-		std::string keyValue = key + "=" + val;
-        std::cout << keyValue << "\n";
-	}
-    */
-
 	std::map<std::string, std::string> headers;
 	headers["SERVER_PROTOCOL"] = "HTTP/1.1";
 	headers["SERVER_PORT"] = std::to_string(server.getPort());
@@ -117,7 +106,7 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["PATH_INFO"] = path;
 	headers["PATH_TRANSLATED"] = path;
 	headers["SCRIPT_NAME"] = path;
-	headers["QUERY_STRING"] = path;
+	headers["QUERY_STRING"] = request.getQueryString();
 	headers["REMOTE_HOST"] = req_headers["User-Agent"];
 	headers["REMOTE_ADDR"] = "";
 	headers["AUTH_TYPE"] = "";
@@ -127,6 +116,9 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["CONTENT_LENGTH"] = std::to_string(request.getRequestBody().size());
 	headers["REDIRECT_STATUS"] = "200";
 	
+    std::cout << "\n\n\n\n\nquery string : " << headers["QUERY_STRING"] << "/n--------------\n\n\n\n\n";
+
+
 	std::map<std::string, std::string>::iterator iter;
 	char **env = new char*[CGI_ENV_LENGTH + 1];
 	int i = 0;
