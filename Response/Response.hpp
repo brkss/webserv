@@ -17,6 +17,8 @@ class Response {
 	std::string status;
 	std::string status_message;
 
+	int fd;
+
 	std::string body;
 
 	public:
@@ -24,6 +26,7 @@ class Response {
 		std::string generateResponse();
 		std::string getContentLength();
 		std::string generateStatusMessage(int status);
+		int getFD();
 
 };
 
