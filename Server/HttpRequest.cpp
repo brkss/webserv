@@ -222,6 +222,9 @@ void	HttpRequest::setRequestPath(const std::string &path) {
 
 	validatePath(path);
 	this->_request_path =  path;
+	size_t pos = this->_request_path.find('?');
+	if (pos != std::string::npos) {
+		this->_request_path = path.substr(0, pos);
 	//this->_request_path = "/tmp" + path;
 }
 
