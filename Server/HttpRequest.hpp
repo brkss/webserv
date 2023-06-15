@@ -32,11 +32,13 @@ class HttpRequest {
 		BODY_TRANSFER 						_transfer_type;
 		std::string							_request_method;
 		std::string							_request_path;
+		std::string 						_query_string;
 		std::string							_http_version;
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
 		std::string							_request_body; // request body is now on disk at fd -->
-		int									_data_file;	
+		//int									_data_file;	
+
 	public:
 		HttpRequest();
 		~HttpRequest();
@@ -46,6 +48,7 @@ class HttpRequest {
 		const std::string 	&getRequestMethod() const ;
 		const std::string 	&getRequestPath()	const ;
 		const std::string 	&getHttpVersion()	const ;
+		const std::string	&getQueryString() const; // get's ?query=test
 		const std::string&	getHeaderValue(const std::string &header); // Get header value by name,
 																	   // returns "header" if not found 
 	
@@ -68,6 +71,7 @@ class HttpRequest {
 		void				setRequestPath(const std::string &path)	;
 		void 				setTransferType(BODY_TRANSFER type);
 		void				setRequestState(REQUEST_STATE state);
+		void				setQueryString(const std::string &url);
 
 		// #Dtata Trandfer Methods 
 		void 				appendChunk(const std::string &chunk);
