@@ -206,6 +206,7 @@ Handler::Handler(Client client){
         this->status = 200;
     }else{
 		this->body = this->getFileContent(path);
+        //this->fd = this->getFileFD(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
         this->status = 200;
@@ -294,4 +295,8 @@ std::string Handler::getType(){
 
 int Handler::getStatus(){
     return this->status;
+}
+
+int Handler::getFD(){
+    return this->fd;
 }

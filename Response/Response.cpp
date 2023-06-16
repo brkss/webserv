@@ -96,3 +96,8 @@ std::string Response::generateStatusMessage(int status){
 
 
 }
+
+
+int Response::getFD(){
+	return this->fd;
+}
