@@ -179,10 +179,12 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	}
 	std::string temp = request_body.substr(0, chunk_size);
 	assert(chunk_size == temp.size());
+	request.writeChunkTofile(temp);
 	request.appendChunk(temp);							// STORE CUNK IN BODY BUFFER
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 	return (true);
 }
+
 
 bool	ServerDrive::getBody(HttpRequest &request) {
 
@@ -193,6 +195,7 @@ bool	ServerDrive::getBody(HttpRequest &request) {
 
 	bytes_left = content_length - request.getRequestBody().size();
 	if (bytes_left <= request_body.size()) {
+		request.writeChunkTofile(request_body.substr(0, bytes_left));
 		request.appendChunk(request_body.substr(0, bytes_left));
 		assert(request.getRequestBody().size() == content_length);
 		return (true);
@@ -207,6 +210,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		getHeader(client_request);
 	}
 	if (client_request.getRequestState() == HttpRequest::BODY_STATE)  {
+		client_request.openDataFile();
 		if (client_request.getBodyTransferType() == HttpRequest::CHUNKED) {
 			while (!client_request.getRequestData().empty() && unchunkBody(client_request)) {
 			}
@@ -227,7 +231,6 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 		#endif
 
-		return ;
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = client.getServer().getRoot() +  client.getServer().getUploadStore() + "/oupload"  + std::to_string(client.getConnectionFd());
 		std::ofstream ofs(out_file_name);
@@ -415,3 +418,4 @@ const Server &ServerDrive::getServerByFd(int fd) {
 	}
 	return (*this->_virtual_servers.begin());
 }
+

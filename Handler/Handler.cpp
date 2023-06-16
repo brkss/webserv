@@ -221,7 +221,7 @@ std::string Handler::getFileContent(std::string filename){
     }
 
     file.seekg(0, std::ios::end);
-    int file_size = file.tellg();
+    size_t file_size = file.tellg();
 	std::cout << "file size " << file_size << std::endl;
     file.seekg(0, std::ios::beg);
 

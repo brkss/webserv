@@ -3,6 +3,8 @@
 
 #include <map>
 #include <iostream>
+#include <cstdio>
+#include <fstream>
 
 class HttpRequest {
 	
@@ -37,7 +39,8 @@ class HttpRequest {
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
 		std::string							_request_body; // request body is now on disk at fd -->
-		//int									_data_file;	
+		std::ofstream						_data_file;
+		std::string 						_data_filename;
 
 	public:
 		HttpRequest();
@@ -58,6 +61,7 @@ class HttpRequest {
 		int					getBodyTransferType()	const;
 		std::string			&getRequestBody();
 		std::string			&getRequestData();
+		std::ofstream 		&getDataFile();
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);
@@ -79,6 +83,9 @@ class HttpRequest {
 		void 				CheckTransferEncoding();
 		void 				CheckTransferType();
 		void 				CeckContentLength();
+		void 				openDataFile();
+
+		void				writeChunkTofile(const std::string &data);
 };
 
 

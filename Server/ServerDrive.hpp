@@ -56,7 +56,6 @@ class   ServerDrive {
 		bool ClientError(int fd);
 		const Server &getServerByName(const std::string &host_name);
 		const Server &getServerByFd(int fd);
-
 };
 
 #endif /* SERVERDRIVE_HPP */
