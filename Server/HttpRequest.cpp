@@ -3,6 +3,7 @@
 #include "ErrorHandler.hpp"
 #include "Utils.hpp"
 
+#include <stdlib.h>
 const std::string 	HttpRequest::GET			= "GET";
 const std::string 	HttpRequest::POST			= "POST";
 const std::string 	HttpRequest::DELETE			= "DELETE";
@@ -10,9 +11,11 @@ const size_t		HttpRequest::URI_MAX_LEN	= 2000;
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET) {
+				
 }
 
 HttpRequest::~HttpRequest() {
+	this->_data_file.close();
 }
 
 HttpRequest::HttpRequest(const HttpRequest &request) {
@@ -21,15 +24,17 @@ HttpRequest::HttpRequest(const HttpRequest &request) {
 	
 HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 
-	this->_request_method =  request._request_method;
-	this->_request_path =  request._request_path;
-	this->_http_version = request._http_version;
+	this->_request_method =	request._request_method;
+	this->_request_path =	request._request_path;
+	this->_http_version =	request._http_version;
 	this->_request_headers =  request._request_headers;
 	this->_request_state =  request._request_state;
 	this->_transfer_type = request._transfer_type;
 	this->_request_data = request._request_data;
 	this->_request_body = request._request_body;
 	this->_query_string =  request._query_string;
+	//this->_data_file = request._data_file;
+	this->_data_filename = request._data_filename;
 	return (*this);
 }
 
@@ -140,6 +145,10 @@ void HttpRequest::CeckContentLength() {
 		else 
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 	}
+}
+
+std::ofstream 		&HttpRequest::getDataFile() {
+	return (this->_data_file);
 }
 
 void		HttpRequest::parse(std::string &request_header) {
@@ -254,4 +263,20 @@ void 				HttpRequest::appendChunk(const std::string &chunk) {
 	// writting  data to disk
 	//write(
 	this->_request_body = this->_request_body + chunk;
+}
+
+void HttpRequest::writeChunkTofile(const std::string &data) {
+	this->_data_file << data ;
+}
+
+void 				HttpRequest::openDataFile() {
+
+		if (not this->_data_filename.empty()) 
+			return ;		// file already open
+
+		this->_data_filename = Utils::randomFileName();
+		this->_data_file.open(this->_data_filename);	
+		if (not this->_data_file.is_open()) {
+			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
+		}
 }

@@ -50,5 +50,19 @@ std::string trimSpaces(const std::string &str) {
 		return ("");
 	return (str.substr(start, end - start + 1));
 }
+std::string  randomFileName() {
+	std::string path_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	std::string path = "/tmp/._webserv";
+	const short path_chars_size = path_chars.size();
+	const short path_size = 11;
+
+	srand(time(0));
+	for (short c = 0; c < path_size; c++) {
+		int index = rand() % path_chars_size;
+		path  += path_chars[index];
+	}
+	std::cout << "Utils: path : " << path << std::endl;
+	return (path);
+}
 
 };

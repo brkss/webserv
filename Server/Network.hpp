@@ -81,7 +81,7 @@ namespace Network
 		socklen_t type_size = sizeof(size);
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
 		std::cout << "size of socket buffer : " << size << std::endl;
-		return (0xFFF);
+		return (0xFFFF);
 	}
 
 	int getFullSpaceSize(int sock_fd) {
