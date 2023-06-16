@@ -4,7 +4,6 @@
 int write_file(std::string path, std::string content){
 
 	std::ofstream outputFile(path);
-
     if (outputFile.is_open()) {
         outputFile << content;
         outputFile.close();
