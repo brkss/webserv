@@ -8,3 +8,4 @@ config/ConfigParse/header.vim !
 Server/.*.swp
 tests/*
 tags
+notes.nt
