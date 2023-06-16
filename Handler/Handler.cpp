@@ -121,10 +121,18 @@ Handler::Handler(Client client){
     std::vector<Location> locations = client.getServer().getLocations();
     std::string upload_location = client.getServer().getUploadStore();
 
-    // find location 
+
+
+    // check location 
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
     if(locationIndex > -1){
         rootPath = locations[locationIndex].getRoot();
+        request.setRequestPath(request.getRequestPath().substr(locations[locationIndex].getEndpoint().length() + 1));
+        std::cout << "\n\n\n---------------- LOCATION PATH ------------------\n\n\n";
+        std::cout << rootPath;
+        std::cout << "\n";
+        std::cout << "\n\n\n ------------------------------------------------\n\n\n";
+        //request.setRequestPath(request.getRequestPath().substr(0,  locations[locationIndex].getEndpoint().length()));
         if(locations[locationIndex].getUploadStore().size() > 0){
             upload_location = locations[locationIndex].getUploadStore();
         }
@@ -141,10 +149,18 @@ Handler::Handler(Client client){
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
     
+
+    std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
+    std::cout << path;
+    std::cout << "\n\n\n ----------------------------------------\n\n\n";
+
+
     if((method == "POST" || method == "DELETE") && !isPHPScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
-        std::string filepath = upload_location + getFilenameFromRequestPath(request.getRequestPath());
+        std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request.getRequestPath());
+        
+        
         if(filepath.length() == 0){
             this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
             this->type = "text/html";
@@ -152,11 +168,13 @@ Handler::Handler(Client client){
             this->status = 404;
             return;
         }
+
         if(method == "POST"){
             status = write_file(filepath, request.getRequestBody());
         }else{
             status = delete_file(filepath);
         }
+
         // check if any of the methods above failed ! 
         if(!status){
             this->status = 500;
@@ -169,6 +187,7 @@ Handler::Handler(Client client){
             this->type = "text/html";
             this->size = 89;
         }
+
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
@@ -176,19 +195,21 @@ Handler::Handler(Client client){
         this->type = "text/html";
         this->size = 91;
         this->status = 404;
+
         return;
     }else if (isDirectory(path)){
         if(!client.getServer().getAutoIndex()){
+
             path = rootPath + client.getServer().getIndex();
-            std::cout << "---------------------------\n";
-            std::cout << path;
-            std::cout << "\n---------------------------\n";
+             
         }else {
-             std::string autoIndexResponse = ListFile(path);
+            std::string autoIndexResponse = ListFile(path);
+            
             this->body = autoIndexResponse;
             this->status = 200;
             this->type = "text/html";
             this->size = autoIndexResponse.size();
+            
             return;
         }
     }
@@ -204,17 +225,21 @@ Handler::Handler(Client client){
         this->type = parsed_cgi_response["type"];
         this->size = parsed_cgi_response["body"].size();
         this->status = 200;
+    
     }else{
-		this->body = this->getFileContent(path);
+		
+        this->body = this->getFileContent(path);
         //this->fd = this->getFileFD(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
         this->status = 200;
+    
     }
 }
 
 
 std::string Handler::getFileContent(std::string filename){
+    
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
 		std::cerr << "Failed to open file: " << filename << std::endl;
