@@ -8,6 +8,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "../config/ConfigParse/inc/location.hpp"
+#include <unistd.h>
+#include <fcntl.h>
 
 
 int write_file(std::string path, std::string content);
@@ -22,5 +24,6 @@ bool directoryExits(std::string path);
 std::string ListFile(std::string path);
 bool isDirectory(std::string path);
 
+int getFileFd(std::string path);
 
 #endif

@@ -35,6 +35,8 @@ class Handler {
         std::string getType();
         int getStatus();
         int getFD();
+
+        
         
 
 };

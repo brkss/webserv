@@ -129,3 +129,10 @@ bool isDirectory(std::string path){
     }
     return false;
 }
+
+int getFileFd(std::string path){
+    int fd = -1;
+
+    fd = open(path.c_str(), O_RDONLY);
+    return fd;
+}
