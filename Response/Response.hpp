@@ -27,6 +27,10 @@ class Response {
 		std::string getContentLength();
 		std::string generateStatusMessage(int status);
 		int getFD();
+		Response(const Response &response);
+		Response & operator=(const Response &response);
+		Response() {};
+		const std::string &getStatusCode() const;
 
 };
 

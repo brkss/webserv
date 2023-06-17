@@ -26,19 +26,12 @@ ServerDrive::ServerDrive(Parse &conf): _config(conf),
 		{
 			sock_fd = Network::CreateSocket();
 			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
-			//try {
-				Network::BindSocket(sock_fd, server->getPort(), server->getAddress() );
-			//}
-			//catch (const std::exception &e) {
-			//	close(sock_fd);
-			//	ConsoleLog::Warning("Server Address reused!. Using Virtual Host");
-			//	continue;
-			//}
+			Network::BindSocket(sock_fd, server->getPort(), server->getAddress() );
 			Network::ListenOnSocket(sock_fd);
 			addSocketFd(sock_fd);
 			FD_SET(sock_fd, &(this->_listenset)); {
-				const std::string ip_port = server->getAddress() + ":" +  std::to_string(server->getPort());
-				ConsoleLog::Specs("Server Listening on :" + ip_port) ;
+				const std::string log = "Serving HTTP on " + server->getAddress() + " Port: " +  std::to_string(server->getPort());
+				ConsoleLog::Specs(log) ;
 			}
 			server->setSocketFd(sock_fd);
 		}
@@ -68,10 +61,7 @@ void sendErrorMessage(int fd, short error) {
 	status_message[501] = "501 No timplemented",
 	status_message[505] = "505 Http version not supported";
 	message = status_message[error];
-	std::string resp = "HTTP/1.1 " +  message +  "\r\n";
-	templat  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
-	resp = resp + templat;
-
+	std::string resp = "HTTP/1.1 " + message +  "\r\n\r\n";
 	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size()) {
 		ConsoleLog::Error("Send error");
 		perror(NULL);
@@ -231,6 +221,7 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 		#endif
 
+		return ;
 		// TESTING DATA TRANSFER
 		const std::string out_file_name = client.getServer().getRoot() +  client.getServer().getUploadStore() + "/oupload"  + std::to_string(client.getConnectionFd());
 		std::ofstream ofs(out_file_name);
@@ -268,11 +259,13 @@ void ServerDrive::checkClientTimout(int fd) {
 
 bool ServerDrive::ClientError(int fd) {
 	Client &client				= getClient(fd) ;
+	HttpRequest &request = client.getRequest();
 	short 	error				= client.getRequestStatus();
 	if (error != 0) {
 		sendErrorMessage(fd, error);
+		const std::string log = "[Request]: " + request.getRequestLine() + " (" +  std::to_string(error) + ")" ;
 		CloseConnection(client.getConnectionFd());
-		ConsoleLog::Debug("Client Error Response Sent!. Closing fd : " + std::to_string(fd));
+		ConsoleLog::Error(log);
 		return (true);
 	}
 	return (false);
@@ -303,6 +296,7 @@ void PrepareResponse(Client &client)  {
 	std::string resp = response.generateResponse();
 	char * resp_copy = moveToHeap(resp);
 	client.setResponse(resp_copy, resp.size());
+	//client.setResponseObj(response);
 }
 
 void ServerDrive::SendResponse(Client &client) {
@@ -321,8 +315,8 @@ void ServerDrive::SendResponse(Client &client) {
 	}
 	if (int ss = send(client_fd, response, size_to_send, 0) != (ssize_t ) size_to_send) {
 			close_connection = true;
-		perror(NULL);
 		#if DEBUG
+		perror(NULL);
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
 		client.setResponse(response + ss , response_size - ss);
@@ -332,12 +326,19 @@ void ServerDrive::SendResponse(Client &client) {
 	#endif 
 	if (close_connection) {
 		#if DEBUG
-		std::string debug_log = "Response Sent!. Closing fd :...";
+		std::string debug_log = "::WebServ Response Sent!. Closing fd :...";
 		debug_log = debug_log +  std::to_string(client_fd);
 		ConsoleLog::Debug(debug_log);
 		#endif 
+		log(client);
 		CloseConnection(client_fd);
 	}
+}
+
+void ServerDrive::log(Client &client) {
+	Response 	&response_obj = client.getResponseObj();
+	const std::string log = "[Response]: " + client.getRequest().getRequestLine() + " (" +  response_obj.getStatusCode() + ")";
+	ConsoleLog::Specs(log);
 }
 
 void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {

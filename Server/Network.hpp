@@ -65,8 +65,9 @@ namespace Network
 			throw(ErrorLog("Error: Failed to accept connection"));
 		}
 		new_client.setConnectionFd(connection_fd);
+		#if DEBUG
 		ConsoleLog::Debug("New client connection ACCEPT ok!");
-		std::cerr << "New connection accepted with  fd : " << connection_fd << std::endl;
+		#endif
 		return (new_client);
 	}
 	
@@ -80,8 +81,7 @@ namespace Network
 		int size;
 		socklen_t type_size = sizeof(size);
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
-		std::cout << "size of socket buffer : " << size << std::endl;
-		return (0xFFFF);
+		return (0xFF);
 	}
 
 	int getFullSpaceSize(int sock_fd) {

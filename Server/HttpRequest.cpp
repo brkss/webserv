@@ -35,6 +35,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_query_string =  request._query_string;
 	//this->_data_file = request._data_file;
 	this->_data_filename = request._data_filename;
+	this->_request_line = request._request_line;
 	return (*this);
 }
 
@@ -71,8 +72,6 @@ void	HttpRequest::parseRequestLine(std::string &request_line) {
 		// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
-			#if DEBUG
-			#endif
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 		}
 		setRequestMethod(values[0]);
@@ -96,7 +95,6 @@ void HttpRequest::parseHeaders(const std::string &headers_str) {
 		if ((pos = line->find(":")) != std::string::npos) {
 			temp_pair = std::make_pair(Utils::trimSpaces(line->substr(0, pos)),Utils::trimSpaces(line->substr(pos + 1)));
 			header_map.insert(temp_pair);
-			//std::cout << "[" << temp_pair.first << "]" << " " << "[" << temp_pair.second << "]" << std::endl;
 		}
 		else
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
@@ -167,6 +165,7 @@ void		HttpRequest::parse(std::string &request_header) {
 	#endif
 	request_line = request_header.substr(0, delim_pos);	
 	headers = request_header.substr(delim_pos + CRLF.size()); 
+	this->_request_line = request_line; // debug;
 	parseRequestLine(request_line);
 	parseHeaders(headers);
 	setRequestState(HttpRequest::BODY_STATE);
@@ -279,4 +278,8 @@ void 				HttpRequest::openDataFile() {
 		if (not this->_data_file.is_open()) {
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
+}
+
+const std::string & HttpRequest::getRequestLine() const {
+	return (this->_request_line);
 }

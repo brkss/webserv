@@ -56,6 +56,9 @@ class   ServerDrive {
 		bool ClientError(int fd);
 		const Server &getServerByName(const std::string &host_name);
 		const Server &getServerByFd(int fd);
+
+		void log( Client &client); // Logs request line and status code
+
 };
 
 #endif /* SERVERDRIVE_HPP */

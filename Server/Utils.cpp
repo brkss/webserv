@@ -61,7 +61,6 @@ std::string  randomFileName() {
 		int index = rand() % path_chars_size;
 		path  += path_chars[index];
 	}
-	std::cout << "Utils: path : " << path << std::endl;
 	return (path);
 }
 
