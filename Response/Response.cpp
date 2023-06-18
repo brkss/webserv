@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ctime>
 #include <fstream>
+#include <unistd.h>
 
 /*
  *
@@ -49,8 +50,8 @@ Response & Response::operator=(const Response &response) {
 	return (*this);
 }
 
-Response::Response(std::string body, std::string type, int size, int status){
-	
+Response::Response(std::string body, std::string type, int size, int status, int fd){
+	this->fd = fd;
 	this->status = std::to_string(status);
 	this->status_message = generateStatusMessage(status);
 	this->contentType = type;
@@ -85,6 +86,47 @@ std::string Response::generateResponse(){
 	response += this->body + "\r\n";
 
 	return response;
+}
+
+std::string Response::getResponseHeaders(){
+	std::string headers = "";
+
+	headers += "HTTP/1.1 " + this->status +  " " + this->status_message + "\r\n";
+	headers += "Content-Type: " + this->contentType + "\r\n";
+	headers += "Content-Length: " + this->contentLength + "\r\n";
+	headers += "Cache-Control: " + this->cacheControl + "\r\n";
+	headers += "Date: " +  this->date  + "\r\n";
+	headers += "Server: " + this->server + "\n";
+	headers += "Connection: " + this->connection + "\r\n";
+	headers += "Accept: " + this->accept + "\r\n";
+	headers += "Accept-Encoding: " + this->acceptEncoding + "\r\n";
+	headers += "Host: " + this->host + "\r\n\r\n";
+
+	return headers;
+}
+
+std::string Response::getResponseBody(){
+	std::string response = this->body + "\r\n";
+
+	return response;
+}
+
+std::string Response::getResponseChunk(int size){
+
+    if(this->fd == -1)
+        return this->body;
+
+    char buffer[size];
+    std::string response = "";
+
+    int status = read(this->fd, buffer, (size_t)size);
+    if(status > 0){
+        response = buffer;
+    }else {
+        perror("read failed : ");
+    }
+
+    return response;
 }
 
 std::string Response::getContentLength(){

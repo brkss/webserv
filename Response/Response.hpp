@@ -22,15 +22,22 @@ class Response {
 	std::string body;
 
 	public:
-		Response(std::string body, std::string type, int size, int status);
+		Response(std::string body, std::string type, int size, int status, int fd);
 		std::string generateResponse();
+		
+		std::string getResponseBody();
+		std::string getResponseHeaders();
+		
 		std::string getContentLength();
 		std::string generateStatusMessage(int status);
+		std::string getResponseChunk(int size);
+
 		int getFD();
 		Response(const Response &response);
 		Response & operator=(const Response &response);
 		Response() {};
 		const std::string &getStatusCode() const;
+
 
 };
 

@@ -292,8 +292,11 @@ void PrepareResponse(Client &client)  {
 	}
 	*/
 	Handler	handler(client);
-	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus());
+	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
 	std::string resp = response.generateResponse();
+	
+	//response.getResponseChunk(30);
+	
 	char * resp_copy = moveToHeap(resp);
 	client.setResponse(resp_copy, resp.size());
 	//client.setResponseObj(response);

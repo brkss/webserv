@@ -7,114 +7,9 @@
 #include "utils.h"
 #include "../config/ConfigParse/inc/location.hpp"
 
-bool checkAllowedMethods(Location location, std::string method){
-    std::vector<std::string> allowedMethods = location.getAllowedMethods();
-    if (allowedMethods.size() == 0)
-        return true;
-    for(size_t i = 0; i < allowedMethods.size(); i++){
-        if(method == allowedMethods[i]){
-            return true;
-        }
-    }
-    return false;
-}
-
-std::string getFilenameFromRequestPath(std::string requestPath){
-    size_t slash_pos = requestPath.find_last_of("/");
-	if (slash_pos != std::string::npos) {
-		std::string filename = requestPath.substr(slash_pos + 1);
-        return filename;
-    }
-    return "";
-}
-
-int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations) {
-    int longestMatchIndex = -1;
-    size_t longestMatchLength = 0;
-
-    for (size_t i = 0; i < locations.size(); i++) {
-        std::string endpoint = locations[i].getEndpoint();
-        size_t endpointLength = endpoint.length();
-
-        if (requestPath.length() >= endpointLength && requestPath.substr(0, endpointLength) == endpoint) {
-            if (endpointLength > longestMatchLength) {
-                longestMatchIndex = i;
-                longestMatchLength = endpointLength;
-            }
-        }
-    }
-
-    return longestMatchIndex;
-}
-
-bool fileExists(std::string filepath){
-    std::fstream file(filepath);
-    return file.good();
-}
-
-bool directoryExits(std::string path){
-    DIR *directory = ::opendir(path.c_str());
-    
-    if(directory != NULL){
-        closedir(directory);
-        return true;
-    }
-    return false;
-}
-
-std::string ListFile(std::string path){
-    DIR *directory = ::opendir(path.c_str());
-    std::string response = "<!DOCTYPE html><html lang='en'><head><title>index of</title></head><body><h1>Index of</h1><table style='table-layout:fixed;width: 100%;'><tr><td><b>Name</b></td><td><b>Date</b></td><td><b>Size</b></td></tr>";
-
-    if(directory == NULL){
-        std::cout << ">>listing files<< : error invalid directory \n";
-        return "";
-    }
-    struct dirent *entry;
-    while((entry = readdir(directory)) != NULL){
-        std::string filename = entry->d_name;
-        std::string fullPath = path + "/" + filename;
-        
-        struct stat fileInfo;
-        if (stat(fullPath.c_str(), &fileInfo) == -1)
-        {
-            std::cerr << "Error getting file info for: " << fullPath << std::endl;
-            continue;
-        }
-
-        if(S_ISDIR(fileInfo.st_mode)){
-            // directory !
-            response += "<tr style='margin-top: 10px;'><td><a href='"+filename+"/'>" + filename + "/</a></td><td>" + std::to_string(fileInfo.st_atime) + "</td><td>--</td></tr>";
-        }else {
-            // file ! 
-            response += "<tr style='margin-top: 10px;'><td><a href='"+filename+"'>" + filename + "</a></td><td>" + std::to_string(fileInfo.st_atime) + "</td><td>" + std::to_string(fileInfo.st_size / 1000000) + " M</td></tr>";
-        }
-    }
-    closedir(directory);
-    response += "</table></body></html>";
-    return response;
-}
-
-bool isDirectory(std::string path){
-    size_t slash_pos = path.find_last_of("/");
-    if(slash_pos != std::string::npos && slash_pos == path.length() -1){
-        return true;
-    }
-    return false;
-}
-
-bool isPHPScript(std::string path){
-    size_t dot_pos = path.find_last_of(".");
-	if (dot_pos != std::string::npos) {
-		std::string extension = path.substr(dot_pos + 1);
-        if(extension == "php")
-            return true;
-    }
-    return false;
-}
-
 
 Handler::Handler(Client client){
+    
     this->client = client;
     HttpRequest request = client.getRequest();
     std::string rootPath = this->client.getServer().getRoot();
@@ -145,6 +40,7 @@ Handler::Handler(Client client){
             return;
         }
     }
+
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
@@ -191,6 +87,7 @@ Handler::Handler(Client client){
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
+        
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
@@ -199,9 +96,7 @@ Handler::Handler(Client client){
         return;
     }else if (isDirectory(path)){
         if(!client.getServer().getAutoIndex()){
-
             path = rootPath + client.getServer().getIndex();
-             
         }else {
             std::string autoIndexResponse = ListFile(path);
             
@@ -229,7 +124,7 @@ Handler::Handler(Client client){
     }else{
 		
         this->body = this->getFileContent(path);
-        //this->fd = this->getFileFD(path);
+        this->fd = getFileFd(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
         this->status = 200;
@@ -304,6 +199,7 @@ std::string Handler::getFileContentType(std::string filename){
 	}
 	return file_type;
 }
+
 
 
 int Handler::getSize(){
