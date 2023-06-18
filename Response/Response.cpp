@@ -114,7 +114,7 @@ std::string Response::getResponseBody(){
 std::string Response::getResponseChunk(int size){
 
     if(this->fd == -1)
-        return "";
+        return this->body;
 
     char buffer[size];
     std::string response = "";

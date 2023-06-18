@@ -24,6 +24,7 @@ void CGI::handlePhpCGI(std::string path){
     
     std::string response;
 
+    
 
     write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
     lseek(fdIN, 0, SEEK_SET);
@@ -59,7 +60,6 @@ void CGI::handlePhpCGI(std::string path){
         std::cerr << "something went wront executing the cgi script !";
         exit(0);
     }else if (pid > 0){
-        
 		// main proccess!
         int status;
 		waitpid(pid, &status, 0);
