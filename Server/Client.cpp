@@ -15,7 +15,8 @@ Client::Client(int connection_fd) : _server_fd(connection_fd),
 									_address_len(0),
 									_response(NULL),
 									_response_cpy(NULL),
-									_response_size(0){
+									_response_size(0),
+									_response_ready(false) {
 
 	bzero(&this->_client_address, sizeof(this->_client_address));
 }
@@ -41,6 +42,7 @@ Client &Client::operator=(const Client &client) {
 	this->_response = client._response;
 	this->_response_cpy = client._response_cpy;
 	this->_responseObj = client._responseObj;
+	this->_response_ready = client._response_ready;
 	return (*this);
 }
 
@@ -123,4 +125,9 @@ void Client::setResponse(char *response, size_t size) {
 
 void Client::setResponseObj(const Response &resp) {
 	this->_responseObj = resp;
+	this->_response_ready = true;
+}
+
+bool 	Client::ResponseReady() const {
+	return (this->_response_ready);
 }

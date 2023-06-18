@@ -294,35 +294,36 @@ void PrepareResponse(Client &client)  {
 	Handler	handler(client);
 	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
 	std::string resp = response.generateResponse();
+	std::cout << "hander.getFd() " << handler.getFD() << std::endl;
 	
 	//response.getResponseChunk(30);
 	
-	char * resp_copy = moveToHeap(resp);
-	client.setResponse(resp_copy, resp.size());
-	//client.setResponseObj(response);
+	//char * resp_copy = moveToHeap(resp);
+	//client.setResponse(resp_copy, resp.size());
+	client.setResponseObj(response);
 }
 
 void ServerDrive::SendResponse(Client &client) {
 
-	size_t		response_size = client.getResponseSize();
-	short 		client_fd = client.getConnectionFd();
-	char *		response = client.getResponse();
-	size_t		socket_buffer_size = Network::getSocketBufferSize(client_fd, SO_RCVBUF);
-	size_t		size_to_send = response_size;
-	bool		close_connection = true;
+	Response &client_response	= client.getResponseObj();
+	short 	client_fd			= client.getConnectionFd();
+	size_t	socket_buffer_size	= Network::getSocketBufferSize(client_fd, SO_RCVBUF);
+	const std::string &response	= client_response.getResponseChunk(socket_buffer_size);
+	size_t	response_size		= response.size();
+	bool	close_connection	= false;
+	std::cout << "=================================" << std::endl;
+	std::cout << "response size " << response.size() <<  " chunk pre size " << socket_buffer_size << std::endl;
+	std::cout << "=================================" << std::endl;
 	
-	if (response_size > socket_buffer_size) {
-		size_to_send = socket_buffer_size ;
-		client.setResponse(response + size_to_send, response_size - size_to_send);
-		close_connection = false;
-	}
-	if (int ss = send(client_fd, response, size_to_send, 0) != (ssize_t ) size_to_send) {
+	if (response_size == 0) 
+			close_connection = true;
+	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
 			close_connection = true;
 		#if DEBUG
 		perror(NULL);
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
-		client.setResponse(response + ss , response_size - ss);
+		//client.setResponse(response + ss , response_size - ss);
 	}
 	#if DEBUG
 	ConsoleLog::Debug("Response Portion  Sent!" );
@@ -330,7 +331,7 @@ void ServerDrive::SendResponse(Client &client) {
 	if (close_connection) {
 		#if DEBUG
 		std::string debug_log = "::WebServ Response Sent!. Closing fd :...";
-		debug_log = debug_log +  std::to_string(client_fd);
+		debug_log = debug_log + std::to_string(client_fd);
 		ConsoleLog::Debug(debug_log);
 		#endif 
 		log(client);
@@ -352,7 +353,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 		try { 
 			if (FD_ISSET(fd, &write_copy) && not ClientError(fd)) {					// response 
 				Client &client = getClient(fd);
-				if (client.getResponseSize() == 0)
+				if (not client.ResponseReady())
 					PrepareResponse(client);
 				#if DEBUG
 				ConsoleLog::Debug("Sending response ...");

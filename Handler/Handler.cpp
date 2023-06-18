@@ -11,6 +11,7 @@
 Handler::Handler(Client client){
     
     this->client = client;
+	this->fd = -1;
     HttpRequest request = client.getRequest();
     std::string rootPath = this->client.getServer().getRoot();
     std::vector<Location> locations = client.getServer().getLocations();
@@ -221,3 +222,4 @@ int Handler::getStatus(){
 int Handler::getFD(){
     return this->fd;
 }
+

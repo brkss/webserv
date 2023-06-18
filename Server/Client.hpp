@@ -29,6 +29,7 @@ class Client {
 		char *				_response_cpy;
 		size_t				_response_size;
 		Response			_responseObj;
+		bool				_response_ready;
 
 
 	public:
@@ -60,6 +61,7 @@ class Client {
 		Response 				&getResponseObj() ;
 		void					setResponse(char *response, size_t size);
 		void 					setResponseObj(const Response &resp);
+		bool					ResponseReady() const;
 
 
 };

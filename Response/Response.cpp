@@ -47,6 +47,7 @@ Response & Response::operator=(const Response &response) {
 	this->status_message = response.status_message;
 	this->fd = response.fd;
 	this->body = response.body;
+	this->headears_sent =  response.headears_sent;
 	return (*this);
 }
 
@@ -65,6 +66,7 @@ Response::Response(std::string body, std::string type, int size, int status, int
 	this->acceptEncoding = "gzip, deflate, sdch";
 	this->host = "localhost:89";
 	this->body = body;
+	this->headears_sent = false;
 }
 
 std::string Response::generateResponse(){
@@ -113,19 +115,26 @@ std::string Response::getResponseBody(){
 
 std::string Response::getResponseChunk(int size){
 
-    if(this->fd == -1)
-        return this->body;
-
-    char buffer[size];
     std::string response = "";
+
+	if (! this->headears_sent) {
+		this->headears_sent = true;
+		return (getResponseHeaders());
+	}
+    if(this->fd == -1) {
+		response = this->body;
+		this->body.clear();
+        return response;
+	}
+
+    char buffer[size + 1];
 
     int status = read(this->fd, buffer, (size_t)size);
     if(status > 0){
-        response = buffer;
+        response = std::string(buffer, status);
     }else {
         perror("read failed : ");
     }
-
     return response;
 }
 

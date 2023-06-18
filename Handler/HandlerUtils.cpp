@@ -131,6 +131,7 @@ bool isDirectory(std::string path){
 }
 
 int getFileFd(std::string path){
+	std::cout << "get file fd  called " << std::endl;
     int fd = -1;
 
     fd = open(path.c_str(), O_RDONLY);

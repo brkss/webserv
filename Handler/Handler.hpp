@@ -36,6 +36,10 @@ class Handler {
         int getStatus();
         int getFD();
 
+		~Handler() {
+			std::cout << "Handler distructor called " << std::endl;
+		}
+
         
         
 

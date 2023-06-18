@@ -18,6 +18,7 @@ class Response {
 	std::string status_message;
 
 	int fd;
+	bool	headears_sent;
 
 	std::string body;
 
