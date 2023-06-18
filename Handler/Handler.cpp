@@ -22,8 +22,11 @@ Handler::Handler(Client client){
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
     if(locationIndex > -1){
         rootPath = locations[locationIndex].getRoot();
-        request.setRequestPath(request.getRequestPath().substr(locations[locationIndex].getEndpoint().length() + 1));
-      
+        //request.setRequestPath(request.getRequestPath().substr(locations[locationIndex].getEndpoint().length() + 1));
+        //std::cout << "\n\n\n---------------- LOCATION PATH ------------------\n\n\n";
+        //std::cout << rootPath;
+        //std::cout << "\n";
+        //std::cout << "\n\n\n ------------------------------------------------\n\n\n";
         //request.setRequestPath(request.getRequestPath().substr(0,  locations[locationIndex].getEndpoint().length()));
         if(locations[locationIndex].getUploadStore().size() > 0){
             upload_location = locations[locationIndex].getUploadStore();
@@ -41,6 +44,12 @@ Handler::Handler(Client client){
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
+    
+
+    //std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
+    //std::cout << path;
+    //std::cout << "\n\n\n ----------------------------------------\n\n\n";
+
 
     if((method == "POST" || method == "DELETE") && !isPHPScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
@@ -115,7 +124,7 @@ Handler::Handler(Client client){
     }else{
 		
         this->body = this->getFileContent(path);
-        //this->fd = getFileFd(path);
+        this->fd = getFileFd(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
         this->status = 200;

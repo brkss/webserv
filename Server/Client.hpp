@@ -5,6 +5,7 @@
 #include "HttpRequest.hpp"
 #include "../config/ConfigParse/inc/server.hpp"
 #include "ErrorHandler.hpp"
+#include "../Response/Response.hpp"
 #include <time.h>
 #include <stdlib.h>
 
@@ -27,6 +28,8 @@ class Client {
 		char *				_response;
 		char *				_response_cpy;
 		size_t				_response_size;
+		Response			_responseObj;
+
 
 	public:
 		static char 		_buffer[BUFFER_SIZE]; 	// SHARED BUFFER
@@ -54,7 +57,9 @@ class Client {
 
 		char *					getResponse() const;
 		size_t					getResponseSize() const ;
+		Response 				&getResponseObj() ;
 		void					setResponse(char *response, size_t size);
+		void 					setResponseObj(const Response &resp);
 
 
 };

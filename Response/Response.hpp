@@ -33,6 +33,10 @@ class Response {
 		std::string getResponseChunk(int size);
 
 		int getFD();
+		Response(const Response &response);
+		Response & operator=(const Response &response);
+		Response() {};
+		const std::string &getStatusCode() const;
 
 
 };

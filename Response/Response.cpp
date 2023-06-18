@@ -24,6 +24,31 @@ std::string nowHTTP(){
 
 	return http_date;
 }
+/*
+ * Adding response copy constructor (adriouic)
+ * */
+Response::Response(const Response &response) {
+	*this = response;
+}
+Response & Response::operator=(const Response &response) {
+
+	if (this == &response) 
+		return (*this);
+	this->contentType = response.contentType;
+	this->contentLength = response.contentLength;
+	this->date = response.date;
+	this->server = response.server;
+	this->connection = response.connection;
+	this->cacheControl = response.cacheControl;
+	this->accept = response.accept;
+	this->acceptEncoding = response.acceptEncoding;
+	this->host = response.host;
+	this->status = response.status;
+	this->status_message = response.status_message;
+	this->fd = response.fd;
+	this->body = response.body;
+	return (*this);
+}
 
 Response::Response(std::string body, std::string type, int size, int status, int fd){
 	this->fd = fd;
@@ -142,4 +167,8 @@ std::string Response::generateStatusMessage(int status){
 
 int Response::getFD(){
 	return this->fd;
+}
+
+const std::string &Response::getStatusCode() const  {
+	return (this->status);
 }

@@ -42,6 +42,9 @@ class HttpRequest {
 		std::ofstream						_data_file;
 		std::string 						_data_filename;
 
+		//for debug 
+		std::string 						_request_line;
+
 	public:
 		HttpRequest();
 		~HttpRequest();
@@ -86,6 +89,8 @@ class HttpRequest {
 		void 				openDataFile();
 
 		void				writeChunkTofile(const std::string &data);
+
+		const std::string & getRequestLine() const ; // for debug
 };
 
 
