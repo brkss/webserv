@@ -169,8 +169,6 @@ std::string Response::generateStatusMessage(int status){
 		default:
 			return "OK";
 	}
-
-
 }
 
 

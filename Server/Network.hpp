@@ -8,7 +8,6 @@
 #include <netinet/ip.h> // has definition of SO_RCVBUF; 
 #include <fcntl.h>
 
-
 namespace Network
 {
 

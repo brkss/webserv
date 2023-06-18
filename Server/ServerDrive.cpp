@@ -279,27 +279,9 @@ char *moveToHeap(const std::string &resp) {
 }
 
 void PrepareResponse(Client &client)  {
-
-	/*  error pages sould be checked and this is already crap
-	if (ClientError(client.getConnectionFd())) {
-		std::string	 message = Response::generateStatusMessage();
-		std::string body  =  "<html><head><title>"+ message + "</title></head><body><h1>" + message + "</h1></body></html>";
-		Response response(body, "text/html", body.szie(), status_code);
-		std::string resp = response.generateResponse();
-		char * resp_copy = moveToHeap(resp);
-		client.setResponse(resp_copy, resp.size());
-		return;
-	}
-	*/
 	Handler	handler(client);
 	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
 	std::string resp = response.generateResponse();
-	std::cout << "hander.getFd() " << handler.getFD() << std::endl;
-	
-	//response.getResponseChunk(30);
-	
-	//char * resp_copy = moveToHeap(resp);
-	//client.setResponse(resp_copy, resp.size());
 	client.setResponseObj(response);
 }
 
@@ -311,10 +293,7 @@ void ServerDrive::SendResponse(Client &client) {
 	const std::string &response	= client_response.getResponseChunk(socket_buffer_size);
 	size_t	response_size		= response.size();
 	bool	close_connection	= false;
-	std::cout << "=================================" << std::endl;
-	std::cout << "response size " << response.size() <<  " chunk pre size " << socket_buffer_size << std::endl;
-	std::cout << "=================================" << std::endl;
-	
+		
 	if (response_size == 0) 
 			close_connection = true;
 	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
@@ -323,7 +302,6 @@ void ServerDrive::SendResponse(Client &client) {
 		perror(NULL);
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
-		//client.setResponse(response + ss , response_size - ss);
 	}
 	#if DEBUG
 	ConsoleLog::Debug("Response Portion  Sent!" );
