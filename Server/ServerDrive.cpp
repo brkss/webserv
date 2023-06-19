@@ -311,9 +311,9 @@ void ServerDrive::SendResponse(Client &client) {
 	const std::string &response	= client_response.getResponseChunk(socket_buffer_size);
 	size_t	response_size		= response.size();
 	bool	close_connection	= false;
-	std::cout << "=================================" << std::endl;
-	std::cout << "response size " << response.size() <<  " chunk pre size " << socket_buffer_size << std::endl;
-	std::cout << "=================================" << std::endl;
+	//std::cout << "=================================" << std::endl;
+	//std::cout << "response size " << response.size() <<  " chunk pre size " << socket_buffer_size << std::endl;
+	//std::cout << "=================================" << std::endl;
 	
 	if (response_size == 0) 
 			close_connection = true;

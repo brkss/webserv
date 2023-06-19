@@ -40,9 +40,6 @@ class Handler {
 			std::cout << "Handler distructor called " << std::endl;
 		}
 
-        
-        
-
 };
 
 

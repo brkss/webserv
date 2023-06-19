@@ -18,6 +18,8 @@ void CGI::handlePhpCGI(std::string path){
 
     FILE *fileIN = ::tmpfile();
     FILE *fileOUT = ::tmpfile();
+    
+
     int fdIN = fileno(fileIN);
     int fdOUT = fileno(fileOUT);
     //int err = -1;
