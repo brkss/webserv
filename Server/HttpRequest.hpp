@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cstdio>
 #include <fstream>
+#include <fcntl.h> // O_RDWR flag
+#include <unistd.h> // close() syscall
 
 class HttpRequest {
 	
@@ -39,8 +41,9 @@ class HttpRequest {
 		std::map<std::string, std::string>	_request_headers; 
 		std::string							_request_data;	
 		std::string							_request_body; // request body is now on disk at fd -->
-		std::ofstream						_data_file;
+		//std::ofstream						_data_file;
 		std::string 						_data_filename;
+		int 								_data_file_fd;
 
 		//for debug 
 		std::string 						_request_line;
@@ -64,7 +67,7 @@ class HttpRequest {
 		int					getBodyTransferType()	const;
 		std::string			&getRequestBody();
 		std::string			&getRequestData();
-		std::ofstream 		&getDataFile();
+		int					getDataFileDescriptor();
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);

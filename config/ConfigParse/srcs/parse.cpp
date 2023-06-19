@@ -150,15 +150,23 @@ void Parse::parseUploadStore(Server &server) {
 	expectToken(Token::COLON);
 }
 
-void Parse::parseListen(Server &conf) {
-	std::string value;
-
+void Parse::parsePort(Server &conf) {
 	nextToken();
 	expectToken(Token::VALUE);
-	value = currToken().getTokenValue();
+	std::string value = currToken().getTokenValue();
 	if (Utils::is_number(value))
 		conf.setPort(std::atoi(value.c_str()));
-	else if (is_valid_ip_address(value))
+	else
+		throw_error(currToken(), "Bad argument");
+	nextToken();
+	expectToken(Token::COLON);
+}
+
+void Parse::parseListen(Server &conf) {
+	nextToken();
+	expectToken(Token::VALUE);
+	std::string value = currToken().getTokenValue();
+	if (is_valid_ip_address(value))
 		conf.setAddress(value);
 	else
 		throw_error(currToken(), "Bad argument");
@@ -269,6 +277,8 @@ void Parse::parseServer() {
 			parseServerName(server_conf);
 		else if (curr_token.getTokenType() == Token::LISTEN)
 			parseListen(server_conf);
+		else if (curr_token.getTokenType() == Token::PORT)
+			parsePort(server_conf);
 		else if (curr_token.getTokenType() == Token::RETURN)
 			parseReturn(server_conf);
 		else if (curr_token.getTokenType() == Token::UPLOAD_STORE)
