@@ -160,8 +160,8 @@ void		HttpRequest::parse(std::string &request_header) {
 	if  (delim_pos == std::string::npos) 
 		throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 
-	#if DEBUG
 	std::cerr << request_header << std::endl;
+	#if DEBUG
 	#endif
 	request_line = request_header.substr(0, delim_pos);	
 	headers = request_header.substr(delim_pos + CRLF.size()); 
@@ -246,7 +246,7 @@ void HttpRequest::setQueryString(const std::string &url) {
    this->_query_string  = ""; 
    if (pos != std::string::npos) {
 	   this->_query_string  = url.substr(pos + 1);
-   }
+  }
 }
 
 void 	HttpRequest::setTransferType(BODY_TRANSFER type) {
