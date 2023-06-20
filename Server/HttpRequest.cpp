@@ -15,7 +15,8 @@ HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 }
 
 HttpRequest::~HttpRequest() {
-	this->_data_file.close();
+	close(this->_data_file_fd);
+
 }
 
 HttpRequest::HttpRequest(const HttpRequest &request) {
@@ -33,7 +34,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_request_data = request._request_data;
 	this->_request_body = request._request_body;
 	this->_query_string =  request._query_string;
-	//this->_data_file = request._data_file;
+	this->_data_file_fd = request._data_file_fd;
 	this->_data_filename = request._data_filename;
 	this->_request_line = request._request_line;
 	return (*this);
@@ -145,8 +146,8 @@ void HttpRequest::CeckContentLength() {
 	}
 }
 
-std::ofstream 		&HttpRequest::getDataFile() {
-	return (this->_data_file);
+int HttpRequest::getDataFileDescriptor() {
+	return (this->_data_file_fd);
 }
 
 void		HttpRequest::parse(std::string &request_header) {
@@ -160,8 +161,8 @@ void		HttpRequest::parse(std::string &request_header) {
 	if  (delim_pos == std::string::npos) 
 		throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
 
-	std::cerr << request_header << std::endl;
 	#if DEBUG
+	std::cerr << request_header << std::endl;
 	#endif
 	request_line = request_header.substr(0, delim_pos);	
 	headers = request_header.substr(delim_pos + CRLF.size()); 
@@ -265,19 +266,31 @@ void 				HttpRequest::appendChunk(const std::string &chunk) {
 }
 
 void HttpRequest::writeChunkTofile(const std::string &data) {
-	this->_data_file << data ;
+	size_t nb_bytes = write(this->_data_file_fd, data.c_str(), data.size());
+
+	if (nb_bytes != data.size()) {
+		#if DEBUG 
+		ConsoleLog::Debug("Failed to write data to MemFile");
+		#endif 
+		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
+	}
 }
 
 void 				HttpRequest::openDataFile() {
 
-		if (not this->_data_filename.empty()) 
+		if (this->_data_file_fd != -1)
 			return ;		// file already open
 
 		this->_data_filename = Utils::randomFileName();
-		this->_data_file.open(this->_data_filename);	
-		if (not this->_data_file.is_open()) {
+		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR); // file opened for read & write
+		if (this->_data_file_fd == -1) {
+			perror(NULL);
+			ConsoleLog::Debug("Failed to open MemFile");
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
+		#if DEBUG 
+		std::cout << "MemFile file name : " << this->_data_filename << std::endl;
+		#endif 
 }
 
 const std::string & HttpRequest::getRequestLine() const {

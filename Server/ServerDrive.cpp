@@ -170,7 +170,7 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	std::string temp = request_body.substr(0, chunk_size);
 	assert(chunk_size == temp.size());
 	request.writeChunkTofile(temp);
-	request.appendChunk(temp);							// STORE CUNK IN BODY BUFFER
+	//request.appendChunk(temp);							// STORE CUNK IN BODY BUFFER
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 	return (true);
 }
@@ -299,7 +299,7 @@ void ServerDrive::SendResponse(Client &client) {
 	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
 			close_connection = true;
 		#if DEBUG
-		perror(NULL);
+		perror("Send error :");
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
 	}

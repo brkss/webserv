@@ -43,6 +43,7 @@ class  Parse
 		void parseClientRequestTimout(Http &config);
 
 		void parseListen(Server &conf);
+		void parsePort(Server &conf);
 		void parseServerName(Server &conf);
 		void parseReturn(Server &conf);
 		void parseLocation(Server &server_conf);

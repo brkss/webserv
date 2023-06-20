@@ -5,6 +5,7 @@ const std::string Token::SERVER 				= "server";
 const std::string Token::LOCATION				= "location";
 const std::string Token::ROOT 					= "root";
 const std::string Token::LISTEN 				= "listen";
+const std::string Token::PORT 					= "port";
 const std::string Token::SERVER_NAME 			= "server_name";
 const std::string Token::ERROR_PAGE 			= "error_page";
 const std::string Token::RETURN 				= "return";
@@ -23,13 +24,14 @@ const std::string Token::VALUE 					= "value";
 const std::string Token::CLIENT_REQUEST_TIMOUT  = "client_request_timeout";
 const std::string Token::UPLOAD_STORE  			= "upload_store";
 
-const std::string Token::_directives[14][2] = {
+const std::string Token::_directives[15][2] = {
 
 	{"http",		Token::HTTP},
 	{"server",		Token::SERVER},
 	{"location",	Token::LOCATION},
 	{"root",		Token::ROOT},
 	{"listen",		Token::LISTEN},
+	{"port",		Token::PORT},
 	{"server_name",	Token::SERVER_NAME},
 	{"return",		Token::RETURN},
 	{"autoindex",	Token::AUTOINDEX},
@@ -41,7 +43,7 @@ const std::string Token::_directives[14][2] = {
 	{"upload_store", Token::UPLOAD_STORE}
 };
 
-const  size_t Token::_nb_directives  = 14;
+const  size_t Token::_nb_directives  = 15;
 
 const std::string &Token::getTokenType() const {
 	return (this->_type);

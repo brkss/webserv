@@ -18,6 +18,7 @@ class Token
 		// Directives
 	   	static const std::string ROOT;
 	   	static const std::string LISTEN;
+	   	static const std::string PORT;
 	   	static const std::string SERVER_NAME;
 	   	static const std::string ERROR_PAGE;
 	   	static const std::string CLIENT_MAX_BODY_SIZE;
@@ -36,7 +37,7 @@ class Token
 		static const std::string UNDEFINED;
 		static const std::string UPLOAD_STORE;
 
-		static const std::string _directives[14][2];
+		static const std::string _directives[15][2];
 		static const size_t		 _nb_directives;
 
 	public:

@@ -123,7 +123,7 @@ Handler::Handler(Client client){
     
     }else{
 		
-        this->body = this->getFileContent(path);
+        //this->body = this->getFileContent(path);
         this->fd = getFileFd(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
