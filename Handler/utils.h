@@ -15,7 +15,7 @@
 int write_file(std::string path, std::string content);
 int delete_file(std::string path);
 
-bool isPHPScript(std::string path);
+bool isCGIScript(std::string path);
 bool checkAllowedMethods(Location location, std::string method);
 std::string getFilenameFromRequestPath(std::string requestPath);
 int findMatchingLocation(const std::string& requestPath, const std::vector<Location>& locations);

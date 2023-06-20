@@ -70,6 +70,7 @@ class HttpRequest {
 		std::string			&getRequestData();
 		int					getDataFileDescriptor();
 		short				getStatusCode() const;
+		const std::string 		&getRequestDataFilename() const;
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);

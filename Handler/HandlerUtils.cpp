@@ -1,11 +1,16 @@
 
 #include "utils.h"
 
-int write_file(std::string path, std::string content){
+int write_file(std::string path, std::string filename){
 
+    std::ifstream inputFile(filename);
 	std::ofstream outputFile(path);
-    if (outputFile.is_open()) {
-        outputFile << content;
+    if (outputFile.is_open() && inputFile.is_open()){
+        std::string line;
+        while (std::getline(inputFile, line)) {
+            outputFile << line << std::endl;
+        }
+        inputFile.close();
         outputFile.close();
     } else 
 		return 0;
@@ -23,11 +28,13 @@ int delete_file(std::string path){
 	return 1;
 }
 
-bool isPHPScript(std::string path){
+bool isCGIScript(std::string path){
+    
+    
     size_t dot_pos = path.find_last_of(".");
 	if (dot_pos != std::string::npos) {
 		std::string extension = path.substr(dot_pos + 1);
-        if(extension == "php")
+        if(extension == "php" || extension == "py")
             return true;
     }
     return false;

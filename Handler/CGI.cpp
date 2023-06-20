@@ -4,7 +4,8 @@
 #include "CGI.hpp"
 #include <stdio.h>
 #include <unistd.h>
-#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 
 CGI::CGI(Client &client) : client(client){
@@ -15,22 +16,16 @@ void CGI::handlePhpCGI(std::string path){
     
 	HttpRequest &request = this->client.getRequest();
 	char **env = generateCGIEnvironement(path);
-
-    FILE *fileIN = ::tmpfile();
     FILE *fileOUT = ::tmpfile();
-    int fdIN = fileno(fileIN);
+    
+
+    int fdIN =  open(request.getRequestDataFilename().c_str(), O_RDONLY);
+    std::cout << "file descriptor file descriptor request : " << fdIN << "\n";
     int fdOUT = fileno(fileOUT);
-    //int err = -1;
+   
     
     std::string response;
-
-    
-
-    write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
-    lseek(fdIN, 0, SEEK_SET);
-
     std::cout << " path : " << path << "\n";
-    //std::cout << "request path ::::: " << request.getRequestPath().c_str() << "\n";
 
     pid_t pid = fork();
     if(pid == -1){
@@ -38,15 +33,16 @@ void CGI::handlePhpCGI(std::string path){
         //exit(0);
     }else if(pid == 0){
 		// child proc
-        if(dup2(fdIN, STDIN_FILENO) == -1){
+        if(dup2(fdIN, STDIN_FILENO) == -1 && fdIN != -1){
             // handle 500
+            perror("something went wrong dup input : ");
             exit(0);
         }
         if(dup2(fdOUT, STDOUT_FILENO) == -1){
             // handle 500
             exit(0);
         }
-        fclose(fileIN);
+        
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);
@@ -65,21 +61,19 @@ void CGI::handlePhpCGI(std::string path){
 		waitpid(pid, &status, 0);
 		WEXITSTATUS(status);
        
-        char buffer[1024];
+        char buffer[2];
         lseek(fdOUT, 0, SEEK_SET);
-		int bread = read(fdOUT, buffer, 1024);
+		int bread = read(fdOUT, buffer, 1);
         
         if(bread == -1){
             perror("read failed : ");
             exit(0);
         } 
         while(bread > 0){
-            std::cout << ">>>> buffer : " << buffer << "\n";
             response += buffer;
-            bread = read(fdOUT, buffer, 1024);
+            bread = read(fdOUT, buffer, 1);
         }
         
-		fclose(fileIN);
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);
@@ -115,9 +109,10 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["CONTENT_TYPE"] = req_headers["Content-Type"];
 	headers["CONTENT_LENGTH"] = std::to_string(request.getRequestBody().size());
 	headers["REDIRECT_STATUS"] = "200";
-	
-    std::cout << "\n\n\n\n\nquery string : " << headers["QUERY_STRING"] << "/n--------------\n\n\n\n\n";
 
+    headers["HTTP_ACCEPT_LANGUAGE"] = req_headers["Accept-Language"];
+    headers["HTTP_ACCEPT_CHARSET"] = req_headers["Accept-Charset"];
+    headers["CONTENT_LANGUAGE"] = req_headers["Content-Language"];
 
 	std::map<std::string, std::string>::iterator iter;
 	char **env = new char*[CGI_ENV_LENGTH + 1];
@@ -162,7 +157,6 @@ std::map<std::string, std::string> CGI::parse_cgi_response(std::string response)
     }else {
 		std::cout << "body no pos !!\n";
 	}
-
    
     results["type"] = contentType;
     results["body"] = body;

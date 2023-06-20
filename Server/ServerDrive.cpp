@@ -188,7 +188,7 @@ bool	ServerDrive::getBody(HttpRequest &request) {
 	bytes_left = content_length - request.getRequestBody().size();
 	if (bytes_left <= request_body.size()) {
 		request.writeChunkTofile(request_body.substr(0, bytes_left));
-		request.appendChunk(request_body.substr(0, bytes_left));
+ 		request.appendChunk(request_body.substr(0, bytes_left));
 		assert(request.getRequestBody().size() == content_length);
 		return (true);
 	}
