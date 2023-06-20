@@ -287,6 +287,8 @@ void PrepareResponse(Client &client)  {
 
 void ServerDrive::SendResponse(Client &client) {
 
+	//if (close(client.getRequest().getDataFileDescriptor()) == -1) { std::cout << "failed to close file fd " << client.getRequest().getDataFileDescriptor() << std::endl; }
+
 	Response &client_response	= client.getResponseObj();
 	short 	client_fd			= client.getConnectionFd();
 	size_t	socket_buffer_size	= Network::getSocketBufferSize(client_fd, SO_RCVBUF);
