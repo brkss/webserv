@@ -70,7 +70,6 @@ void CGI::handlePhpCGI(std::string path){
             exit(0);
         } 
         while(bread > 0){
-            std::cout << ">>>> buffer : " << buffer << "\n";
             response += buffer;
             bread = read(fdOUT, buffer, 1);
         }
@@ -110,6 +109,10 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["CONTENT_TYPE"] = req_headers["Content-Type"];
 	headers["CONTENT_LENGTH"] = std::to_string(request.getRequestBody().size());
 	headers["REDIRECT_STATUS"] = "200";
+
+    headers["HTTP_ACCEPT_LANGUAGE"] = req_headers["Accept-Language"];
+    headers["HTTP_ACCEPT_CHARSET"] = req_headers["Accept-Charset"];
+    headers["CONTENT_LANGUAGE"] = req_headers["Content-Language"];
 
 	std::map<std::string, std::string>::iterator iter;
 	char **env = new char*[CGI_ENV_LENGTH + 1];

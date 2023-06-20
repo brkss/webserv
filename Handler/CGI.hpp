@@ -1,7 +1,7 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
-#define CGI_ENV_LENGTH 15
+#define CGI_ENV_LENGTH 20
 
 #include <string>
 #include <iostream>

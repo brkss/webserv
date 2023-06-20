@@ -24,11 +24,6 @@ Handler::Handler(Client &client){
     if(locationIndex > -1){
         rootPath = locations[locationIndex].getRoot();
         request.setRequestPath(request.getRequestPath().substr(locations[locationIndex].getEndpoint().length() + 1));
-        //std::cout << "\n\n\n---------------- LOCATION PATH ------------------\n\n\n";
-        //std::cout << rootPath;
-        //std::cout << "\n";
-        //std::cout << "\n\n\n ------------------------------------------------\n\n\n";
-        //request.setRequestPath(request.getRequestPath().substr(0,  locations[locationIndex].getEndpoint().length()));
         if(locations[locationIndex].getUploadStore().size() > 0){
             upload_location = locations[locationIndex].getUploadStore();
         }
@@ -45,13 +40,14 @@ Handler::Handler(Client &client){
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
+    std::map<std::string, std::string> req_headers = request.getHeaders();
 
     std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
     std::cout << path;
     std::cout << "\n\n\n ----------------------------------------\n\n\n";
 
 
-    if((method == "POST" || method == "DELETE") && !isPHPScript(path) && upload_location.length() > 0){
+    if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
         std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request.getRequestPath());
@@ -66,7 +62,7 @@ Handler::Handler(Client &client){
         }
 
         if(method == "POST"){
-            status = write_file(filepath, request.getRequestBody());
+            status = write_file(filepath, request.getRequestDataFilename());
         }else{
             status = delete_file(filepath);
         }
@@ -88,6 +84,7 @@ Handler::Handler(Client &client){
     }
     else if(!fileExists(path) && !directoryExits(path)){
         
+        std::cout << "file not found !!!!\n\n\n\n";
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
@@ -109,7 +106,7 @@ Handler::Handler(Client &client){
         }
     }
     
-    if(isPHPScript(path)){
+    if(isCGIScript(path)){
         // handle cgi !
         CGI cgi(client);
         cgi.handlePhpCGI(path);
@@ -123,7 +120,7 @@ Handler::Handler(Client &client){
     
     }else{
 		
-        //this->body = this->getFileContent(path);
+        this->body = this->getFileContent(path);
         this->fd = getFileFd(path);
 		this->type = this->getFileContentType(path);
 		this->size = this->getFileContentLength(path);
