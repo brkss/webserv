@@ -10,7 +10,8 @@ const std::string 	HttpRequest::DELETE			= "DELETE";
 const size_t		HttpRequest::URI_MAX_LEN	= 2000; 
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
-							 _transfer_type(UNSET) {
+							 _transfer_type(UNSET),
+							 _data_file_fd(-1) {
 				
 }
 
@@ -266,8 +267,8 @@ void 				HttpRequest::appendChunk(const std::string &chunk) {
 }
 
 void HttpRequest::writeChunkTofile(const std::string &data) {
-	size_t nb_bytes = write(this->_data_file_fd, data.c_str(), data.size());
 
+	size_t nb_bytes = write(this->_data_file_fd, data.c_str(), data.size());
 	if (nb_bytes != data.size()) {
 		#if DEBUG 
 		ConsoleLog::Debug("Failed to write data to MemFile");
@@ -282,9 +283,10 @@ void 				HttpRequest::openDataFile() {
 			return ;		// file already open
 
 		this->_data_filename = Utils::randomFileName();
-		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR); // file opened for read & write
+		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR | O_CREAT, 0600); // file opened for read & write
 		if (this->_data_file_fd == -1) {
 			perror(NULL);
+			std::cout << "file name " << this->_data_filename  << std::endl;
 			ConsoleLog::Debug("Failed to open MemFile");
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
