@@ -11,13 +11,13 @@ const size_t		HttpRequest::URI_MAX_LEN	= 2000;
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET),
-							 _data_file_fd(-1) {
+							 _data_file_fd(-1), 
+							 _request_status_code(0) {
 				
 }
 
 HttpRequest::~HttpRequest() {
 	close(this->_data_file_fd);
-
 }
 
 HttpRequest::HttpRequest(const HttpRequest &request) {
@@ -38,6 +38,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_data_file_fd = request._data_file_fd;
 	this->_data_filename = request._data_filename;
 	this->_request_line = request._request_line;
+	this->_request_status_code = request._request_status_code;
 	return (*this);
 }
 
@@ -71,7 +72,6 @@ void	validateVersion(const std::string &http_version) {
 }
 
 void	HttpRequest::parseRequestLine(std::string &request_line) {
-		// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
@@ -286,7 +286,6 @@ void 				HttpRequest::openDataFile() {
 		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR | O_CREAT, 0600); // file opened for read & write
 		if (this->_data_file_fd == -1) {
 			perror(NULL);
-			std::cout << "file name " << this->_data_filename  << std::endl;
 			ConsoleLog::Debug("Failed to open MemFile");
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
@@ -298,3 +297,12 @@ void 				HttpRequest::openDataFile() {
 const std::string & HttpRequest::getRequestLine() const {
 	return (this->_request_line);
 }
+
+void HttpRequest::setStatusCode(int status) {
+	this->_request_status_code = status ;
+}
+
+short HttpRequest::getStatusCode() const {
+	return (this->_request_status_code);
+}
+

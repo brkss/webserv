@@ -46,7 +46,7 @@ namespace Network
 
 	void ListenOnSocket(int sock_fd)  { 
 		int listen_stat;
-		listen_stat = listen(sock_fd, 10);
+		listen_stat = listen(sock_fd, 216);
 		if (listen_stat == -1) {
 			throw(ErrorLog("Error: failed to liten on socket"));
 		}
@@ -81,6 +81,7 @@ namespace Network
 		socklen_t type_size = sizeof(size);
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
 		return (0xFF);
+		return (0x5b8);
 	}
 
 	int getFullSpaceSize(int sock_fd) {

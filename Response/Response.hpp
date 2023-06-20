@@ -2,7 +2,7 @@
 #define RESPONSE
 
 #include <string>
-
+#include <unistd.h>
 class Response {
 
 	std::string contentType;
@@ -19,19 +19,22 @@ class Response {
 
 	int fd;
 	bool	headears_sent;
+	static std::ifstream static_file;
 
-	std::string body;
+	static std::string response_chunk;
+	static std::string body;
 
 	public:
 		Response(std::string body, std::string type, int size, int status, int fd);
+		~Response()  {  } 
 		std::string generateResponse();
 		
-		std::string getResponseBody();
+		const std::string &getResponseBody();
 		std::string getResponseHeaders();
 		
 		std::string getContentLength();
 		std::string generateStatusMessage(int status);
-		std::string getResponseChunk(int size);
+		const std::string &getResponseChunk(int size);
 
 		int getFD();
 		Response(const Response &response);

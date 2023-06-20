@@ -23,7 +23,7 @@ class Handler {
 
 
     public:
-        Handler(Client client);
+        Handler(Client &client);
         //Handler(std::string path, std::string req_body, std::map<std::string, std::string> headers);
 
         std::string getFileContent(std::string filename);
@@ -31,16 +31,14 @@ class Handler {
         std::string getFileContentType(std::string filename);
 
         int getSize();
-        std::string getBody();
+		const std::string &getBody();
         std::string getType();
         int getStatus();
         int getFD();
 
 		~Handler() {
-			std::cout << "Handler distructor called " << std::endl;
+
 		}
-
 };
-
 
 #endif

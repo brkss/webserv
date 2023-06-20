@@ -8,13 +8,13 @@
 #include <sstream>
 
 
-CGI::CGI(Client client){
+CGI::CGI(Client &client) : client(client){
 	this->client = client;
 }
 
 void CGI::handlePhpCGI(std::string path){
     
-	HttpRequest request = this->client.getRequest();
+	HttpRequest &request = this->client.getRequest();
 	char **env = generateCGIEnvironement(path);
 
     //int reqDataFD = request.getDataFileDescriptor();

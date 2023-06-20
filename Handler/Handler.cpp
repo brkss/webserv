@@ -8,7 +8,7 @@
 #include "../config/ConfigParse/inc/location.hpp"
 
 
-Handler::Handler(Client client){
+Handler::Handler(Client &client){
     
     this->client = client;
 	this->fd = -1;
@@ -200,13 +200,11 @@ std::string Handler::getFileContentType(std::string filename){
 	return file_type;
 }
 
-
-
 int Handler::getSize(){
     return this->size;
 }
 
-std::string Handler::getBody(){
+const std::string &Handler::getBody(){
     return this->body;
 }
 

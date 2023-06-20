@@ -11,14 +11,14 @@
 
 class CGI {
 
-	Client client;
+	Client &client;
 
 	std::string cgi_response;
 	int status;
 
 	public:
 		
-		CGI(Client client);
+		CGI(Client &client);
 		
 		void handlePhpCGI(std::string path);
 		std::map<std::string, std::string> parse_cgi_response(std::string response);
