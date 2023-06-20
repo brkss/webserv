@@ -4,7 +4,8 @@
 #include "CGI.hpp"
 #include <stdio.h>
 #include <unistd.h>
-#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 
 CGI::CGI(Client client){
@@ -16,19 +17,43 @@ void CGI::handlePhpCGI(std::string path){
 	HttpRequest request = this->client.getRequest();
 	char **env = generateCGIEnvironement(path);
 
-    FILE *fileIN = ::tmpfile();
+    //int reqDataFD = request.getDataFileDescriptor();
+
+    //FILE *fileIN = ::tmpfile();
     FILE *fileOUT = ::tmpfile();
     
 
-    int fdIN = fileno(fileIN);
+    //int fdIN = fileno(fileIN);
+    int fdIN =  request.getDataFileDescriptor();
+    std::cout << "file descriptor file descriptor request : " << fdIN << "\n";
     int fdOUT = fileno(fileOUT);
     //int err = -1;
     
     std::string response;
 
     
-
-    write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
+    //write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
+    //write(fdIN, req_body.c_str(), req_body.size());
+    
+    // tmp : check file !
+        char buffer[1024];
+        lseek(fdOUT, 0, SEEK_SET);
+        int bread = read(fdIN, buffer, 1024);
+        if(bread == -1){
+            perror("read fd req : ");
+        }
+        std::cout << " read : " << bread << "\n";
+        std::string k = "";
+        while(bread > 0){
+            std::cout << " buff : " << buffer << "\n";
+            k += buffer;
+            bread = read(fdIN, buffer, 1024);
+        }
+        std::cout << "\n\n\n\n--------------------------------------\n\n\n\n\n";
+        std::cout << "oop>> :" << k;
+         std::cout << "\n\n\n\n--------------------------------------\n\n\n\n";
+    // -- end 
+    
     lseek(fdIN, 0, SEEK_SET);
 
     std::cout << " path : " << path << "\n";
@@ -40,17 +65,18 @@ void CGI::handlePhpCGI(std::string path){
         //exit(0);
     }else if(pid == 0){
 		// child proc
-        if(dup2(fdIN, STDIN_FILENO) == -1){
+        if(dup2(fdIN, STDIN_FILENO) == -1 && fdIN != -1){
             // handle 500
+            perror("something went wrong dup input : ");
             exit(0);
         }
         if(dup2(fdOUT, STDOUT_FILENO) == -1){
             // handle 500
             exit(0);
         }
-        fclose(fileIN);
+        //fclose(fileIN);
         fclose(fileOUT);
-        close(fdIN);
+        //close(fdIN);
         close(fdOUT);
         
         execve(path.c_str(), nullptr, env);
@@ -81,9 +107,9 @@ void CGI::handlePhpCGI(std::string path){
             bread = read(fdOUT, buffer, 1024);
         }
         
-		fclose(fileIN);
+		//fclose(fileIN);
         fclose(fileOUT);
-        close(fdIN);
+        //close(fdIN);
         close(fdOUT);
 
         std::cout << ">>>>>response : " << response << "\n";
@@ -117,9 +143,6 @@ char **CGI::generateCGIEnvironement(std::string path){
 	headers["CONTENT_TYPE"] = req_headers["Content-Type"];
 	headers["CONTENT_LENGTH"] = std::to_string(request.getRequestBody().size());
 	headers["REDIRECT_STATUS"] = "200";
-	
-    std::cout << "\n\n\n\n\nquery string : " << headers["QUERY_STRING"] << "/n--------------\n\n\n\n\n";
-
 
 	std::map<std::string, std::string>::iterator iter;
 	char **env = new char*[CGI_ENV_LENGTH + 1];
