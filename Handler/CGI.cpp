@@ -16,48 +16,16 @@ void CGI::handlePhpCGI(std::string path){
     
 	HttpRequest &request = this->client.getRequest();
 	char **env = generateCGIEnvironement(path);
-
-    //int reqDataFD = request.getDataFileDescriptor();
-
-    //FILE *fileIN = ::tmpfile();
     FILE *fileOUT = ::tmpfile();
     
 
-    //int fdIN = fileno(fileIN);
-    int fdIN =  request.getDataFileDescriptor();
+    int fdIN =  open(request.getRequestDataFilename().c_str(), O_RDONLY);
     std::cout << "file descriptor file descriptor request : " << fdIN << "\n";
     int fdOUT = fileno(fileOUT);
-    //int err = -1;
+   
     
     std::string response;
-
-    
-    //write(fdIN, request.getRequestBody().c_str(), request.getRequestBody().size());
-    //write(fdIN, req_body.c_str(), req_body.size());
-    
-    // tmp : check file !
-        char buffer[1024];
-        lseek(fdOUT, 0, SEEK_SET);
-        int bread = read(fdIN, buffer, 1024);
-        if(bread == -1){
-            perror("read fd req : ");
-        }
-        std::cout << " read : " << bread << "\n";
-        std::string k = "";
-        while(bread > 0){
-            std::cout << " buff : " << buffer << "\n";
-            k += buffer;
-            bread = read(fdIN, buffer, 1024);
-        }
-        std::cout << "\n\n\n\n--------------------------------------\n\n\n\n\n";
-        std::cout << "oop>> :" << k;
-         std::cout << "\n\n\n\n--------------------------------------\n\n\n\n";
-    // -- end 
-    
-    lseek(fdIN, 0, SEEK_SET);
-
     std::cout << " path : " << path << "\n";
-    //std::cout << "request path ::::: " << request.getRequestPath().c_str() << "\n";
 
     pid_t pid = fork();
     if(pid == -1){

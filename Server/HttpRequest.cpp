@@ -294,6 +294,12 @@ void 				HttpRequest::openDataFile() {
 		#endif 
 }
 
+
+
+const std::string 	&HttpRequest::getRequestDataFilename() const{
+	return this->_data_filename;
+}
+
 const std::string & HttpRequest::getRequestLine() const {
 	return (this->_request_line);
 }
