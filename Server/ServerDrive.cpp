@@ -1,10 +1,11 @@
-#include <iostream> 
+#include <iostream>
 #include "ServerDrive.hpp"
 #include <strings.h>
 #include "ErrorHandler.hpp"
 #include "Network.hpp"
 #include <algorithm>
 #include "Utils.hpp"
+#include <unistd.h>
 
 const std::string ServerDrive::HEADER_DELIM = "\r\n\r\n";
 const std::string ServerDrive::CRLF			= "\r\n";
@@ -27,6 +28,7 @@ ServerDrive::ServerDrive(Parse &conf): _config(conf),
 			sock_fd = Network::CreateSocket();
 			setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &true_, sizeof(int));
 			Network::BindSocket(sock_fd, server->getPort(), server->getAddress() );
+
 			Network::ListenOnSocket(sock_fd);
 			addSocketFd(sock_fd);
 			FD_SET(sock_fd, &(this->_listenset)); {
@@ -228,7 +230,6 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		if (ofs.is_open())
 			ofs << client.getRequest().getRequestBody() ;
 		else {
-			std::cout << "upload dir" << out_file_name << std::endl;
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
 		ConsoleLog::Specs("Data uploaded to :" + out_file_name);
@@ -279,13 +280,16 @@ char *moveToHeap(const std::string &resp) {
 }
 
 void PrepareResponse(Client &client)  {
+
+
 	Handler	handler(client);
 	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
-	std::string resp = response.generateResponse();
 	client.setResponseObj(response);
+	//std::string resp = response.generateResponse();
 }
 
 void ServerDrive::SendResponse(Client &client) {
+
 
 	Response &client_response	= client.getResponseObj();
 	short 	client_fd			= client.getConnectionFd();

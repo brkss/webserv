@@ -8,7 +8,7 @@
 #include "../config/ConfigParse/inc/location.hpp"
 
 
-Handler::Handler(Client client){
+Handler::Handler(Client &client){
     
     this->client = client;
 	this->fd = -1;

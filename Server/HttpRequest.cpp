@@ -17,7 +17,6 @@ HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 
 HttpRequest::~HttpRequest() {
 	close(this->_data_file_fd);
-
 }
 
 HttpRequest::HttpRequest(const HttpRequest &request) {
@@ -71,7 +70,6 @@ void	validateVersion(const std::string &http_version) {
 }
 
 void	HttpRequest::parseRequestLine(std::string &request_line) {
-		// Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 		std::vector<std::string> values = Utils::split(request_line, " ");
 		if (values.size() != 3) {
 			throw(RequestError(ErrorNumbers::_400_BAD_REQUEST));
@@ -286,7 +284,6 @@ void 				HttpRequest::openDataFile() {
 		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR | O_CREAT, 0600); // file opened for read & write
 		if (this->_data_file_fd == -1) {
 			perror(NULL);
-			std::cout << "file name " << this->_data_filename  << std::endl;
 			ConsoleLog::Debug("Failed to open MemFile");
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
