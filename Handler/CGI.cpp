@@ -42,9 +42,9 @@ void CGI::handlePhpCGI(std::string path){
             // handle 500
             exit(0);
         }
-        //fclose(fileIN);
+        
         fclose(fileOUT);
-        //close(fdIN);
+        close(fdIN);
         close(fdOUT);
         
         execve(path.c_str(), nullptr, env);
@@ -61,9 +61,9 @@ void CGI::handlePhpCGI(std::string path){
 		waitpid(pid, &status, 0);
 		WEXITSTATUS(status);
        
-        char buffer[1024];
+        char buffer[2];
         lseek(fdOUT, 0, SEEK_SET);
-		int bread = read(fdOUT, buffer, 1024);
+		int bread = read(fdOUT, buffer, 1);
         
         if(bread == -1){
             perror("read failed : ");
@@ -72,12 +72,11 @@ void CGI::handlePhpCGI(std::string path){
         while(bread > 0){
             std::cout << ">>>> buffer : " << buffer << "\n";
             response += buffer;
-            bread = read(fdOUT, buffer, 1024);
+            bread = read(fdOUT, buffer, 1);
         }
         
-		//fclose(fileIN);
         fclose(fileOUT);
-        //close(fdIN);
+        close(fdIN);
         close(fdOUT);
 
         std::cout << ">>>>>response : " << response << "\n";
