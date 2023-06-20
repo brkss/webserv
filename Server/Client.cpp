@@ -22,8 +22,11 @@ Client::Client(int connection_fd) : _server_fd(connection_fd),
 }
 
 Client::~Client() {
+
+	int fd  = this->_responseObj.getFD();
 	delete (this->_response_cpy);
-	close(this->_responseObj.getFD());
+	if(fd > 0)
+		close(fd);
 }
 
 Client::Client(const Client &client): _response(NULL),

@@ -56,16 +56,18 @@ namespace Network
 		int connection_fd;
 	
 		Client new_client(sock_fd) ;
+		std::cout << sock_fd << std::endl;
 		connection_fd = accept(sock_fd, (struct sockaddr *) new_client.getClientAddress(), new_client.getAddressLen());
+		perror("accept error ? : ");
 		fcntl(connection_fd, F_SETFL, O_NONBLOCK);
-		if (connection_fd == -1) 
-		{
+		if (connection_fd == -1) {
 			close(sock_fd);
 			throw(ErrorLog("Error: Failed to accept connection"));
 		}
 		new_client.setConnectionFd(connection_fd);
 		#if DEBUG
 		ConsoleLog::Debug("New client connection ACCEPT ok!");
+		std::cout << "accepted fd : " << connection_fd << std::endl;
 		#endif
 		return (new_client);
 	}
@@ -80,8 +82,8 @@ namespace Network
 		int size;
 		socklen_t type_size = sizeof(size);
 		getsockopt(socket_fd,SOL_SOCKET,io_type,(void *)&size, &type_size); 
-		return (0xFF);
 		return (0x5b8);
+		return (0xFF);
 	}
 
 	int getFullSpaceSize(int sock_fd) {

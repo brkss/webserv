@@ -84,6 +84,8 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	#endif 
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, NULL);//&timout);
 	if  (select_stat < 0)  {
+			perror(NULL);
+		ConsoleLog::Error("Select failed ");
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 	}
 }
@@ -289,8 +291,6 @@ void PrepareResponse(Client &client)  {
 }
 
 void ServerDrive::SendResponse(Client &client) {
-
-
 	Response &client_response	= client.getResponseObj();
 	short 	client_fd			= client.getConnectionFd();
 	size_t	socket_buffer_size	= Network::getSocketBufferSize(client_fd, SO_RCVBUF);

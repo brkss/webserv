@@ -113,7 +113,6 @@ std::string Response::getResponseHeaders(){
 
 const std::string &Response::getResponseBody(){
 	this->body = this->body + "\r\n";
-
 	return this->body;
 }
 
@@ -142,6 +141,7 @@ const std::string &Response::getResponseChunk(int size){
 		std::cout << "this->fd " << this->fd << std::endl;
         perror("read failed : ");
     }
+	std::cout << "read status " << status << std::endl;
     return response;
 }
 

@@ -62,6 +62,7 @@ class RequestError {
 
 	public:
 		RequestError(int error_number) : _error_number(error_number) {
+		std::cout << "error number "  << _error_number << std::endl;
 		}
 		int getErrorNumber() const  {
 			return (this->_error_number);
