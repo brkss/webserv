@@ -157,7 +157,6 @@ std::map<std::string, std::string> CGI::parse_cgi_response(std::string response)
     }else {
 		std::cout << "body no pos !!\n";
 	}
-
    
     results["type"] = contentType;
     results["body"] = body;
