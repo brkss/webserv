@@ -135,6 +135,6 @@ int getFileFd(std::string path){
     int fd = -1;
 
     fd = open(path.c_str(), O_RDONLY);
-	std::cout << "file opened ok" << std::endl;
+	std::cout << "file opened with fd :" << fd << std::endl;
     return fd;
 }

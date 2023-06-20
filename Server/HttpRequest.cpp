@@ -11,7 +11,8 @@ const size_t		HttpRequest::URI_MAX_LEN	= 2000;
 
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET),
-							 _data_file_fd(-1) {
+							 _data_file_fd(-1), 
+							 _request_status_code(0) {
 				
 }
 
@@ -37,6 +38,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_data_file_fd = request._data_file_fd;
 	this->_data_filename = request._data_filename;
 	this->_request_line = request._request_line;
+	this->_request_status_code = request._request_status_code;
 	return (*this);
 }
 
@@ -295,3 +297,12 @@ void 				HttpRequest::openDataFile() {
 const std::string & HttpRequest::getRequestLine() const {
 	return (this->_request_line);
 }
+
+void HttpRequest::setStatusCode(int status) {
+	this->_request_status_code = status ;
+}
+
+short HttpRequest::getStatusCode() const {
+	return (this->_request_status_code);
+}
+

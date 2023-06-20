@@ -31,18 +31,14 @@ class Handler {
         std::string getFileContentType(std::string filename);
 
         int getSize();
-        std::string getBody();
+		const std::string &getBody();
         std::string getType();
         int getStatus();
         int getFD();
 
 		~Handler() {
+
 		}
-
-        
-        
-
 };
-
 
 #endif

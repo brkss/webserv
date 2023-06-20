@@ -11,6 +11,10 @@
  * HELPER fucntion that get current date and time in the format required by http !
  *
  */
+std::string Response::response_chunk = "";
+std::string Response::body = "";
+//std::ifstream Response::static_file();
+
 std::string nowHTTP(){
  	// Get the current time
     std::time_t current_time = std::time(nullptr);
@@ -107,19 +111,21 @@ std::string Response::getResponseHeaders(){
 	return headers;
 }
 
-std::string Response::getResponseBody(){
-	std::string response = this->body + "\r\n";
+const std::string &Response::getResponseBody(){
+	this->body = this->body + "\r\n";
 
-	return response;
+	return this->body;
 }
 
-std::string Response::getResponseChunk(int size){
+const std::string &Response::getResponseChunk(int size){
 
-    std::string response = "";
+   //std::string response = "";
+   std::string &response = this->response_chunk;
 
 	if (! this->headears_sent) {
 		this->headears_sent = true;
-		return (getResponseHeaders());
+		response = getResponseHeaders();
+		return (response);
 	}
     if(this->fd == -1) {
 		response = this->body;
@@ -133,6 +139,7 @@ std::string Response::getResponseChunk(int size){
     if(status > 0){
         response = std::string(buffer, status);
     }else {
+		std::cout << "this->fd " << this->fd << std::endl;
         perror("read failed : ");
     }
     return response;

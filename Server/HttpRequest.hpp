@@ -44,6 +44,7 @@ class HttpRequest {
 		//std::ofstream						_data_file;
 		std::string 						_data_filename;
 		int 								_data_file_fd;
+		int									_request_status_code; // is set on request error 
 
 		//for debug 
 		std::string 						_request_line;
@@ -68,6 +69,7 @@ class HttpRequest {
 		std::string			&getRequestBody();
 		std::string			&getRequestData();
 		int					getDataFileDescriptor();
+		short				getStatusCode() const;
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);
@@ -82,6 +84,7 @@ class HttpRequest {
 		void 				setTransferType(BODY_TRANSFER type);
 		void				setRequestState(REQUEST_STATE state);
 		void				setQueryString(const std::string &url);
+		void 				setStatusCode(int status);
 
 		// #Dtata Trandfer Methods 
 		void 				appendChunk(const std::string &chunk);

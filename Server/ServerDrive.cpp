@@ -303,6 +303,7 @@ void ServerDrive::SendResponse(Client &client) {
 	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
 			close_connection = true;
 		#if DEBUG
+		client.getRequest().setStatusCode(0xde);//eadbeef
 		perror("Send error :");
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
@@ -322,6 +323,10 @@ void ServerDrive::SendResponse(Client &client) {
 }
 
 void ServerDrive::log(Client &client) {
+	if (client.getRequest().getStatusCode()) {
+		ConsoleLog::Error("[Send Error]");
+		return ;
+	}
 	Response 	&response_obj = client.getResponseObj();
 	const std::string log = "[Response]: " + client.getRequest().getRequestLine() + " (" +  response_obj.getStatusCode() + ")";
 	ConsoleLog::Specs(log);
