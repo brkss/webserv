@@ -61,17 +61,18 @@ void CGI::handlePhpCGI(std::string path){
 		waitpid(pid, &status, 0);
 		WEXITSTATUS(status);
        
-        char buffer[2];
+        char buffer[1024];
         lseek(fdOUT, 0, SEEK_SET);
-		int bread = read(fdOUT, buffer, 1);
-        
+		int bread = read(fdOUT, buffer, 1023);
+        buffer[1023] = '\0';
         if(bread == -1){
             perror("read failed : ");
             exit(0);
         } 
         while(bread > 0){
             response += buffer;
-            bread = read(fdOUT, buffer, 1);
+            bread = read(fdOUT, buffer, 1023);
+            buffer[1023] = '\0';
         }
         
         fclose(fileOUT);
@@ -156,7 +157,7 @@ std::map<std::string, std::string> CGI::parse_cgi_response(std::string response)
         body = response.substr(bodyIndex);
     }else {
 		std::cout << "body no pos !!\n";
-	}
+	} 
    
     results["type"] = contentType;
     results["body"] = body;
