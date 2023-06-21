@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerDrive.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
+/*   Updated: 2023/06/22 00:24:53 by adriouic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <iostream>
 #include "ServerDrive.hpp"
 #include <strings.h>
@@ -173,8 +185,7 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 	}
 	std::string temp = request_body.substr(0, chunk_size);
 	assert(chunk_size == temp.size());
-	request.writeChunkTofile(temp);
-	//request.appendChunk(temp);							// STORE CUNK IN BODY BUFFER
+	request.writeChunkTofile(temp);							// write data to temp file
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 	return (true);
 }
@@ -224,18 +235,6 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		#if DEBUG 
 		ConsoleLog::Debug("server handeling the request : " + client.getServer().getServerName());
 		#endif
-
-		return ;
-		// TESTING DATA TRANSFER
-		const std::string out_file_name = client.getServer().getRoot() +  client.getServer().getUploadStore() + "/oupload"  + std::to_string(client.getConnectionFd());
-		std::ofstream ofs(out_file_name);
-		if (ofs.is_open())
-			ofs << client.getRequest().getRequestBody() ;
-		else {
-			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
-		}
-		ConsoleLog::Specs("Data uploaded to :" + out_file_name);
-		// should add log error 
 	}
 }
 
@@ -264,6 +263,7 @@ bool ServerDrive::ClientError(int fd) {
 	Client &client				= getClient(fd) ;
 	HttpRequest &request = client.getRequest();
 	short 	error				= client.getRequestStatus();
+
 	if (error != 0) {
 		sendErrorMessage(fd, error);
 		const std::string log = "[Request]: " + request.getRequestLine() + " (" +  std::to_string(error) + ")" ;
@@ -283,12 +283,9 @@ char *moveToHeap(const std::string &resp) {
 
 void PrepareResponse(Client &client)  {
 
-	std::cout << "preparing the response " << std::endl;
 	Handler	handler(client);
-	std::cout << "prepared response ok" << std::endl;
 	Response response(handler.getBody(), handler.getType(), handler.getCookie(), handler.getLocation(), handler.getSize(), handler.getStatus(), handler.getFD());
 	client.setResponseObj(response);
-	//std::string resp = response.generateResponse();
 }
 
 void ServerDrive::SendResponse(Client &client) {
@@ -309,11 +306,6 @@ void ServerDrive::SendResponse(Client &client) {
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
 	}
-	#if DEBUG
-	ConsoleLog::Debug("Response Portion  Sent!" );
-	std::cout << "response : =========================+" << std::endl;
-	std::cout << response << std::endl;
-	#endif 
 	if (close_connection) {
 		#if DEBUG
 		std::string debug_log = "::WebServ Response Sent!. Closing fd :...";
@@ -361,7 +353,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 					&& !FD_ISSET(fd, &this->_writeset)) // CLIENT SHOULD BE CHECKED FOR TIMEOUT
 				checkClientTimout(fd);	
 
-		} catch (const RequestError &error)  {
+		} catch (const RequestError &error) {
 			#if DEBUG
 			ConsoleLog::Error("Request Error: status code : " + std::to_string(error.getErrorNumber()));
 			#endif

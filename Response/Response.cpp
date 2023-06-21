@@ -145,10 +145,9 @@ const std::string &Response::getResponseChunk(int size){
     if(status > 0){
         response = std::string(buffer, status);
     }else {
-		std::cout << "this->fd " << this->fd << std::endl;
-        perror("read failed : ");
+		if (status == 0 ) response = "";
+		else perror("MEMFILE read failed");
     }
-	std::cout << "read status " << status << std::endl;
     return response;
 }
 

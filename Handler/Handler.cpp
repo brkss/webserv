@@ -45,12 +45,7 @@ Handler::Handler(Client &client){
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
     std::map<std::string, std::string> req_headers = request.getHeaders();
-
-    std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
-    std::cout << path;
-    std::cout << "\n\n\n ----------------------------------------\n\n\n";
-
-
+    std::cout << "Path : " << path << std::endl;;
     if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
@@ -86,7 +81,7 @@ Handler::Handler(Client &client){
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
-        std::cout << "file not found !!!!\n\n\n\n";
+        std::cout << "file not found: " << path << std::endl;
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
@@ -114,10 +109,7 @@ Handler::Handler(Client &client){
             return;
         }
     }
-    
-    std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
-    std::cout << path;
-    std::cout << "\n\n\n ---------------------------------------\n\n\n";
+    std::cout << "Path: " << path << std::endl;;
     
     if(isCGIScript(path)){
         // handle cgi !
