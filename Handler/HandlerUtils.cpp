@@ -91,6 +91,7 @@ bool directoryExits(std::string path){
     
     if(directory != NULL){
         closedir(directory);
+        std::cout << "found it as a directory !!" << path << "\n\n\n\n";
         return true;
     }
     return false;
