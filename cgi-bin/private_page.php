@@ -1,8 +1,9 @@
+#!/opt/homebrew/bin/php-cgi
 <?php 
 	require_once("session.php");
 ?> 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 	<title>session-test-private</title>
 </head>
@@ -15,3 +16,4 @@
 		<p> Destroy php-session <a href="logout.php">Logout</a></p>
 	</main> 
 </body>
+<html>

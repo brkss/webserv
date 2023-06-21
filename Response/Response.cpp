@@ -52,10 +52,12 @@ Response & Response::operator=(const Response &response) {
 	this->fd = response.fd;
 	this->body = response.body;
 	this->headears_sent =  response.headears_sent;
+	this->cookie = response.cookie;
+	this->redirect = response.redirect;
 	return (*this);
 }
 
-Response::Response(std::string body, std::string type, int size, int status, int fd){
+Response::Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd){
 	this->fd = fd;
 	this->status = std::to_string(status);
 	this->status_message = generateStatusMessage(status);
@@ -70,6 +72,9 @@ Response::Response(std::string body, std::string type, int size, int status, int
 	this->acceptEncoding = "gzip, deflate, sdch";
 	this->host = "localhost:89";
 	this->body = body;
+	this->cookie = cookie;
+	this->redirect = redirect;
+	//this->cookie = "cookie value" ;
 	this->headears_sent = false;
 }
 
@@ -102,9 +107,11 @@ std::string Response::getResponseHeaders(){
 	headers += "Content-Length: " + this->contentLength + "\r\n";
 	headers += "Cache-Control: " + this->cacheControl + "\r\n";
 	headers += "Date: " +  this->date  + "\r\n";
-	headers += "Server: " + this->server + "\n";
+	headers += "Server: " + this->server + "\r\n";
 	headers += "Connection: " + this->connection + "\r\n";
 	headers += "Accept: " + this->accept + "\r\n";
+	headers += "Set-Cookie: " + this->cookie + "\r\n";
+	headers += "Location: " + this->redirect + "\r\n";
 	headers += "Accept-Encoding: " + this->acceptEncoding + "\r\n";
 	headers += "Host: " + this->host + "\r\n\r\n";
 

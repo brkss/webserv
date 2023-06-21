@@ -130,7 +130,12 @@ Handler::Handler(Client &client){
         this->body = parsed_cgi_response["body"];
         this->type = parsed_cgi_response["type"];
         this->size = parsed_cgi_response["body"].size();
+		this->location = parsed_cgi_response["redirect"];
         this->status = 200;
+		if (this->location != "") {
+			this->cookie = parsed_cgi_response["cookie"];
+        	this->status = 303;
+		}
     
     }else{
 		

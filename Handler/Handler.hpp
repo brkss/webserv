@@ -16,6 +16,9 @@ class Handler {
     
     std::string body;
     std::string type;
+	std::string cookie;
+
+	std::string location;
     int status;
     int size;
 
@@ -35,6 +38,12 @@ class Handler {
         std::string getType();
         int getStatus();
         int getFD();
+		const std::string &getCookie() const  {
+			return (this->cookie);
+		}
+		const std::string &getLocation() const {
+			return (this->location);
+		}
 
 		~Handler() {
 

@@ -16,6 +16,8 @@ class Response {
 	std::string host;
 	std::string status;
 	std::string status_message;
+	std::string cookie;
+	std::string redirect;
 
 	int fd;
 	bool	headears_sent;
@@ -25,7 +27,9 @@ class Response {
 	static std::string body;
 
 	public:
-		Response(std::string body, std::string type, int size, int status, int fd);
+		//Response(std::string body, std::string type, int size, int status, int fd);
+
+		Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd);
 		~Response()  {  } 
 		std::string generateResponse();
 		

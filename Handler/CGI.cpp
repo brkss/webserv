@@ -64,7 +64,8 @@ void CGI::handlePhpCGI(std::string path){
         char buffer[1024];
         lseek(fdOUT, 0, SEEK_SET);
 		int bread = read(fdOUT, buffer, 1023);
-        buffer[1023] = '\0';
+        //buffer[1023] = '\0'; //  l9lawi
+        buffer[bread] = '\0';
         if(bread == -1){
             perror("read failed : ");
             exit(0); // ANARI NARI 
@@ -114,6 +115,7 @@ char **CGI::generateCGIEnvironement(std::string path){
     headers["HTTP_ACCEPT_LANGUAGE"] = req_headers["Accept-Language"];
     headers["HTTP_ACCEPT_CHARSET"] = req_headers["Accept-Charset"];
     headers["CONTENT_LANGUAGE"] = req_headers["Content-Language"];
+    headers["HTTP_COOKIE"] = req_headers["Cookie"];
 
 	std::map<std::string, std::string>::iterator iter;
 	char **env = new char*[CGI_ENV_LENGTH + 1];
@@ -133,34 +135,62 @@ char **CGI::generateCGIEnvironement(std::string path){
 }
 
 
+const std::string getHeaderValue(const std::string &response, const std::string &header_name) {
+	std::string header_value;
+	std::size_t header_index = response.find(header_name);
+	    if (header_index != std::string::npos) {
+	        header_index += header_name.size();
+	        std::size_t newlineindex = response.find("\r\n", header_index);
+	        if (newlineindex != std::string::npos) {
+	            header_value = response.substr(header_index, newlineindex - header_index);
+	        }
+	    }
+	return (header_value);
+}
 
 std::map<std::string, std::string> CGI::parse_cgi_response(std::string response){
     
 
+	std::cout << response  << std::endl;
 	std::map <std::string, std::string> results;
-    std::string contentType;
     std::string body;
 
-    std::size_t contentTypeIndex = response.find("Content-type: ");
-    if (contentTypeIndex != std::string::npos) {
-        contentTypeIndex += 14;
-        std::size_t newlineIndex = response.find('\n', contentTypeIndex);
-        if (newlineIndex != std::string::npos) {
-            contentType = response.substr(contentTypeIndex, newlineIndex - contentTypeIndex);
-        }
-    }
+    //std::size_t contenttypeindex = response.find("Content-Type: ");
+    //if (contenttypeindex != std::string::npos) {
+    //    contenttypeindex += 14;
+    //    std::size_t newlineindex = response.find('\n', contenttypeindex);
+    //    if (newlineindex != std::string::npos) {
+    //        contentType = response.substr(contenttypeindex, newlineindex - contenttypeindex);
+    //    }
+    //}
+
+	//std::size_t cookie_index  = response.find("Set-Cookie:");
+    //if (cookie_index != std::string::npos) {
+    //    cookie_index += 11;
+    //    std::size_t nl_index = response.find('\n', cookie_index);
+    //    if (nl_index != std::string::npos) {
+    //        cookie = response.substr(cookie_index, nl_index - cookie_index);
+    //    }
+    //}
+
     
     std::size_t bodyIndex = response.find("\r\n\r\n");
     if (bodyIndex != std::string::npos) {
-        bodyIndex += 2; 
+        bodyIndex += 4; 
         
         body = response.substr(bodyIndex);
-    }else {
+    } else {
 		std::cout << "body no pos !!\n";
 	} 
-   
-    results["type"] = contentType;
+  	results["type"] = getHeaderValue(response, "Content-type:"); 
+	results["cookie"] = getHeaderValue(response, "Set-Cookie: ");
+	results["redirect"] = getHeaderValue(response, "Location: ");
     results["body"] = body;
+
+    //results["type"] = contentType;
+	//std::cout << " ------------------------- content-type " << contentType << std::endl;
+    //results["body"] = body;
+	//results["cookie"] = cookie;
     return results;
 }
 

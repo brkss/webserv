@@ -283,10 +283,10 @@ char *moveToHeap(const std::string &resp) {
 
 void PrepareResponse(Client &client)  {
 
-std::cout << "preparing the response " << std::endl;
+	std::cout << "preparing the response " << std::endl;
 	Handler	handler(client);
 	std::cout << "prepared response ok" << std::endl;
-	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
+	Response response(handler.getBody(), handler.getType(), handler.getCookie(), handler.getLocation(), handler.getSize(), handler.getStatus(), handler.getFD());
 	client.setResponseObj(response);
 	//std::string resp = response.generateResponse();
 }
@@ -311,6 +311,8 @@ void ServerDrive::SendResponse(Client &client) {
 	}
 	#if DEBUG
 	ConsoleLog::Debug("Response Portion  Sent!" );
+	std::cout << "response : =========================+" << std::endl;
+	std::cout << response << std::endl;
 	#endif 
 	if (close_connection) {
 		#if DEBUG
