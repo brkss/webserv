@@ -17,16 +17,20 @@ Handler::Handler(Client &client){
     std::vector<Location> locations = client.getServer().getLocations();
     std::string upload_location = client.getServer().getUploadStore();
 
-
-
     // check location 
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
+    
     if(locationIndex > -1){
+       
         rootPath = locations[locationIndex].getRoot();
-        request.setRequestPath(request.getRequestPath().substr(locations[locationIndex].getEndpoint().length() + 1));
+        //std::string req_path_sub = request.getRequestPath();
+       
+        //request.setRequestPath(req_path_sub);
+        
         if(locations[locationIndex].getUploadStore().size() > 0){
             upload_location = locations[locationIndex].getUploadStore();
         }
+       
         // check allowed methods !
         if(!checkAllowedMethods(locations[locationIndex], request.getRequestMethod())){
             this->body = "<html><body style='text-align: center'><h1>405 Method Not Allowed</h1></body></html>";
@@ -51,7 +55,6 @@ Handler::Handler(Client &client){
         // handle POST / DELETE
         int status = -1;
         std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request.getRequestPath());
-        
         
         if(filepath.length() == 0){
             this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
@@ -83,7 +86,6 @@ Handler::Handler(Client &client){
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
-        
         std::cout << "file not found !!!!\n\n\n\n";
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
@@ -94,6 +96,13 @@ Handler::Handler(Client &client){
     }else if (isDirectory(path)){
         if(!client.getServer().getAutoIndex()){
             path = rootPath + client.getServer().getIndex();
+            if(!fileExists(path)){
+                this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
+                this->type = "text/html";
+                this->size = 91;
+                this->status = 404;
+                return;
+            }
         }else {
             std::string autoIndexResponse = ListFile(path);
             
@@ -105,6 +114,10 @@ Handler::Handler(Client &client){
             return;
         }
     }
+    
+    std::cout << "\n\n\n---------------- PATH ------------------\n\n\n";
+    std::cout << path;
+    std::cout << "\n\n\n ---------------------------------------\n\n\n";
     
     if(isCGIScript(path)){
         // handle cgi !
