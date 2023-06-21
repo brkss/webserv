@@ -170,7 +170,10 @@ void		HttpRequest::parse(std::string &request_header) {
 	this->_request_line = request_line; // debug;
 	parseRequestLine(request_line);
 	parseHeaders(headers);
-	setRequestState(HttpRequest::BODY_STATE);
+	if (this->_request_method ==  HttpRequest::POST)
+		setRequestState(HttpRequest::BODY_STATE);
+	else
+		setRequestState(HttpRequest::REQUEST_READY);
 }
 
 // GETTERS 

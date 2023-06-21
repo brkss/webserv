@@ -283,8 +283,9 @@ char *moveToHeap(const std::string &resp) {
 
 void PrepareResponse(Client &client)  {
 
-
+std::cout << "preparing the response " << std::endl;
 	Handler	handler(client);
+	std::cout << "prepared response ok" << std::endl;
 	Response response(handler.getBody(), handler.getType(), handler.getSize(), handler.getStatus(), handler.getFD());
 	client.setResponseObj(response);
 	//std::string resp = response.generateResponse();

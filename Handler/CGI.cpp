@@ -67,13 +67,13 @@ void CGI::handlePhpCGI(std::string path){
         
         if(bread == -1){
             perror("read failed : ");
-            exit(0);
+            exit(0); // ANARI NARI 
+
         } 
         while(bread > 0){
             response += buffer;
             bread = read(fdOUT, buffer, 1);
         }
-        
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);

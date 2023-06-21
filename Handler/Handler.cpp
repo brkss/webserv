@@ -109,6 +109,7 @@ Handler::Handler(Client &client){
     if(isCGIScript(path)){
         // handle cgi !
         CGI cgi(client);
+		//std::cout << "php cgi ok" << std::endl;
         cgi.handlePhpCGI(path);
         std::string response = cgi.getResponse();
         std::map <std::string, std::string> parsed_cgi_response = cgi.parse_cgi_response(response);
