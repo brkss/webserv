@@ -29,7 +29,7 @@ void Parse::print_config() {
 		std::cout << "-----:server:" << "Index		: " << (*it).getIndex()  << std::endl;
 		std::cout << "-----:server:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
 		std::cout << "-----:server:" << "Root		: " << (*it).getRoot() << std::endl;
-		std::cout << "-----:server:" << "ClientBoy : " << (*it).getClientMaxBodySize() << std::endl;
+		std::cout << "-----:server:" << "ClientMaxBody : " << (*it).getClientMaxBodySize() << std::endl;
 		std::cout << "-----:server:" << "ServerName: " << (*it).getServerName() << std::endl;
 		std::cout << "-----:server:" << "Adderss: " << (*it).getAddress() << std::endl;
 		std::cout << "-----:server:" << "Port: " << (*it).getPort() << std::endl;

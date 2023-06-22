@@ -6,7 +6,7 @@
 /*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/22 00:24:53 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/22 16:06:36 by adriouic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,8 @@ void ServerDrive::addClient(Client client) {
 
 	int sock_fd = client.getConnectionFd();
 	int server_fd = client.getServerFd();
-	pair_t pair(sock_fd, client);
 	client.setServer(getServerByFd(server_fd));
+	pair_t pair(sock_fd, client);
 	this->_clients.insert(pair);
 	addSocketFd(sock_fd);
 }

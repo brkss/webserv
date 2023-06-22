@@ -39,6 +39,7 @@ Server &Server::operator=(const Server & server) {
 		this->_return_code = server._return_code;
 		this->_upload_store =  server._upload_store;
 		this->_allow_upload = server._allow_upload;
+		this->_client_max_body_size = server._client_max_body_size;
 	}
 	return (*this);
 }
