@@ -157,7 +157,6 @@ const std::string &Response::getResponseChunk(int size){
         response = std::string(buffer, status);
     }else {
 		if (status == 0 ) response = "";
-		else perror("MEMFILE read failed");
     }
     return response;
 }
@@ -207,13 +206,11 @@ void Response::checkErrorPage(){
 		if(static_cast<int>(iter->first) == this->status){
 			errorPageFilename = iter->second;
 		}
-		std::cout << "error pages : " << iter->first << " : " << iter->second << "\n\n\n";
 	}
 	
 	if(errorPageFilename == "")
 		return;
 	errorPageFilename = this->rootPath + "/" + errorPageFilename;
-	std::cout << "error path : " << errorPageFilename << "\n\n\n";
 	if(!fileExists(errorPageFilename))
 		return;
 	

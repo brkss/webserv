@@ -13,7 +13,6 @@ std::string getFileContent(std::string filename){
 
     file.seekg(0, std::ios::end);
     size_t file_size = file.tellg();
-	std::cout << "file size " << file_size << std::endl;
     file.seekg(0, std::ios::beg);
 
     char* buffer = new char[file_size];

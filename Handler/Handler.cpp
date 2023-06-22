@@ -20,6 +20,11 @@ Handler::Handler(Client &client){
     std::vector<Location> locations = client.getServer().getLocations();
     std::string upload_location = client.getServer().getUploadStore();
 
+    if(this->client.getServer().getReturnURL().length() > 0){
+        this->return_url = this->client.getServer().getReturnURL();
+        this->return_status = this->client.getServer().getReturnCode();
+    }
+
     // check location 
     int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
     
@@ -27,10 +32,16 @@ Handler::Handler(Client &client){
        
         this->rootPath = locations[locationIndex].getRoot();
         this->errorPages = locations[locationIndex].getErroPages();
-        //std::string req_path_sub = request.getRequestPath();
-       
-        //request.setRequestPath(req_path_sub);
         
+        // overlaped request !
+        if(locations[locationIndex].getReturnURL().length() > 0){
+            this->return_url = locations[locationIndex].getReturnURL();
+            this->return_status = locations[locationIndex].getReturnCode();
+        }else {
+            this->return_url = "";
+            this->return_status = -1;
+        }
+
         if(locations[locationIndex].getUploadStore().size() > 0){
             upload_location = locations[locationIndex].getUploadStore();
         }
@@ -49,7 +60,6 @@ Handler::Handler(Client &client){
 	std::string path = rootPath + request.getRequestPath();
     std::string method = request.getRequestMethod();
     std::map<std::string, std::string> req_headers = request.getHeaders();
-    std::cout << "Path : " << path << std::endl;;
     if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
@@ -85,7 +95,6 @@ Handler::Handler(Client &client){
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
-        std::cout << "file not found: " << path << std::endl;
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
@@ -95,6 +104,7 @@ Handler::Handler(Client &client){
     }else if (isDirectory(path)){
         if(!client.getServer().getAutoIndex()){
             path = rootPath + client.getServer().getIndex();
+            
             if(!fileExists(path)){
                 this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
                 this->type = "text/html";
@@ -102,7 +112,7 @@ Handler::Handler(Client &client){
                 this->status = 404;
                 return;
             }
-        }else {
+        }else {          
             std::string autoIndexResponse = ListFile(path);
             
             this->body = autoIndexResponse;
@@ -113,7 +123,6 @@ Handler::Handler(Client &client){
             return;
         }
     }
-    std::cout << "Path: " << path << std::endl;;
     
     if(isCGIScript(path)){
         // handle cgi !
@@ -155,7 +164,6 @@ std::string Handler::getFileContent(std::string filename){
 
     file.seekg(0, std::ios::end);
     size_t file_size = file.tellg();
-	std::cout << "file size " << file_size << std::endl;
     file.seekg(0, std::ios::beg);
 
     char* buffer = new char[file_size];
