@@ -91,7 +91,6 @@ bool directoryExits(std::string path){
     
     if(directory != NULL){
         closedir(directory);
-        std::cout << "found it as a directory !!" << path << "\n\n\n\n";
         return true;
     }
     return false;
@@ -102,7 +101,6 @@ std::string ListFile(std::string path){
     std::string response = "<!DOCTYPE html><html lang='en'><head><title>index of</title></head><body><h1>Index of</h1><table style='table-layout:fixed;width: 100%;'><tr><td><b>Name</b></td><td><b>Date</b></td><td><b>Size</b></td></tr>";
 
     if(directory == NULL){
-        std::cout << ">>listing files<< : error invalid directory \n";
         return "";
     }
     struct dirent *entry;

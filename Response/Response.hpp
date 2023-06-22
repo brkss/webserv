@@ -3,6 +3,8 @@
 
 #include <string>
 #include <unistd.h>
+#include <map>
+
 class Response {
 
 	std::string contentType;
@@ -14,10 +16,13 @@ class Response {
 	std::string accept;
 	std::string acceptEncoding;
 	std::string host;
-	std::string status;
+	int status;
 	std::string status_message;
 	std::string cookie;
 	std::string redirect;
+
+	std::string rootPath;
+	std::map<short, std::string> errorPages;
 
 	int fd;
 	bool	headears_sent;
@@ -29,7 +34,7 @@ class Response {
 	public:
 		//Response(std::string body, std::string type, int size, int status, int fd);
 
-		Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd);
+		Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd, std::string path, std::map<short, std::string> errorPages);
 		~Response()  {  } 
 		std::string generateResponse();
 		
@@ -39,12 +44,14 @@ class Response {
 		std::string getContentLength();
 		std::string generateStatusMessage(int status);
 		const std::string &getResponseChunk(int size);
+		
+		void checkErrorPage();
 
 		int getFD();
 		Response(const Response &response);
 		Response & operator=(const Response &response);
 		Response() {};
-		const std::string &getStatusCode() const;
+		std::string getStatusCode();
 
 
 };

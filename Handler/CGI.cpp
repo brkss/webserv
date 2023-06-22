@@ -20,22 +20,18 @@ void CGI::handlePhpCGI(std::string path){
     
 
     int fdIN =  open(request.getRequestDataFilename().c_str(), O_RDONLY);
-    std::cout << "file descriptor file descriptor request : " << fdIN << "\n";
     int fdOUT = fileno(fileOUT);
    
     
     std::string response;
-    std::cout << " path : " << path << "\n";
 
     pid_t pid = fork();
     if(pid == -1){
-        std::cout << "something went wrong forking !\n";
         //exit(0);
     }else if(pid == 0){
 		// child proc
         if(dup2(fdIN, STDIN_FILENO) == -1 && fdIN != -1){
             // handle 500
-            perror("something went wrong dup input : ");
             exit(0);
         }
         if(dup2(fdOUT, STDOUT_FILENO) == -1){
@@ -52,7 +48,6 @@ void CGI::handlePhpCGI(std::string path){
         //err = 500;
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Error</h1></body></html>";
         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
-        perror("execve err : ");
         std::cerr << "something went wront executing the cgi script !";
         exit(0);
     }else if (pid > 0){
@@ -65,12 +60,7 @@ void CGI::handlePhpCGI(std::string path){
         lseek(fdOUT, 0, SEEK_SET);
 		int bread = read(fdOUT, buffer, 1023);
         //buffer[1023] = '\0'; //  l9lawi
-        buffer[bread] = '\0';
-        if(bread == -1){
-            perror("read failed : ");
-            exit(0); // ANARI NARI 
-
-        } 
+        buffer[bread] = '\0'; 
         while(bread > 0){
             response += buffer;
             bread = read(fdOUT, buffer, 1023);
@@ -79,11 +69,8 @@ void CGI::handlePhpCGI(std::string path){
         fclose(fileOUT);
         close(fdIN);
         close(fdOUT);
-
-        std::cout << ">>>>>response : " << response << "\n";
 		
 		this->cgi_response = response; 
-		std::cout << "cgi response >>> : " << response; 
     }
     
 }
@@ -150,8 +137,6 @@ const std::string getHeaderValue(const std::string &response, const std::string 
 
 std::map<std::string, std::string> CGI::parse_cgi_response(std::string response){
     
-
-	std::cout << response  << std::endl;
 	std::map <std::string, std::string> results;
     std::string body;
 
@@ -180,7 +165,7 @@ std::map<std::string, std::string> CGI::parse_cgi_response(std::string response)
         
         body = response.substr(bodyIndex);
     } else {
-		std::cout << "body no pos !!\n";
+		//std::cout << "body no pos !!\n";
 	} 
   	results["type"] = getHeaderValue(response, "Content-type:"); 
 	results["cookie"] = getHeaderValue(response, "Set-Cookie: ");

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerDrive.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkass <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/22 17:55:45 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/22 23:44:25 by bberkass         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,7 +288,17 @@ char *moveToHeap(const std::string &resp) {
 void PrepareResponse(Client &client)  {
 
 	Handler	handler(client);
-	Response response(handler.getBody(), handler.getType(), handler.getCookie(), handler.getLocation(), handler.getSize(), handler.getStatus(), handler.getFD());
+	
+	// shit's dirty i konw , IAM SO TIRED !
+	std::string location_checked = "";
+	int status = handler.getStatus();
+	if(handler.getReturnUrl().length() > 0){
+		location_checked = handler.getReturnUrl();
+		status = handler.getReturnStatus();
+	}else {
+		location_checked = handler.getLocation();
+	}
+	Response response(handler.getBody(), handler.getType(), handler.getCookie(),location_checked, handler.getSize(), status, handler.getFD(), handler.getPath(), handler.getErrorPages());
 	client.setResponseObj(response);
 }
 

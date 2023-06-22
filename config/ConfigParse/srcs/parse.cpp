@@ -37,6 +37,12 @@ void Parse::print_config() {
 		std::cout << "-----:server:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
 		std::cout << "-----:server:" << "Upload allow : " << (*it).allowUpload() << std::endl;
 		std::cout << "-----:server:" << "UploadStore: " << (*it).getUploadStore() << std::endl;
+		std::cout << "-----------: Error Pages: " ;
+			for (std::map<short, std::string>::const_iterator m = it->getErroPages().begin();
+				m != it->getErroPages().end(); m++) {
+				std::cout << m->first << " : " << m->second << " " ;
+			}
+			std::cout << std::endl;
 		for (cl_iterator lit = it->getLocations().begin(); lit != it->getLocations().end(); lit++)
 		{
 			std::cout << "			>>> Location <<< " << std::endl;

@@ -19,13 +19,18 @@ class Handler {
 	std::string cookie;
 
 	std::string location;
-    int status;
-    int size;
+    int         status;
+    int         size;
+    int         fd;
 
-    int fd;
+    std::string                  rootPath;
+    std::map<short, std::string> errorPages;
+    int                          return_status;
+    std::string                  return_url;
 
 
     public:
+        Handler();
         Handler(Client &client);
         //Handler(std::string path, std::string req_body, std::map<std::string, std::string> headers);
 
@@ -38,6 +43,21 @@ class Handler {
         std::string getType();
         int getStatus();
         int getFD();
+
+
+        int getReturnStatus(){
+            return this->return_status;
+        }
+        std::string getReturnUrl(){
+            return this->return_url;
+        }
+
+        const std::string &getPath() const {
+            return this->rootPath;
+        }
+        const std::map<short, std::string> &getErrorPages() const {
+            return this->errorPages;
+        }
 		const std::string &getCookie() const  {
 			return (this->cookie);
 		}

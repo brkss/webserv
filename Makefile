@@ -18,6 +18,7 @@ SRC = ./config/ConfigParse/srcs/lexer.cpp \
 	  ./Handler/Handler.cpp \
 	  ./Handler/CGI.cpp \
 	  ./Handler/HandlerUtils.cpp \
+	  ./Response/ResponseUtils.cpp \
 	  main.cpp
 
 OBJS=${SRC:.cpp=.o} 
