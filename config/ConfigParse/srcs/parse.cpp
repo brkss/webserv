@@ -59,6 +59,12 @@ void Parse::print_config() {
 				std::cout << *m << " " ;
 				}
 			std::cout << std::endl;
+			std::cout << "----------- err pages: " ;
+			for (std::map<short, std::string>::const_iterator m = lit->getErroPages().begin();
+				m != lit->getErroPages().end(); m++) {
+				std::cout << "code: " << m->first << "page : " << m->second << std::endl;
+				}
+			std::cout << std::endl;
 
 		}
 	}
