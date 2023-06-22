@@ -44,8 +44,9 @@ class HttpRequest {
 		//std::ofstream						_data_file;
 		std::string 						_data_filename;
 		int 								_data_file_fd;
-		int									_request_status_code; // is set on request error 
+		short								_request_status_code; // is set on request error 
 		size_t 								_request_body_size;
+		short								_request_sataus;
 
 		//for debug 
 		std::string 						_request_line;
@@ -73,6 +74,7 @@ class HttpRequest {
 		short				getStatusCode() const;
 		const std::string 		&getRequestDataFilename() const;
 		size_t 				getRequestBodySize()const;
+		short				getRequestStatus() const;
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);

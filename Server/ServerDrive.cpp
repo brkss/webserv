@@ -6,7 +6,7 @@
 /*   By: bberkass <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/22 23:44:25 by bberkass         ###   ########.fr       */
+/*   Updated: 2023/06/23 00:29:42 by adriouic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,10 +292,10 @@ void PrepareResponse(Client &client)  {
 	// shit's dirty i konw , IAM SO TIRED !
 	std::string location_checked = "";
 	int status = handler.getStatus();
-	if(handler.getReturnUrl().length() > 0){
+	if (handler.getReturnUrl().length() > 0){
 		location_checked = handler.getReturnUrl();
 		status = handler.getReturnStatus();
-	}else {
+	} else {
 		location_checked = handler.getLocation();
 	}
 	Response response(handler.getBody(), handler.getType(), handler.getCookie(),location_checked, handler.getSize(), status, handler.getFD(), handler.getPath(), handler.getErrorPages());
@@ -347,7 +347,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-			if (FD_ISSET(fd, &write_copy) && not ClientError(fd)) {					// response 
+			if (FD_ISSET(fd, &write_copy) ) { //&& not ClientError(fd)) {					// response 
 				Client &client = getClient(fd);
 				if (not client.ResponseReady())
 					PrepareResponse(client);
