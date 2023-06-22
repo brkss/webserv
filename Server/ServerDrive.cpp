@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerDrive.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkass <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/22 16:06:36 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/22 18:31:16 by bberkass         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,7 +284,7 @@ char *moveToHeap(const std::string &resp) {
 void PrepareResponse(Client &client)  {
 
 	Handler	handler(client);
-	Response response(handler.getBody(), handler.getType(), handler.getCookie(), handler.getLocation(), handler.getSize(), handler.getStatus(), handler.getFD());
+	Response response(handler.getBody(), handler.getType(), handler.getCookie(), handler.getLocation(), handler.getSize(), handler.getStatus(), handler.getFD(), handler.getPath(), handler.getErrorPages());
 	client.setResponseObj(response);
 }
 

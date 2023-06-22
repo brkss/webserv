@@ -8,12 +8,15 @@
 #include "../config/ConfigParse/inc/location.hpp"
 
 
+Handler::Handler(){ }
+
 Handler::Handler(Client &client){
     
     this->client = client;
 	this->fd = -1;
     HttpRequest request = client.getRequest();
-    std::string rootPath = this->client.getServer().getRoot();
+    this->rootPath = this->client.getServer().getRoot();
+    this->errorPages = this->client.getServer().getErroPages();
     std::vector<Location> locations = client.getServer().getLocations();
     std::string upload_location = client.getServer().getUploadStore();
 
@@ -22,7 +25,8 @@ Handler::Handler(Client &client){
     
     if(locationIndex > -1){
        
-        rootPath = locations[locationIndex].getRoot();
+        this->rootPath = locations[locationIndex].getRoot();
+        this->errorPages = locations[locationIndex].getErroPages();
         //std::string req_path_sub = request.getRequestPath();
        
         //request.setRequestPath(req_path_sub);

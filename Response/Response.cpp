@@ -6,6 +6,9 @@
 #include <fstream>
 #include <unistd.h>
 
+#include "../Handler/utils.h"
+#include "./ResponseUtils.h"
+
 /*
  *
  * HELPER fucntion that get current date and time in the format required by http !
@@ -38,6 +41,8 @@ Response & Response::operator=(const Response &response) {
 
 	if (this == &response) 
 		return (*this);
+	this->rootPath = response.rootPath;
+	this->errorPages = response.errorPages;
 	this->contentType = response.contentType;
 	this->contentLength = response.contentLength;
 	this->date = response.date;
@@ -57,9 +62,13 @@ Response & Response::operator=(const Response &response) {
 	return (*this);
 }
 
-Response::Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd){
+Response::Response(std::string body, std::string type,const std::string &cookie, const std::string &redirect, int size, int status, int fd, std::string path, std::map<short, std::string> errorPages){
+	
+	this->rootPath = path;
+	this->errorPages = errorPages;
+	
 	this->fd = fd;
-	this->status = std::to_string(status);
+	this->status = status;
 	this->status_message = generateStatusMessage(status);
 	this->contentType = type;
 	this->contentLength = std::to_string(size);
@@ -76,6 +85,8 @@ Response::Response(std::string body, std::string type,const std::string &cookie,
 	this->redirect = redirect;
 	//this->cookie = "cookie value" ;
 	this->headears_sent = false;
+	
+	this->checkErrorPage();
 }
 
 std::string Response::generateResponse(){
@@ -83,7 +94,7 @@ std::string Response::generateResponse(){
 	std::string response = "";
 
 	// set header 
-	response += "HTTP/1.1 " + this->status +  " " + this->status_message + "\r\n";
+	response += "HTTP/1.1 " + std::to_string(this->status) +  " " + this->status_message + "\r\n";
 	response += "Content-Type: " + this->contentType + "\r\n";
 	response += "Content-Length: " + this->contentLength + "\r\n";
 	response += "Cache-Control: " + this->cacheControl + "\r\n";
@@ -102,7 +113,7 @@ std::string Response::generateResponse(){
 std::string Response::getResponseHeaders(){
 	std::string headers = "";
 
-	headers += "HTTP/1.1 " + this->status +  " " + this->status_message + "\r\n";
+	headers += "HTTP/1.1 " + std::to_string(this->status) +  " " + this->status_message + "\r\n";
 	headers += "Content-Type: " + this->contentType + "\r\n";
 	headers += "Content-Length: " + this->contentLength + "\r\n";
 	headers += "Cache-Control: " + this->cacheControl + "\r\n";
@@ -184,11 +195,42 @@ std::string Response::generateStatusMessage(int status){
 	}
 }
 
+void Response::checkErrorPage(){
+	
+	
+	if(this->status == 200)
+		return;
+	std::string errorPageFilename = "";
+	std::map<short, std::string>::iterator iter;
+	
+	for(iter= this->errorPages.begin(); iter != this->errorPages.end(); ++iter){
+		if(static_cast<int>(iter->first) == this->status){
+			errorPageFilename = iter->second;
+		}
+		std::cout << "error pages : " << iter->first << " : " << iter->second << "\n\n\n";
+	}
+	
+	if(errorPageFilename == "")
+		return;
+	errorPageFilename = this->rootPath + "/" + errorPageFilename;
+	std::cout << "error path : " << errorPageFilename << "\n\n\n";
+	if(!fileExists(errorPageFilename))
+		return;
+	
+	
+	this->body = getFileContent(errorPageFilename);
+	this->contentLength = std::to_string(getFileContentLength(errorPageFilename));
+	this->contentType = getFileContentType(errorPageFilename);
+	
+	
+}
+
 
 int Response::getFD(){
 	return this->fd;
 }
 
-const std::string &Response::getStatusCode() const  {
-	return (this->status);
+std::string Response::getStatusCode()   {
+	std::string status_code = std::to_string(this->status);
+	return (status_code);
 }

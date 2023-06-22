@@ -21,11 +21,15 @@ class Handler {
 	std::string location;
     int status;
     int size;
-
     int fd;
+
+    std::string rootPath;
+    std::map<short, std::string> errorPages;
+
 
 
     public:
+        Handler();
         Handler(Client &client);
         //Handler(std::string path, std::string req_body, std::map<std::string, std::string> headers);
 
@@ -38,6 +42,13 @@ class Handler {
         std::string getType();
         int getStatus();
         int getFD();
+
+        const std::string &getPath() const {
+            return this->rootPath;
+        }
+        const std::map<short, std::string> &getErrorPages() const {
+            return this->errorPages;
+        }
 		const std::string &getCookie() const  {
 			return (this->cookie);
 		}
