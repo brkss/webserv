@@ -6,7 +6,7 @@
 /*   By: adriouic <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/22 16:06:36 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/22 17:55:45 by adriouic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,9 +183,8 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 		request.setRequestState(HttpRequest::REQUEST_READY);
 		request_body.clear(); return false;
 	}
-	std::string temp = request_body.substr(0, chunk_size);
-	assert(chunk_size == temp.size());
-	request.writeChunkTofile(temp);							// write data to temp file
+	//assert(chunk_size == temp.size());
+	request.writeChunkTofile(request_body.substr(0, chunk_size));							// write data to temp file
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 	return (true);
 }
@@ -194,17 +193,19 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 bool	ServerDrive::getBody(HttpRequest &request) {
 
 	const std::string	&length_str = request.getHeaderValue("Content-Length");
-	std::string			&request_body = request.getRequestData();
+	std::string			&request_body = request.getRequestData();// main buffer 
 	size_t				content_length =  std::atoi(length_str.c_str());
 	size_t				bytes_left;
 
-	bytes_left = content_length - request.getRequestBody().size();
-	if (bytes_left <= request_body.size()) {
-		request.writeChunkTofile(request_body.substr(0, bytes_left));
- 		request.appendChunk(request_body.substr(0, bytes_left));
-		assert(request.getRequestBody().size() == content_length);
-		return (true);
+	bytes_left = content_length - request.getRequestBodySize();
+	if (bytes_left > 0 && request_body.size() <= bytes_left) {
+		//const std::sting &chunk = request_body.substr(0, bytes_left);
+		request.writeChunkTofile(request_body);
+		request_body = "";
+ 		//request.appendChunk(request_body.substr(0, bytes_left));
 	}
+	if(request.getRequestBodySize() == content_length) 
+		return (true);
 	return (false);
 }
 
@@ -215,6 +216,9 @@ void ServerDrive::CheckRequestStatus(Client &client) {
 		getHeader(client_request);
 	}
 	if (client_request.getRequestState() == HttpRequest::BODY_STATE)  {
+
+		if (client_request.getRequestData().size() > client.getServer().getClientMaxBodySize())
+				throw(RequestError(ErrorNumbers::_413_PAYLOAD_TOO_LARGE));
 		client_request.openDataFile();
 		if (client_request.getBodyTransferType() == HttpRequest::CHUNKED) {
 			while (!client_request.getRequestData().empty() && unchunkBody(client_request)) {

@@ -45,6 +45,7 @@ class HttpRequest {
 		std::string 						_data_filename;
 		int 								_data_file_fd;
 		int									_request_status_code; // is set on request error 
+		size_t 								_request_body_size;
 
 		//for debug 
 		std::string 						_request_line;
@@ -71,6 +72,7 @@ class HttpRequest {
 		int					getDataFileDescriptor();
 		short				getStatusCode() const;
 		const std::string 		&getRequestDataFilename() const;
+		size_t 				getRequestBodySize()const;
 
 		// #Parse Methods
 		void				addRequestData(const std::string &data);

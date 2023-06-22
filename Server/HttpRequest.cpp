@@ -12,7 +12,8 @@ const size_t		HttpRequest::URI_MAX_LEN	= 2000;
 HttpRequest::HttpRequest() : _request_state(HEADER_STATE),
 							 _transfer_type(UNSET),
 							 _data_file_fd(-1), 
-							 _request_status_code(0) {
+							 _request_status_code(0),
+							 _request_body_size(0) {
 				
 }
 
@@ -39,6 +40,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &request) {
 	this->_data_filename = request._data_filename;
 	this->_request_line = request._request_line;
 	this->_request_status_code = request._request_status_code;
+	this->_request_body_size =  request._request_body_size;
 	return (*this);
 }
 
@@ -278,6 +280,7 @@ void HttpRequest::writeChunkTofile(const std::string &data) {
 		#endif 
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 	}
+	this->_request_body_size += nb_bytes;
 }
 
 void 				HttpRequest::openDataFile() {
@@ -315,3 +318,6 @@ short HttpRequest::getStatusCode() const {
 	return (this->_request_status_code);
 }
 
+size_t 	HttpRequest::getRequestBodySize()const {
+	return (this->_request_body_size);
+}
