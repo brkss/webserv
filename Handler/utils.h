@@ -25,5 +25,6 @@ std::string ListFile(std::string path);
 bool isDirectory(std::string path);
 
 int getFileFd(std::string path);
+std::string generateErrorResponse(int status);
 
 #endif

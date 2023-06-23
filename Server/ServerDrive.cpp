@@ -292,12 +292,14 @@ void PrepareResponse(Client &client)  {
 	// shit's dirty i konw , IAM SO TIRED !
 	std::string location_checked = "";
 	int status = handler.getStatus();
+	
 	if (handler.getReturnUrl().length() > 0){
 		location_checked = handler.getReturnUrl();
 		status = handler.getReturnStatus();
 	} else {
 		location_checked = handler.getLocation();
 	}
+	
 	Response response(handler.getBody(), handler.getType(), handler.getCookie(),location_checked, handler.getSize(), status, handler.getFD(), handler.getPath(), handler.getErrorPages());
 	client.setResponseObj(response);
 }
