@@ -26,7 +26,7 @@ Handler::Handler(Client &client){
     if(this->client.getServer().getReturnURL().length() > 0){
         this->return_url = this->client.getServer().getReturnURL();
         this->return_status = this->client.getServer().getReturnCode();
-         this->body = "";
+        this->body = "";
         this->size = 0;
         this->type = "";
         this->fd = -1;
@@ -44,6 +44,7 @@ Handler::Handler(Client &client){
         index = locations[locationIndex].getIndex();
 
         // overlaped request !
+
         if(locations[locationIndex].getReturnURL().length() > 0){
             this->return_url = locations[locationIndex].getReturnURL();
             this->return_status = locations[locationIndex].getReturnCode();
@@ -84,6 +85,7 @@ Handler::Handler(Client &client){
 
 	// joined location path with resource name 
 	std::string path = rootPath + request.getRequestPath();
+    
     std::string method = request.getRequestMethod();
     std::map<std::string, std::string> req_headers = request.getHeaders();
     if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
@@ -127,10 +129,10 @@ Handler::Handler(Client &client){
         this->status = 404;
 
         return;
-    }else if (isDirectory(path)){
+    }else if (directoryExits(path)){
         if(!autoindex){
             path = rootPath + index;
-            
+           
             if(!fileExists(path)){
                 this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
                 this->type = "text/html";
@@ -169,7 +171,6 @@ Handler::Handler(Client &client){
 		}
     
     }else{
-		
         //this->body = this->getFileContent(path);
         this->fd = getFileFd(path);
 		this->type = this->getFileContentType(path);
@@ -181,13 +182,12 @@ Handler::Handler(Client &client){
 
 
 std::string Handler::getFileContent(std::string filename){
-    
     std::ifstream file(filename, std::ios::binary);
-    if (!file) {
+    if (!file || isDirectory(filename)) {
 		std::cerr << "Failed to open file: " << filename << std::endl;
         return "";
     }
-
+    
     file.seekg(0, std::ios::end);
     size_t file_size = file.tellg();
     file.seekg(0, std::ios::beg);
