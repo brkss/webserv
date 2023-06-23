@@ -15,7 +15,7 @@ namespace Network
 	int  CreateSocket()  {
 		int sock_fd;
 		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
-		fcntl(sock_fd, F_SETFL, O_NONBLOCK);
+		//fcntl(sock_fd, F_SETFL, O_NONBLOCK);
 		if (sock_fd < 0) {
 			ConsoleLog::Error("Failed to create Socket !!!");
 			throw(ErrorLog("could not create socket"));
