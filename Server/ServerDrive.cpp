@@ -347,7 +347,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-			if (FD_ISSET(fd, &write_copy) ) { //&& not ClientError(fd)) {					// response 
+			if (FD_ISSET(fd, &write_copy) ){// ClientError(fd)) {					// response 
 				Client &client = getClient(fd);
 				if (not client.ResponseReady())
 					PrepareResponse(client);

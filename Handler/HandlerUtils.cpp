@@ -141,3 +141,43 @@ int getFileFd(std::string path){
     fd = open(path.c_str(), O_RDONLY);
     return fd;
 }
+
+
+std::string generateStatusMessage(int status){
+	if(status == 404)
+		return "Not Found";
+	else if (status == 500)
+		return "Internal Server Error";
+	else if (status == 403)
+		return "Forbidden";
+	else if (status == 401)
+		return "Unauthorized";
+	else if (status == 503)
+		return "Service Unavailable"; 
+	else if (status == 405)
+		return "Method Not Allowed";
+	switch  (status) { 
+		case (400): return   "Bad request";
+		case (408): return   "Request timeout";
+		case (411): return   "Length required";
+		case (414): return   "Uri_too long";
+		case (413): return   "Payload too large";
+		case (431): return   "Request header fields too large";
+		case (500): return   "Internal server error";
+		case (501): return   "No timplemented";
+		case (505): return   "Http version not supported";
+		default:
+			return "OK";
+	}
+}
+
+std::string generateErrorResponse(int status){    
+
+    std::string body = "<html><body><h1 style='text-align: center;'>";
+
+    body += std::to_string(status) + " ";
+    body += generateStatusMessage(status);
+    
+    body += "<html><body><h1>";
+    return body;
+}

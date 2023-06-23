@@ -7,7 +7,6 @@
 #include "utils.h"
 #include "../config/ConfigParse/inc/location.hpp"
 
-
 Handler::Handler(){ }
 
 Handler::Handler(Client &client){
@@ -54,6 +53,18 @@ Handler::Handler(Client &client){
             this->type = "text/html";
             return;
         }
+    }
+
+    std::cout << "----------------\n";
+    std::cout << "req code : " << request.getStatusCode() << "\n";
+    std::cout << "----------------\n";
+
+    if(request.getStatusCode() > 0){
+        std::string res = generateErrorResponse(request.getStatusCode());
+        this->body = res;
+        this->size = res.size();
+        this->type = "text/html";
+        return;
     }
 
 	// joined location path with resource name 
