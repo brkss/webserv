@@ -1,3 +1,4 @@
+#!/Users/adriouic/.brew/bin/php-cgi
 <?php
 	session_save_path('/tmp/php');	
 	if (isset($_COOKIE['PHPSESSID'])) {

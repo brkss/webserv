@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/php-cgi
+#!/Users/adriouic/.brew/bin/php-cgi
 <?php
 	session_save_path('/tmp/php');	
 	session_start();

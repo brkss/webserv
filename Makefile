@@ -1,4 +1,4 @@
-DEBUG = true
+DEBUG = false
 NAME = webserv
 
 SRC = ./config/ConfigParse/srcs/lexer.cpp \

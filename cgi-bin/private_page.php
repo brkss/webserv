@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/php-cgi
+#!/Users/adriouic/.brew/bin/php-cgi
 <?php 
 	require_once("session.php");
 ?> 

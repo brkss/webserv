@@ -44,11 +44,12 @@ void CGI::handlePhpCGI(std::string path){
         close(fdOUT);
         
         execve(path.c_str(), nullptr, env);
-        
+		perror(path.c_str());
+       
         //err = 500;
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Error</h1></body></html>";
         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
-        std::cerr << "something went wront executing the cgi script !";
+        std::cerr << "something went wront executing the cgi script !\n";
         exit(0);
     }else if (pid > 0){
 
