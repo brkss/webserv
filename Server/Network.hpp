@@ -17,7 +17,9 @@ namespace Network
 		sock_fd = socket(PF_INET, SOCK_STREAM, 0); 
 		//fcntl(sock_fd, F_SETFL, O_NONBLOCK);
 		if (sock_fd < 0) {
+			#if DEBUG
 			ConsoleLog::Error("Failed to create Socket !!!");
+			#endif
 			throw(ErrorLog("could not create socket"));
 		}
 		return (sock_fd);
@@ -32,7 +34,9 @@ namespace Network
 		sock_addr.sin_family = AF_INET;
 		sock_addr.sin_port = htons(port);
 		if (inet_aton(address.c_str(), &sock_addr.sin_addr) == 0) {  //see man inet_aton 
+			#if DEBUG
 			ConsoleLog::Error("[::0] Failed to bind On address");
+			#endif
 			close(sock_fd);
 			throw(ErrorLog("Error: invalid address"));
 		}

@@ -6,7 +6,7 @@
 /*   By: bberkass <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/23 01:33:31 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/23 03:55:38 by adriouic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,29 +60,6 @@ ServerDrive::~ServerDrive() {
 		close(*it);
 }
 
-void sendErrorMessage(int fd, short error) {
-	std::map<short, std::string> status_message;
-	std::string message;
-
-	std::string templat; 
-	status_message[400] = "400 Bad request",
-	status_message[408] = "408 Request timeout",
-	status_message[411] = "411 Length required",
-	status_message[414] = "414 Uri_too long",
-	status_message[413] = "413 Payload too large",
-	status_message[431] = "431 Request header fields too large",
-	status_message[500] = "500 Internal server error",
-	status_message[501] = "501 No timplemented",
-	status_message[505] = "505 Http version not supported";
-	message = status_message[error];
-	std::string resp = "HTTP/1.1 " + message +  "\r\n\r\n";
-	if (send(fd, resp.c_str(), resp.size() , 0) != (ssize_t ) resp.size()) {
-		ConsoleLog::Error("Send error");
-		perror(NULL);
-		throw(ErrorLog("Send error message"));
-	}
-}
-
 void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	
 	struct timeval timout;
@@ -96,8 +73,10 @@ void ServerDrive::io_select(fd_set &read_copy, fd_set &write_copy) {
 	#endif 
 	select_stat =  select(this->_fd_max + 1, &read_copy, &write_copy, NULL, NULL);//&timout);
 	if  (select_stat < 0)  {
+		#if DEBUG
 			perror(NULL);
 		ConsoleLog::Error("Select failed ");
+		#endif
 		throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 	}
 }
@@ -183,7 +162,6 @@ bool ServerDrive::unchunkBody(HttpRequest &request) {
 		request.setRequestState(HttpRequest::REQUEST_READY);
 		request_body.clear(); return false;
 	}
-	//assert(chunk_size == temp.size());
 	request.writeChunkTofile(request_body.substr(0, chunk_size));							// write data to temp file
 	request_body = request_body.substr(chunk_size + 2); // +2 EXPECTING CRLF AFTER CHUNK
 	return (true);
@@ -263,21 +241,6 @@ void ServerDrive::checkClientTimout(int fd) {
 	}
 }
 
-bool ServerDrive::ClientError(int fd) {
-	Client &client				= getClient(fd) ;
-	HttpRequest &request = client.getRequest();
-	short 	error				= client.getRequestStatus();
-
-	if (error != 0) {
-		sendErrorMessage(fd, error);
-		const std::string log = "[Request]: " + request.getRequestLine() + " (" +  std::to_string(error) + ")" ;
-		CloseConnection(client.getConnectionFd());
-		ConsoleLog::Error(log);
-		return (true);
-	}
-	return (false);
-}
-
 char *moveToHeap(const std::string &resp) {
 	const char *r = resp.c_str();
 	char *resp_copy = new char [resp.size()];
@@ -317,10 +280,7 @@ void ServerDrive::SendResponse(Client &client) {
 	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
 			close_connection = true;
 		#if DEBUG
-		std::cout << "data size : " << response_size << std::endl;
-		std::cout << "client fd : " << client_fd << std::endl;
-		client.getRequest().setStatusCode(500);//eadbeef
-		perror("Send error :");
+		client.getRequest().setStatusCode(500);//deadbeef
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
 	}
@@ -351,7 +311,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-			if (FD_ISSET(fd, &write_copy)) {  //  && not ClientError(fd)) {					// response 
+			if (FD_ISSET(fd, &write_copy)) {
 				Client &client = getClient(fd);
 				if (not client.ResponseReady())
 					PrepareResponse(client);

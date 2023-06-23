@@ -80,7 +80,6 @@ void Server::validateUplodeStore(const Server &scop) const {
 		return ;
 	const std::string &path_name = scop.getRoot() + scop.getUploadStore();
 	if (!path_name.empty() and access(path_name.c_str(), F_OK | W_OK) ){ 
-		perror(NULL);
 		const std::string error = "[Config Error][Server: " + scop.getServerName() + "]" + "[Upload Dir] : " +  path_name ;
 		throw(std::invalid_argument(error));
 	}

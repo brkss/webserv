@@ -291,8 +291,9 @@ void 				HttpRequest::openDataFile() {
 		this->_data_filename = Utils::randomFileName();
 		this->_data_file_fd = open(this->_data_filename.c_str(), O_RDWR | O_CREAT, 0600); // file opened for read & write
 		if (this->_data_file_fd == -1) {
-			perror(NULL);
+			#if DEBUG
 			ConsoleLog::Debug("Failed to open MemFile");
+			#endif
 			throw(RequestError(ErrorNumbers::_500_INTERNAL_SERVER_ERROR));
 		}
 		#if DEBUG 
