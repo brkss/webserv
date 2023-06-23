@@ -22,6 +22,11 @@ Handler::Handler(Client &client){
     if(this->client.getServer().getReturnURL().length() > 0){
         this->return_url = this->client.getServer().getReturnURL();
         this->return_status = this->client.getServer().getReturnCode();
+         this->body = "";
+        this->size = 0;
+        this->type = "";
+        this->fd = -1;
+        return;
     }
 
     // check location 
@@ -36,6 +41,11 @@ Handler::Handler(Client &client){
         if(locations[locationIndex].getReturnURL().length() > 0){
             this->return_url = locations[locationIndex].getReturnURL();
             this->return_status = locations[locationIndex].getReturnCode();
+            this->body = "";
+            this->size = 0;
+            this->type = "";
+            this->fd = -1;
+            return;
         }else {
             this->return_url = "";
             this->return_status = -1;
@@ -55,9 +65,7 @@ Handler::Handler(Client &client){
         }
     }
 
-    std::cout << "----------------\n";
-    std::cout << "req code : " << request.getStatusCode() << "\n";
-    std::cout << "----------------\n";
+   
 
     if(request.getStatusCode() > 0){
         std::string res = generateErrorResponse(request.getStatusCode());
