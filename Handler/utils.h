@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "../config/ConfigParse/inc/location.hpp"
+#include "../ConfigParse/inc/location.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -26,7 +26,6 @@ bool isDirectory(std::string path);
 
 int getFileFd(std::string path);
 std::string generateErrorResponse(int status);
-
 std::string removeEndpoint(const std::string& requestPath, const std::string& endpoint);
 
 #endif

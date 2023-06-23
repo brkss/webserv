@@ -5,7 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "utils.h"
-#include "../config/ConfigParse/inc/location.hpp"
+#include "../ConfigParse/inc/location.hpp"
 
 Handler::Handler(){ }
 
