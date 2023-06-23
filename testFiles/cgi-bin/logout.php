@@ -1,6 +1,6 @@
 #!/Users/adriouic/.brew/bin/php-cgi
 <?php
-	session_save_path('/tmp/php');	
+	session_save_path('/tmp');	
 	session_start();
 	session_unset(); //clear out userid
 	session_destroy();  //delete session file
