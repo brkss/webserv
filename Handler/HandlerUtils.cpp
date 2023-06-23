@@ -12,8 +12,12 @@ int write_file(std::string path, std::string filename){
         }
         inputFile.close();
         outputFile.close();
-    } else 
-		return 0;
+        
+    } else {
+        perror("writing file ! : ");
+        return 0;
+    }
+		
 
 	return 1;
 }
@@ -186,6 +190,8 @@ std::string generateErrorResponse(int status){
 std::string removeEndpoint(const std::string& requestPath, const std::string& endpoint) {
     if (requestPath.substr(0, endpoint.length()) == endpoint) {
         std::string updatedPath = requestPath.substr(endpoint.length());
+        if(endpoint[endpoint.length() - 1] == '/')
+            updatedPath = "/" + updatedPath;
         return updatedPath;
     }
     return requestPath;
