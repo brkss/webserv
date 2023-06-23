@@ -64,6 +64,7 @@ Handler::Handler(Client &client){
         this->body = res;
         this->size = res.size();
         this->type = "text/html";
+        this->status = request.getStatusCode();
         return;
     }
 

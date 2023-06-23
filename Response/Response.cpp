@@ -67,6 +67,7 @@ Response::Response(std::string body, std::string type,const std::string &cookie,
 	this->rootPath = path;
 	this->errorPages = errorPages;
 	
+	
 	this->fd = fd;
 	this->status = status;
 	this->status_message = generateStatusMessage(status);
@@ -92,7 +93,7 @@ Response::Response(std::string body, std::string type,const std::string &cookie,
 std::string Response::generateResponse(){
 
 	std::string response = "";
-
+	
 	// set header 
 	response += "HTTP/1.1 " + std::to_string(this->status) +  " " + this->status_message + "\r\n";
 	response += "Content-Type: " + this->contentType + "\r\n";
