@@ -14,7 +14,7 @@ Handler::Handler(Client &client){
     this->client = client;
 	this->fd = -1;
     HttpRequest request = client.getRequest();
-    this->rootPath = this->client.getServer().getRoot();
+    this->rootPath = this->client.getServer().getRoot() + "/";
     this->errorPages = this->client.getServer().getErroPages();
     std::vector<Location> locations = client.getServer().getLocations();
     std::string upload_location = client.getServer().getUploadStore();
@@ -39,9 +39,6 @@ Handler::Handler(Client &client){
     
     if(locationIndex > -1){
        
-        this->rootPath = locations[locationIndex].getRoot();
-        this->errorPages = locations[locationIndex].getErroPages();
-        autoindex = locations[locationIndex].getAutoIndex();
         index = locations[locationIndex].getIndex();
 
         // overlaped request !
@@ -160,7 +157,7 @@ Handler::Handler(Client &client){
     }else if (directoryExits(path)){
         if(!autoindex){
             path = rootPath + index;
-           
+          	std::cout << "path : " << path << "\n";	 
             if(!fileExists(path)){
                 this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
                 this->type = "text/html";
