@@ -21,6 +21,7 @@ Handler::Handler(Client &client){
 
     int autoindex = client.getServer().getAutoIndex();
     std::string index = client.getServer().getIndex();
+    std::string request_path = request.getRequestPath();
 
 
     if(this->client.getServer().getReturnURL().length() > 0){
@@ -34,7 +35,7 @@ Handler::Handler(Client &client){
     }
 
     // check location 
-    int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
+    int locationIndex = findMatchingLocation(request_path, locations);
     
     if(locationIndex > -1){
        
@@ -44,7 +45,15 @@ Handler::Handler(Client &client){
         index = locations[locationIndex].getIndex();
 
         // overlaped request !
+        request_path = removeEndpoint(request_path, locations[locationIndex].getEndpoint());
+        
+        //request.setRequestPath(new_request_path);
 
+        std::cout << "---------------\n";
+        std::cout << "PATH : " << request_path << "\n";
+        std::cout << "PATH : " << this->rootPath + request_path << "\n";
+        std::cout << "---------------\n";
+        
         if(locations[locationIndex].getReturnURL().length() > 0){
             this->return_url = locations[locationIndex].getReturnURL();
             this->return_status = locations[locationIndex].getReturnCode();
@@ -84,14 +93,14 @@ Handler::Handler(Client &client){
     }
 
 	// joined location path with resource name 
-	std::string path = rootPath + request.getRequestPath();
+	std::string path = rootPath + request_path;
     
     std::string method = request.getRequestMethod();
     std::map<std::string, std::string> req_headers = request.getHeaders();
     if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
         // handle POST / DELETE
         int status = -1;
-        std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request.getRequestPath());
+        std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request_path);
         
         if(filepath.length() == 0){
             this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";

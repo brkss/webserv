@@ -181,3 +181,12 @@ std::string generateErrorResponse(int status){
     body += "<html><body><h1>";
     return body;
 }
+
+
+std::string removeEndpoint(const std::string& requestPath, const std::string& endpoint) {
+    if (requestPath.substr(0, endpoint.length()) == endpoint) {
+        std::string updatedPath = requestPath.substr(endpoint.length());
+        return updatedPath;
+    }
+    return requestPath;
+}
