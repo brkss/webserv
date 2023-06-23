@@ -21,6 +21,7 @@ Handler::Handler(Client &client){
 
     int autoindex = client.getServer().getAutoIndex();
     std::string index = client.getServer().getIndex();
+    std::string request_path = request.getRequestPath();
 
 
     if(this->client.getServer().getReturnURL().length() > 0){
@@ -34,7 +35,7 @@ Handler::Handler(Client &client){
     }
 
     // check location 
-    int locationIndex = findMatchingLocation(request.getRequestPath(), locations);
+    int locationIndex = findMatchingLocation(request_path, locations);
     
     if(locationIndex > -1){
        
@@ -44,7 +45,12 @@ Handler::Handler(Client &client){
         index = locations[locationIndex].getIndex();
 
         // overlaped request !
+        request_path = removeEndpoint(request_path, locations[locationIndex].getEndpoint());
+        
+        //request.setRequestPath(new_request_path);
 
+        
+        
         if(locations[locationIndex].getReturnURL().length() > 0){
             this->return_url = locations[locationIndex].getReturnURL();
             this->return_status = locations[locationIndex].getReturnCode();
@@ -83,28 +89,49 @@ Handler::Handler(Client &client){
         return;
     }
 
+
+
 	// joined location path with resource name 
-	std::string path = rootPath + request.getRequestPath();
+	std::string path = rootPath + request_path;
     
     std::string method = request.getRequestMethod();
     std::map<std::string, std::string> req_headers = request.getHeaders();
-    if((method == "POST" || method == "DELETE") && !isCGIScript(path) && upload_location.length() > 0){
+    if((method == "POST" || method == "DELETE") && !isCGIScript(path)){
         // handle POST / DELETE
         int status = -1;
-        std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request.getRequestPath());
-        
-        if(filepath.length() == 0){
-            this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
-            this->type = "text/html";
-            this->size = 91;
-            this->status = 404;
-            return;
-        }
 
-        if(method == "POST"){
+        if(method == "POST" && upload_location.length() > 0){
+            std::string filepath = rootPath + upload_location + getFilenameFromRequestPath(request_path);
+            
+            if(filepath.length() == 0){
+                this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
+                this->type = "text/html";
+                this->size = 91;
+                this->status = 404;
+                return;
+            }
+            std::cout << "try to upload !\n";
             status = write_file(filepath, request.getRequestDataFilename());
         }else{
+            
+            std::string filepath = rootPath + request_path;
+            
+            if(!fileExists(filepath)){
+                this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
+                this->type = "text/html";
+                this->size = 91;
+                this->status = 404;
+                return;
+            }
+
             status = delete_file(filepath);
+            if(status == 403){
+                this->body = "<html><body style='text-align:center'><h1>403 Unautorized</h1><h3>webserv</h3></body></html>";
+                this->type = "text/html";
+                this->size = 93;
+                this->status = 403;
+                return;
+            }
         }
 
         // check if any of the methods above failed ! 
@@ -123,6 +150,7 @@ Handler::Handler(Client &client){
         return;
     }
     else if(!fileExists(path) && !directoryExits(path)){
+        
         this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
         this->type = "text/html";
         this->size = 91;
