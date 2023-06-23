@@ -6,7 +6,7 @@
 /*   By: bberkass <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 23:15:29 by adriouic          #+#    #+#             */
-/*   Updated: 2023/06/23 00:29:42 by adriouic         ###   ########.fr       */
+/*   Updated: 2023/06/23 01:33:31 by adriouic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,7 +315,9 @@ void ServerDrive::SendResponse(Client &client) {
 	if (int ss = send(client_fd, response.c_str(), response_size, 0) != (ssize_t ) response_size) {
 			close_connection = true;
 		#if DEBUG
-		client.getRequest().setStatusCode(0xde);//eadbeef
+		std::cout << "data size : " << response_size << std::endl;
+		std::cout << "client fd : " << client_fd << std::endl;
+		client.getRequest().setStatusCode(500);//eadbeef
 		perror("Send error :");
 		ConsoleLog::Warning("Send Error: failed to  writre data to socket !");
 		#endif 
@@ -347,7 +349,7 @@ void ServerDrive::eventHandler(fd_set &read_copy, fd_set &write_copy) {
 
 	for (int fd = 3; fd <=  fd_max; fd++) {
 		try { 
-			if (FD_ISSET(fd, &write_copy) ) { //&& not ClientError(fd)) {					// response 
+			if (FD_ISSET(fd, &write_copy)) {  //  && not ClientError(fd)) {					// response 
 				Client &client = getClient(fd);
 				if (not client.ResponseReady())
 					PrepareResponse(client);

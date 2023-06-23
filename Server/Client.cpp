@@ -103,6 +103,7 @@ size_t Client::getResponseSize() const {
 
 void  Client::setRequestStatus(short error_num) {
 	this->_request_status = error_num;
+	this->_request.setStatusCode(error_num);
 }
 
 
