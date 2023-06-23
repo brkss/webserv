@@ -157,7 +157,6 @@ Handler::Handler(Client &client){
     }else if (directoryExits(path)){
         if(!autoindex){
             path = rootPath + index;
-          	std::cout << "path : " << path << "\n";	 
             if(!fileExists(path)){
                 this->body = "<html><body style='text-align:center'><h1>404 Not Found</h1><h3>webserv</h3></body></html>";
                 this->type = "text/html";
