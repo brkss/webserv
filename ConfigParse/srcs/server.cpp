@@ -1,7 +1,7 @@
 #include "../inc/server.hpp"
 #include "../inc/location.hpp"
 #include "../inc/defaultConfig.hpp"
-#include "../../../Server/ErrorHandler.hpp"
+#include "../../Server/ErrorHandler.hpp"
 
 Server::Server() :	Http(),
 					_address(DefaulConfig::ADDRESS),

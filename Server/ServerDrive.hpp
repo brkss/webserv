@@ -1,8 +1,8 @@
 #ifndef SERVERDRIVE_HPP
 # define SERVERDRIVE_HPP 
 
-#include  "../config/ConfigParse/inc/parse.hpp"
-#include  "../config/ConfigParse/inc/server.hpp"
+#include  "../ConfigParse/inc/parse.hpp"
+#include  "../ConfigParse/inc/server.hpp"
 #include "Client.hpp"
 #include "../Response/Response.hpp"
 #include "../Handler/Handler.hpp"

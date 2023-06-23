@@ -3,7 +3,7 @@
 
 #include <netinet/in.h> // sockaddr_in
 #include "HttpRequest.hpp"
-#include "../config/ConfigParse/inc/server.hpp"
+#include "../ConfigParse/inc/server.hpp"
 #include "ErrorHandler.hpp"
 #include "../Response/Response.hpp"
 #include <time.h>

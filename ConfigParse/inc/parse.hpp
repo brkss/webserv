@@ -52,13 +52,9 @@ class  Parse
 		void parseUploadStore(Server &server);
 
 		void ValidateConfigRequirements();
-
-		void print_config();
-
 		void addServer(const Server &server);
 		
 		std::vector<Server> &getVirtualServers();
 };
-
 
 #endif /* PARSE_HPP */

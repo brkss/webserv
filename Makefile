@@ -1,13 +1,13 @@
 DEBUG = false
 NAME = webserv
 
-SRC = ./config/ConfigParse/srcs/lexer.cpp \
-	  ./config/ConfigParse/srcs/token.cpp \
-	  ./config/ConfigParse/srcs/server.cpp \
-	  ./config/ConfigParse/srcs/location.cpp \
-	  ./config/ConfigParse/srcs/http.cpp \
-	  ./config/ConfigParse/srcs/parse.cpp \
-	  ./config/ConfigParse/srcs/defaultConfig.cpp \
+SRC = ./ConfigParse/srcs/lexer.cpp \
+	  ./ConfigParse/srcs/token.cpp \
+	  ./ConfigParse/srcs/server.cpp \
+	  ./ConfigParse/srcs/location.cpp \
+	  ./ConfigParse/srcs/http.cpp \
+	  ./ConfigParse/srcs/parse.cpp \
+	  ./ConfigParse/srcs/defaultConfig.cpp \
 	  ./Server/ServerDrive.cpp \
 	  ./Server/Client.cpp \
 	  ./Server/HttpRequest.cpp \

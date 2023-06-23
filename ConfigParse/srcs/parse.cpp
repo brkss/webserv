@@ -1,82 +1,12 @@
+#include <string>
+#include <arpa/inet.h>	// for ip4 wrapper function 
+#include <algorithm>	// for find method
+#include <unistd.h>
 #include "../inc/parse.hpp"
 #include "../inc/location.hpp"
 #include "../inc/lexer.hpp"
-#include "../../../Server/Utils.hpp"
-#include "../../../Server/ErrorHandler.hpp"
-#include <string>
-#include <arpa/inet.h> // for ip4 wrapper function 
-#include <algorithm> // for find method
-#include <unistd.h>
-
-
-
-void Parse::print_config() {
-	typedef  std::vector<Server>::const_iterator cv_iterator;
-	typedef  std::vector<Location>::const_iterator cl_iterator;
-	std::cerr << "--- Common config ---"    << std::endl;
-//	std::cout << "Error log : " << this->_common_config.getErroLog() << std::endl;
-	std::cout << "Index		: " << this->_common_config.getIndex()  << std::endl;
-	std::cout << "Auto index: " << this->_common_config.getAutoIndex()  << std::endl;
-	std::cout << "Root		: " << this->_common_config.getRoot() << std::endl;
-	std::cout << "ClientBody : " << this->_common_config.getClientMaxBodySize() << std::endl;
-	std::cerr << "--- Servers config ---"    << std::endl;
-	
-	for (cv_iterator it  = this->_servers.begin() ; it != this->_servers.end(); it++)
-	{
-		std::cout << ">>> server <<< " << std::endl;
-
-	//	std::cout << "-----:server:" << "Error log : " << (*it).getErroLog() << std::endl;
-		std::cout << "-----:server:" << "Index		: " << (*it).getIndex()  << std::endl;
-		std::cout << "-----:server:" << "Auto index: " << (*it).getAutoIndex()  << std::endl;
-		std::cout << "-----:server:" << "Root		: " << (*it).getRoot() << std::endl;
-		std::cout << "-----:server:" << "ClientMaxBody : " << (*it).getClientMaxBodySize() << std::endl;
-		std::cout << "-----:server:" << "ServerName: " << (*it).getServerName() << std::endl;
-		std::cout << "-----:server:" << "Adderss: " << (*it).getAddress() << std::endl;
-		std::cout << "-----:server:" << "Port: " << (*it).getPort() << std::endl;
-		std::cout << "-----:server:" << "ReturnCode: " << (*it).getReturnCode() << std::endl;
-		std::cout << "-----:server:" << "ReturnURL: " << (*it).getReturnURL() << std::endl;
-		std::cout << "-----:server:" << "Upload allow : " << (*it).allowUpload() << std::endl;
-		std::cout << "-----:server:" << "UploadStore: " << (*it).getUploadStore() << std::endl;
-		std::cout << "-----------: Error Pages: " ;
-			for (std::map<short, std::string>::const_iterator m = it->getErroPages().begin();
-				m != it->getErroPages().end(); m++) {
-				std::cout << m->first << " : " << m->second << " " ;
-			}
-			std::cout << std::endl;
-		for (cl_iterator lit = it->getLocations().begin(); lit != it->getLocations().end(); lit++)
-		{
-			std::cout << "			>>> Location <<< " << std::endl;
-			std::cout << "-----------:Location:" << "Location endpoint : " << (*lit).getEndpoint() << std::endl;
-	////		std::cout << "-----------:Location:" << "Error log : " << (*lit).getErroLog() << std::endl;
-			std::cout << "-----------:Location:" << "Index		: " << (*lit).getIndex()  << std::endl;
-			std::cout << "-----------:Location:" << "Auto index: " << (*lit).getAutoIndex()  << std::endl;
-			std::cout << "-----------:Location:" << "Root		: " << (*lit).getRoot() << std::endl;
-			std::cout << "-----------:Location:" << "ClientBoy : " << (*lit).getClientMaxBodySize() << std::endl;
-			std::cout << "-----------:Location:" << "ServerName: " << (*lit).getServerName() << std::endl;
-			std::cout << "-----------:Location:" << "Adderss: " << (*lit).getAddress() << std::endl;
-			std::cout << "-----------:Location:" << "Port: " << (*lit).getPort() << std::endl;
-			std::cout << "-----------:Location:" << "ReturnCode: " << (*lit).getReturnCode() << std::endl;
-			std::cout << "-----------:Location:" << "ReturnURL: " << (*lit).getReturnURL() << std::endl;
-			std::cout << "-----------:Location::" << "UploadStore: " << (*it).getUploadStore() << std::endl;
-			std::cout << "-----------:Location::" << "Upload Alow ? : " << (*it).allowUpload() << std::endl;
-			std::cout << "-----------:Allowed Methods: " ;
-			for (std::vector<std::string>::const_iterator m = lit->getAllowedMethods().begin();
-				m != lit->getAllowedMethods().end(); m++) {
-				std::cout << *m << " " ;
-				}
-			std::cout << std::endl;
-			std::cout << "----------- err pages: " ;
-			for (std::map<short, std::string>::const_iterator m = lit->getErroPages().begin();
-				m != lit->getErroPages().end(); m++) {
-				std::cout << "code: " << m->first << "page : " << m->second << std::endl;
-				}
-			std::cout << std::endl;
-
-		}
-	}
-
-
-}
+#include "../../Server/Utils.hpp"
+#include "../../Server/ErrorHandler.hpp"
 
 void throw_error(const Token &token, std::string error) throw(std::invalid_argument)
 {
